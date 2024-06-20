@@ -184,36 +184,34 @@ def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100):
     :return:
     """
     sim = 1 - np.array(cosine_similarity(Lvec, Rvec))
+
     sim_edit_dis = np.zeros((len(entity_text_left), len(entity_text_right)))
     for i in range(len(entity_text_left)):
         for j in range(len(entity_text_right)):
             sim_edit_dis[i][j] = edit_distance(entity_text_left[i],entity_text_right[j],len(entity_text_left[i]),len(entity_text_right[j]))
+
     sim_csls = 1 - compute_csls(Lvec, Rvec)
 
-    sim1_2 = np.array([[sim[i][j]+sim_edit_dis[i][j] for j in range(len(entity_text_right))]
-              for i in range(len(entity_text_left))])
-    sim1_3 = np.array([[sim[i][j]+sim_csls[i][j] for j in range(len(entity_text_right))]
-              for i in range(len(entity_text_left))])
-    sim2_3 = np.array([[sim_edit_dis[i][j] + sim_csls[i][j] for j in range(len(entity_text_right))]
-              for i in range(len(entity_text_left))])
+    # sim1_2 = np.array([[sim[i][j]+sim_edit_dis[i][j] for j in range(len(entity_text_right))]
+    #           for i in range(len(entity_text_left))])
+    # sim1_3 = np.array([[sim[i][j]+sim_csls[i][j] for j in range(len(entity_text_right))]
+    #           for i in range(len(entity_text_left))])
+    # sim2_3 = np.array([[sim_edit_dis[i][j] + sim_csls[i][j] for j in range(len(entity_text_right))]
+    #           for i in range(len(entity_text_left))])
     sim1_2_3 = np.array([[sim[i][j] + sim_edit_dis[i][j] + sim_csls[i][j] for j in range(len(entity_text_right))]
               for i in range(len(entity_text_left))])
 
-    print(sim.shape, sim_edit_dis.shape)
     candidates = [0] * len(Lvec)
     ent_left = [0] * len(Lvec)
     ent_right = [0] * len(Lvec)
     for i in range(len(Lvec)):
-        rank = sim[i, :].argsort()
-        rank = sim_edit_dis[i, :].argsort()
-        rank = sim_csls[i, :].argsort()
-        rank = sim1_2[i, :].argsort()
-        rank = sim1_3[i, :].argsort()
-        rank = sim2_3[i, :].argsort()
+        # rank = sim[i, :].argsort()
+        # rank = sim_edit_dis[i, :].argsort()
+        # rank = sim_csls[i, :].argsort()
+        # rank = sim1_2[i, :].argsort()
+        # rank = sim1_3[i, :].argsort()
+        # rank = sim2_3[i, :].argsort()
         rank = sim1_2_3[i, :].argsort()
-        # rank_edit_dis = sim_edit_dis[i, :].argsort()
-        # rank_all = np.array([rank[i]+rank_edit_dis[i] for i in range(len(rank))])
-        # rank_all = rank_all.argsort()
 
         candidates[i] = rank[0:n_cand]
         ent_left[i] = entity_text_left[i]
@@ -308,19 +306,19 @@ if __name__ == '__main__':
     thresh_num = 3000
     bert_model = 'bert-base-uncased'  #"bert-base-multilingual-cased"
     try:
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl"), "rb") as fp:
+        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl"), "rb") as fp:
             candidates_idx_list = pickle.load(fp)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "aligned_entity_"), 'r', encoding='utf8') as f:
+        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "aligned_entity_"), 'r', encoding='utf8') as f:
             ent_right = json.load(f)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "target_entity_"), 'r', encoding='utf8') as f:
+        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "target_entity_"), 'r', encoding='utf8') as f:
             ent_left = json.load(f)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "entity_text_left_"), 'r', encoding='utf8') as f:
+        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "entity_text_left_"), 'r', encoding='utf8') as f:
             entity_text_left = json.load(f)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "entity_text_right_"), 'r', encoding='utf8') as f:
+        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "entity_text_right_"), 'r', encoding='utf8') as f:
             entity_text_right = json.load(f)
     except:
         tokenizer = BertTokenizer.from_pretrained(bert_model)
@@ -351,22 +349,22 @@ if __name__ == '__main__':
         print('ent_left len', len(ent_left))
         print('ent_right:\n', ent_right)
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "aligned_entity_")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "aligned_entity_")
         with open(save_dir, 'w', encoding='utf8') as f:
             json.dump(ent_right, f)
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "target_entity_")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "target_entity_")
         with open(save_dir, 'w', encoding='utf8') as f:
             json.dump(ent_left, f)
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl")
         pickle.dump(candidates_idx_list, open(save_dir, "wb"))
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "entity_text_left_")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "entity_text_left_")
         with open(save_dir, 'w', encoding='utf8') as f:
             json.dump(entity_text_left, f)
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "entity_text_right_")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_cos_ed_csls/").replace("gpt4_turbo_", "entity_text_right_")
         with open(save_dir, 'w', encoding='utf8') as f:
             json.dump(entity_text_right, f)
 
