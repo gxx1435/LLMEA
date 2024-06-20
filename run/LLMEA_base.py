@@ -11,47 +11,47 @@ import tqdm
 import time
 
 
-# def compute_csls(X_src, X_tgt, k=10):
-#     """
-#     Compute Cross-domain Similarity Local Scaling (CSLS).
-#
-#     Parameters:
-#     X_src : np.array
-#         Source domain embeddings (n_samples_src, n_features)
-#     X_tgt : np.array
-#         Target domain embeddings (n_samples_tgt, n_features)
-#     k : int
-#         Number of nearest neighbors for local scaling
-#
-#     Returns:
-#     csls_matrix : np.array
-#         CSLS similarity scores matrix (n_samples_src, n_samples_tgt)
-#     """
-#     # Compute cosine similarity matrix
-#     cosine_sim = np.dot(X_src, X_tgt.T)
-#
-#     # Normalize vectors to have unit norm
-#     X_src_norm = np.linalg.norm(X_src, axis=1, keepdims=True)
-#     X_tgt_norm = np.linalg.norm(X_tgt, axis=1, keepdims=True)
-#     cosine_sim /= (X_src_norm @ X_tgt_norm.T)
-#
-#     # Compute nearest neighbor similarity for source and target domains
-#     src_nn_sim = np.zeros(X_src.shape[0])
-#     tgt_nn_sim = np.zeros(X_tgt.shape[0])
-#
-#     for i in range(X_src.shape[0]):
-#         src_nn_sim[i] = np.mean(np.sort(cosine_sim[i, :])[-k:])
-#
-#     for j in range(X_tgt.shape[0]):
-#         tgt_nn_sim[j] = np.mean(np.sort(cosine_sim[:, j])[-k:])
-#
-#     # Compute CSLS similarity scores
-#     csls_matrix = np.zeros(cosine_sim.shape)
-#     for i in range(X_src.shape[0]):
-#         for j in range(X_tgt.shape[0]):
-#             csls_matrix[i, j] = 2 * cosine_sim[i, j] - src_nn_sim[i] - tgt_nn_sim[j]
-#
-#     return csls_matrix
+def compute_csls(X_src, X_tgt, k=10):
+    """
+    Compute Cross-domain Similarity Local Scaling (CSLS).
+
+    Parameters:
+    X_src : np.array
+        Source domain embeddings (n_samples_src, n_features)
+    X_tgt : np.array
+        Target domain embeddings (n_samples_tgt, n_features)
+    k : int
+        Number of nearest neighbors for local scaling
+
+    Returns:
+    csls_matrix : np.array
+        CSLS similarity scores matrix (n_samples_src, n_samples_tgt)
+    """
+    # Compute cosine similarity matrix
+    cosine_sim = np.dot(X_src, X_tgt.T)
+
+    # Normalize vectors to have unit norm
+    X_src_norm = np.linalg.norm(X_src, axis=1, keepdims=True)
+    X_tgt_norm = np.linalg.norm(X_tgt, axis=1, keepdims=True)
+    cosine_sim /= (X_src_norm @ X_tgt_norm.T)
+
+    # Compute nearest neighbor similarity for source and target domains
+    src_nn_sim = np.zeros(X_src.shape[0])
+    tgt_nn_sim = np.zeros(X_tgt.shape[0])
+
+    for i in range(X_src.shape[0]):
+        src_nn_sim[i] = np.mean(np.sort(cosine_sim[i, :])[-k:])
+
+    for j in range(X_tgt.shape[0]):
+        tgt_nn_sim[j] = np.mean(np.sort(cosine_sim[:, j])[-k:])
+
+    # Compute CSLS similarity scores
+    csls_matrix = np.zeros(cosine_sim.shape)
+    for i in range(X_src.shape[0]):
+        for j in range(X_tgt.shape[0]):
+            csls_matrix[i, j] = 2 * cosine_sim[i, j] - src_nn_sim[i] - tgt_nn_sim[j]
+
+    return csls_matrix
 
 def edit_distance(s1, s2, m, n):
     """
@@ -188,6 +188,16 @@ def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100):
     for i in range(len(entity_text_left)):
         for j in range(len(entity_text_right)):
             sim_edit_dis[i][j] = edit_distance(entity_text_left[i],entity_text_right[j],len(entity_text_left[i]),len(entity_text_right[j]))
+    sim_csls = 1 - compute_csls(Lvec, Rvec)
+
+    sim1_2 = np.array([[sim[i][j]+sim_edit_dis[i][j] for j in range(len(entity_text_right))]
+              for i in range(len(entity_text_left))])
+    sim1_3 = np.array([[sim[i][j]+sim_csls[i][j] for j in range(len(entity_text_right))]
+              for i in range(len(entity_text_left))])
+    sim2_3 = np.array([[sim_edit_dis[i][j] + sim_csls[i][j] for j in range(len(entity_text_right))]
+              for i in range(len(entity_text_left))])
+    sim1_2_3 = np.array([[sim[i][j] + sim_edit_dis[i][j] + sim_csls[i][j] for j in range(len(entity_text_right))]
+              for i in range(len(entity_text_left))])
 
     print(sim.shape, sim_edit_dis.shape)
     candidates = [0] * len(Lvec)
@@ -195,11 +205,17 @@ def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100):
     ent_right = [0] * len(Lvec)
     for i in range(len(Lvec)):
         rank = sim[i, :].argsort()
-        rank_edit_dis = sim_edit_dis[i, :].argsort()
-        rank_all = np.array([rank[i]+rank_edit_dis[i] for i in range(len(rank))])
-        rank_all = rank_all.argsort()
+        rank = sim_edit_dis[i, :].argsort()
+        rank = sim_csls[i, :].argsort()
+        rank = sim1_2[i, :].argsort()
+        rank = sim1_3[i, :].argsort()
+        rank = sim2_3[i, :].argsort()
+        rank = sim1_2_3[i, :].argsort()
+        # rank_edit_dis = sim_edit_dis[i, :].argsort()
+        # rank_all = np.array([rank[i]+rank_edit_dis[i] for i in range(len(rank))])
+        # rank_all = rank_all.argsort()
 
-        candidates[i] = rank_all[0:n_cand]
+        candidates[i] = rank[0:n_cand]
         ent_left[i] = entity_text_left[i]
         ent_right[i] = entity_text_right[i]
     
@@ -289,7 +305,7 @@ if __name__ == '__main__':
     input_prompt_dir_1 = sys.argv[1]   
     input_prompt_dir_2 = sys.argv[2] 
     llm_resp_save_dir = sys.argv[3] 
-    thresh_num = 1000
+    thresh_num = 3000
     bert_model = 'bert-base-uncased'  #"bert-base-multilingual-cased"
     try:
         with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results/").replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl"), "rb") as fp:
