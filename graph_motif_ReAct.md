@@ -14,6 +14,7 @@ The Candidate entities list is:
 **NOTE**: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.  
 
 [**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
+  
 ################### Your Answer Starts Here: ###################  
 Turn 1:
 *4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.*  
@@ -35,7 +36,7 @@ The Candidate entities list is:
 
 [**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!    
   
-################### Your Answer Starts Here: ###################  
+################### Your Answer Starts Here: ###################
 Turn 1:  
 *4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.*  
 Thought 1: I cannot find an entity in the candidate list that is a direct match for "Salauddin." I need to request more information about the target entity "Salauddin" to increase my confidence and make an informed decision.  
@@ -114,7 +115,7 @@ Turn 4:
 [Important!] 1 turn left to provide final answer. Based on the observation, 'Salahuddin of Selangor' is connected with Kuala Lumpur and Malaysia. This information is not as relevant as the connections 'Salauddin' has with Bangladesh, India, and Pervez Musharraf. The connections of 'Abdulla Kurd' with Turkey seem more aligned with the context of 'Salauddin'.  
 Thought 4: Considering all the observations, 'Abdulla Kurd' appears to be the most aligned entity given its connection with Turkey, which aligns with the regional context related to 'Salauddin'. Therefore, I am confident in selecting 'Abdulla Kurd' as the aligned entity.  
 Act 4: Terminate['Abdulla Kurd']  
-
+  
 ################### Your Answer Ends Here: ###################   
 
 # Example2 End   
