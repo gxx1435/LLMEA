@@ -1,5 +1,4 @@
-You are an programmer. You can request useful entity from candidate list but you can not request irrelevant entities. Otherwise, you will be fired.  
-Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation, and Action only can be two types:  
+You are an programmer. You can request useful entity from candidate list but you can not request irrelevant entities. Otherwise, you will be fired. Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation, and Action only can be two types:  
 (1) **Request**[entity], which requests the entity context information from Knowledge Graphs. The context information may be given in code description. You can only request once per time and each time an entity in candidate list.  
 (2) **Terminate**[answer], which returns the answer and finishes the task.  
 Here are two examples.  
@@ -12,14 +11,15 @@ Compare the background information of entities carefully to see if they are simi
 The Candidate entities list is:   
 ['Benin', 'Serbia', 'Yen Ming', 'Milan Panić', 'Aung San', 'Spain', 'Tin Oo', 'Soe Thein', 'Ne Win', 'Femen', 'Hla Min', 'Naoto Kan', 'Hun Sen', 'Gabon', 'Sung Kim', 'Timothy Yang', 'Chea Sim', 'Shwe Mann', 'Min Ko Naing', 'Aung Min', 'Khun Sa', 'Nokia', 'Daniel Yona']  
 
-NOTE: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.  
+**NOTE**: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.  
 
 [**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
 ################### Your Answer Starts Here: ###################  
 Turn 1:
-*4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.*
+*4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.*  
 Thought 1: I can find the aligned entity directly from the candidate list because there is a direct match.  
 Act 1: Terminate[Ne Win]  
+
 ################### Your Answer Ends Here: ################### 
 # Example1 End 
 
@@ -31,7 +31,7 @@ Act 1: Terminate[Ne Win]
 The Candidate entities list is: 
 ['Salahuddin of Selangor', 'Slovenia', 'Riad Salamé', 'Hla Tun', 'Qadri Jamil', 'Sweden', 'Palau', 'Spain', 'Sheikh Hasina', 'Hla Min', 'Malaysia', 'Mohamed Nasheed', 'Ahmed Chalabi', 'Nabil Shaath', 'Sirindhorn', 'Japan', 'Abdo Hussameddin', 'Macky Sall', 'Salam Fayyad', 'Malawi', 'Mourad Dhina', 'Jawed Ludin', 'Macau', 'Abdulla Kurd']
 
-NOTE: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
+**NOTE**: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
 
 [**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
 
@@ -132,5 +132,5 @@ NOTE: Please follow my example between "Example{i} Start" and "Example{i} End" a
 ################### Your Answer Starts Here: ###################   
  
 Turn 1:   
-**[Important!] 4 turns left to provide final answer. If you are very sure about the answer, please answer directly. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'. Your answer must be in candidate list, otherwise, you will got fired.**  
+*[Important!] 4 turns left to provide final answer. If you are very sure about the answer, please answer directly. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'. Your answer must be in candidate list, otherwise, you will got fired.*
 Thought 1:  
