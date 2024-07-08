@@ -33,8 +33,8 @@ The Candidate entities list is:
 
 **NOTE**: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
 
-[**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
-
+[**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!    
+  
 ################### Your Answer Starts Here: ###################  
 Turn 1:  
 *4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.*  
