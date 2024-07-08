@@ -1,3 +1,5 @@
-run
+run/mid_*
+run/out_log
+run/llm_response
 data
 escape

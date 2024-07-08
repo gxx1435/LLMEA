@@ -1,30 +1,30 @@
-You are an programmer. You can request useful entity from candidate list but you can not request irrelevant entities. Otherwise, you will be fired. 
-Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation, and Action only can be two types: 
-(1) Request[entity], which requests the entity context information from Knowledge Graphs. The context information may be given in code description. You can only request once per time and each time an entity in candidate list.
-(2) Terminate[answer], which returns the answer and finishes the task.
-Here are two examples.
-Compare the background information of entities carefully to see if they are similar. 
+You are an programmer. You can request useful entity from candidate list but you can not request irrelevant entities. Otherwise, you will be fired.  
+Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation, and Action only can be two types:  
+(1) *Request*[entity], which requests the entity context information from Knowledge Graphs. The context information may be given in code description. You can only request once per time and each time an entity in candidate list.  
+(2) *Terminate*[answer], which returns the answer and finishes the task.  
+Here are two examples.  
+Compare the background information of entities carefully to see if they are similar.  
 # Example1 Start  
 
-[USER (Boss)]: Give me the most aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. The target entity is:
-'Ne Win'
+[**USER (Boss)**]: Give me the most aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. The target entity is:  
+'Ne Win'  
 
-The Candidate entities list is: 
-['Benin', 'Serbia', 'Yen Ming', 'Milan Panić', 'Aung San', 'Spain', 'Tin Oo', 'Soe Thein', 'Ne Win', 'Femen', 'Hla Min', 'Naoto Kan', 'Hun Sen', 'Gabon', 'Sung Kim', 'Timothy Yang', 'Chea Sim', 'Shwe Mann', 'Min Ko Naing', 'Aung Min', 'Khun Sa', 'Nokia', 'Daniel Yona']
+The Candidate entities list is:   
+['Benin', 'Serbia', 'Yen Ming', 'Milan Panić', 'Aung San', 'Spain', 'Tin Oo', 'Soe Thein', 'Ne Win', 'Femen', 'Hla Min', 'Naoto Kan', 'Hun Sen', 'Gabon', 'Sung Kim', 'Timothy Yang', 'Chea Sim', 'Shwe Mann', 'Min Ko Naing', 'Aung Min', 'Khun Sa', 'Nokia', 'Daniel Yona']  
 
-NOTE: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
+NOTE: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.  
 
-[YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
-################### Your Answer Starts Here: ################### 
+[**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
+################### Your Answer Starts Here: ###################  
 Turn 1:
-# 4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.
-Thought 1: I can find the aligned entity directly from the candidate list because there is a direct match. 
-Act 1: Terminate[Ne Win]
+*4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.*
+Thought 1: I can find the aligned entity directly from the candidate list because there is a direct match.  
+Act 1: Terminate[Ne Win]  
 # Example1 End 
 
 # Example2 Start  
 
-[USER (Boss)]: Give me the most aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. The target entity is:
+[**USER (Boss)**]: Give me the most aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. The target entity is:
 'Salauddin'
 
 The Candidate entities list is: 
@@ -32,10 +32,10 @@ The Candidate entities list is:
 
 NOTE: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
 
-[YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
+[**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
 ################### Your Answer Starts Here: ################### 
 Turn 1:
-# 4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.
+*4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.*
 Thought 1: I cannot find an entity in the candidate list that is a direct match for "Salauddin." I need to request more information about the target entity "Salauddin" to increase my confidence and make an informed decision.
 Act 1: Request['Salauddin']
 Observation 1: 
@@ -84,6 +84,7 @@ def Salauddin_Connected_with_Police(Salauddin, Police_India, Bangladesh):
 Turn 2:
 [Important!] 3 turns left to provide final answer. Based on the observation, 'Salauddin' has connections with Bangladesh, India, and Pervez Musharraf. Considering this information, I should now request information about the most relevant candidate entity.
 Thought 2: I need more information to increase my confidence in selecting the correct aligned entity. Given the context, I will request information about 'Abdulla Kurd,' as it seems a potentially relevant candidate.
+
 Act 2: Request['Abdulla Kurd']
 Observation 2: 
 
@@ -115,7 +116,7 @@ Act 4: Terminate['Abdulla Kurd']
 # Example2 End 
 
 
-[USER (Boss)]: Give me the aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. Please select from candiates! The target entity is:
+[**USER (Boss)**]: Give me the aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. Please select from candiates! The target entity is:
 Party of the Revolution	
 
 The Candidate entities list is: 
@@ -123,9 +124,9 @@ The Candidate entities list is:
  
 NOTE: Please follow my example between "Example{i} Start" and "Example{i} End" above to answer task with interleaving Thought, Code, Action, Result turns. Each turn contains one segment of the target code to solve the problem. 
 
-[YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment task turn by turn! 
+[**YOU (Programmer)**]: Let's break down the code generation into several turns and solve the Entity Alignment task turn by turn! 
 ################### Your Answer Starts Here: ################### 
 
 Turn 1:
-# [Important!] 4 turns left to provide final answer. If you are very sure about the answer, please answer directly. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'. Your answer must be in candidate list, otherwise, you will got fired. 
+**[Important!] 4 turns left to provide final answer. If you are very sure about the answer, please answer directly. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'. Your answer must be in candidate list, otherwise, you will got fired.**
 Thought 1:
