@@ -1,4 +1,10 @@
-git
+import os.path
+import networkx as nx
+from itertools import combinations
+from heapq import nlargest
+import numpy as np
+from collections import Counter, defaultdict
+
 
 from run.utils import get_id_entity_dict, get_ent_id_dict
 
@@ -810,7 +816,7 @@ if __name__ == '__main__':
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Workers' Party of Korea"""
+    entity = """Institutional Revolutionary Party"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
