@@ -128,9 +128,11 @@ Act 4: Terminate['Abdulla Kurd']
 
 
 [**USER (Boss)**]: Give me the aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. Please select from candiates! The target entity is:  
+  
 Party of the Revolution	 
 
 The Candidate entities list is:  
+  
 ['Party of Democratic Action', "Spanish Socialist Workers' Party", "Workers' Party of Korea", 'Justicialist Party', 'Institutional Revolutionary Party', 'National Resistance Movement', 'Carlos De León', 'Bank of Mexico', 'Rally of the Republicans', 'Liberal Party of Canada', 'Christine Boutin', 'Union for a Popular Movement', 'Conservative Party of Canada', 'State of Law Coalition', 'Park Tae-joon', 'John Bruton', 'Croatian Democratic Union', 'Party of Regions', 'Beatrix of the Netherlands', 'Communist Party of China', 'Chama Cha Mapinduzi']  
  
 NOTE: Please follow my example between "Example{i} Start" and "Example{i} End" above to answer task with interleaving Thought, Code, Action, Result turns. Each turn contains one segment of the target code to solve the problem.   
@@ -139,5 +141,5 @@ NOTE: Please follow my example between "Example{i} Start" and "Example{i} End" a
 ################### Your Answer Starts Here: ###################   
  
 Turn 1:   
-*[Important!] 4 turns left to provide final answer. If you are very sure about the answer, please answer directly. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'. Your answer must be in candidate list, otherwise, you will got fired.*
+***[Important!] 4 turns left to provide final answer. If you are very sure about the answer, please answer directly. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'. Your answer must be in candidate list, otherwise, you will got fired.***
 Thought 1:  
