@@ -45,7 +45,7 @@ Observation 1:
 import engage_in_symbolic_act, provide_aid, impose_curfew, praise_or_endorse, express_intent_to_change_institutions_regime, occupy_territory, express_intent_to_cooperate_militarily  
 import express_intent_to_engage_in_diplomatic_cooperation, express_intent_to_meet_or_negotiate, host_a_visit, make_optimistic_comment, make_statement, connected_with, reduce_or_stop_material_aid, accuse  
 
-def Salauddin_Engage_in_symbolic_act(Salauddin, Government_Bangladesh, Bangladesh):  
+**def Salauddin_Engage_in_symbolic_act(Salauddin, Government_Bangladesh, Bangladesh)**:   
     Salauddin = engage_in_symbolic_act(Government_Bangladesh)  
     Salauddin += provide_aid(Bangladesh)  
     Government_Bangladesh = impose_curfew(Bangladesh)  
@@ -55,26 +55,26 @@ def Salauddin_Engage_in_symbolic_act(Salauddin, Government_Bangladesh, Banglades
     Government_Bangladesh += express_intent_to_cooperate_militarily(Bangladesh)  
     return Salauddin, Government_Bangladesh, Bangladesh  
 
-def Salauddin_Express_intent_to_engage_in_diplomatic_cooperation(Salauddin, Ali_Ahsan_Mohammad_Mujahid, Political_Parties_Bangladesh):  
+**def Salauddin_Express_intent_to_engage_in_diplomatic_cooperation(Salauddin, Ali_Ahsan_Mohammad_Mujahid, Political_Parties_Bangladesh):**    
     Salauddin = express_intent_to_engage_in_diplomatic_cooperation(Ali_Ahsan_Mohammad_Mujahid)  
     Salauddin += express_intent_to_meet_or_negotiate(Political_Parties_Bangladesh)  
     Ali_Ahsan_Mohammad_Mujahid = express_intent_to_meet_or_negotiate(Political_Parties_Bangladesh)  
     return Salauddin, Ali_Ahsan_Mohammad_Mujahid, Political_Parties_Bangladesh  
 
-def Salauddin_Express_intent_to_engage_in_diplomatic_cooperation_with_Qatar(Salauddin, Head_of_Government_Qatar, Pervez_Musharraf):  
+**def Salauddin_Express_intent_to_engage_in_diplomatic_cooperation_with_Qatar(Salauddin, Head_of_Government_Qatar, Pervez_Musharraf):**  
     Salauddin = express_intent_to_engage_in_diplomatic_cooperation(Head_of_Government_Qatar)  
     Salauddin += connected_with(Pervez_Musharraf)  
     Head_of_Government_Qatar = host_a_visit(Pervez_Musharraf)  
     Head_of_Government_Qatar += make_optimistic_comment(Pervez_Musharraf)  
     return Salauddin, Head_of_Government_Qatar, Pervez_Musharraf  
 
-def Salauddin_Make_statement(Salauddin, Israel, Pervez_Musharraf):  
+**def Salauddin_Make_statement(Salauddin, Israel, Pervez_Musharraf):**  
     Salauddin = make_statement(Israel)  
     Salauddin += connected_with(Pervez_Musharraf)  
     Israel = connected_with(Pervez_Musharraf)  
     return Salauddin, Israel, Pervez_Musharraf  
 
-def Salauddin_Connected_with_Police(Salauddin, Police_India, Bangladesh):  
+**def Salauddin_Connected_with_Police(Salauddin, Police_India, Bangladesh):**  
     Salauddin = connected_with(Police_India)  
     Salauddin += provide_aid(Bangladesh)  
     Police_India = make_statement(Bangladesh)  
@@ -93,7 +93,7 @@ Observation 2:
 
 import connected_with  
 
-def Abdulla_Kurd_connected_with_1(Abdulla_Kurd, Turkey):  
+**def Abdulla_Kurd_connected_with_1(Abdulla_Kurd, Turkey):**   
     unknown_entity = connected_with(Turkey)  
     unknown_entity += connected_with(Abdulla_Kurd)  
     Turkey = connected_with(Abdulla_Kurd)  
@@ -107,7 +107,7 @@ Observation 3:
 
 import connected_with, educated_at, continent  
 
-def Kuala_Lumpur_connected_with_Salahuddin_of_Selangor(Kuala_Lumpur, Salahuddin_of_Selangor, Malaysia):  
+**def Kuala_Lumpur_connected_with_Salahuddin_of_Selangor(Kuala_Lumpur, Salahuddin_of_Selangor, Malaysia):**  
     Kuala_Lumpur = connected_with(Salahuddin_of_Selangor)  
     Kuala_Lumpur += educated_at(Malaysia)  
     Salahuddin_of_Selangor = continent(Malaysia)  
