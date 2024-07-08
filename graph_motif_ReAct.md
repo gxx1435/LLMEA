@@ -36,13 +36,13 @@ The Candidate entities list is:
 
 [**YOU (Programmer)**]: Let's break down the code generation and solve the Entity Alignment task turn by turn!    
   
-################### Your Answer Starts Here: ###################
+################### Your Answer Starts Here: ###################    
 Turn 1:  
 *4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.*  
 Thought 1: I cannot find an entity in the candidate list that is a direct match for "Salauddin." I need to request more information about the target entity "Salauddin" to increase my confidence and make an informed decision.  
 Act 1: Request['Salauddin']  
 Observation 1:  
-Observation 1: import engage_in_symbolic_act, provide_aid, impose_curfew, praise_or_endorse, express_intent_to_change_institutions_regime, occupy_territory, express_intent_to_cooperate_militarily  
+import engage_in_symbolic_act, provide_aid, impose_curfew, praise_or_endorse, express_intent_to_change_institutions_regime, occupy_territory, express_intent_to_cooperate_militarily  
 import express_intent_to_engage_in_diplomatic_cooperation, express_intent_to_meet_or_negotiate, host_a_visit, make_optimistic_comment, make_statement, connected_with, reduce_or_stop_material_aid, accuse  
 
 def Salauddin_Engage_in_symbolic_act(Salauddin, Government_Bangladesh, Bangladesh):  
@@ -103,7 +103,9 @@ Turn 3:
 [Important!] 2 turns left to provide final answer. Based on the observation, 'Abdulla Kurd' has connections with Turkey. Since 'Salauddin' has connections with regions including Bangladesh and India, I need to evaluate if there is a stronger match in the candidate list. Given this context, I should now request information about another potentially relevant candidate entity.  
 Thought 3: I need to request information about another candidate to ensure the most aligned entity is identified. 'Salahuddin of Selangor' could be a relevant entity to explore further connections.  
 Act 3: Request['Salahuddin of Selangor']  
-Observation 3: import connected_with, educated_at, continent  
+Observation 3:   
+
+import connected_with, educated_at, continent  
 
 def Kuala_Lumpur_connected_with_Salahuddin_of_Selangor(Kuala_Lumpur, Salahuddin_of_Selangor, Malaysia):  
     Kuala_Lumpur = connected_with(Salahuddin_of_Selangor)  
