@@ -435,59 +435,86 @@ import networkx as nx
 import networkx as nx
 from heapq import nlargest
 
-def find_top_shared_triangles(graph, node, top_n):
-    # 获取目标节点的邻居
-    neighbors = set(graph.neighbors(node))
+# def find_top_shared_triangles(graph, node, top_n):
+#     # 获取目标节点的邻居
+#     neighbors = set(graph.neighbors(node))
+#
+#     # 字典来记录每个邻居节点与目标节点共享的三角形列表
+#     shared_triangles = {neighbor: [] for neighbor in neighbors}
+#
+#     # 遍历每个邻居节点，找出共享三角形
+#     for neighbor in neighbors:
+#         # 获取邻居节点的邻居
+#         neighbors_of_neighbor = set(graph.neighbors(neighbor))
+#
+#         # 找出共同邻居（即三角形中的第三个节点）
+#         common_neighbors = neighbors & neighbors_of_neighbor
+#
+#         # 记录共享三角形
+#         for common_neighbor in common_neighbors:
+#             triangle = tuple(sorted((node, neighbor, common_neighbor)))
+#             shared_triangles[neighbor].append(triangle)
+#
+#     # 将所有共享三角形收集到一个列表中
+#     all_shared_triangles = []
+#     for triangles in shared_triangles.values():
+#         all_shared_triangles.extend(triangles)
+#
+#     # 找出前 top_n 个共享次数最多的三角形
+#     top_shared_triangles = nlargest(top_n, set(all_shared_triangles), key=lambda t: all_shared_triangles.count(t))
+#
+#     # 构建包含这些三角形motif的子图
+#     motif_graphs = []
+#     for triangle in top_shared_triangles:
+#         motif_graph = nx.Graph()
+#         motif_graph.add_edges_from(
+#             [(triangle[0], triangle[1]), (triangle[1], triangle[2]), (triangle[2], triangle[0])]
+#         )
+#         motif_graphs.append(motif_graph)
+#
+#     return motif_graphs
+#
+# # 示例使用
+# G = nx.Graph()
+# # 添加示例节点和边
+# G.add_edges_from([
+#     (1, 2), (1, 3), (1, 4),
+#     (2, 3), (2, 4),
+#     (3, 4), (3, 5),
+#     (4, 5)
+# ])
+#
+# node = 1
+# top_n = 5
+#
+# motifs = find_top_shared_triangles(G, node, top_n)
+# for i, motif in enumerate(motifs):
+#     print(f"Motif {i+1}:")
+#     print(motif.edges())
 
-    # 字典来记录每个邻居节点与目标节点共享的三角形列表
-    shared_triangles = {neighbor: [] for neighbor in neighbors}
 
-    # 遍历每个邻居节点，找出共享三角形
-    for neighbor in neighbors:
-        # 获取邻居节点的邻居
-        neighbors_of_neighbor = set(graph.neighbors(neighbor))
 
-        # 找出共同邻居（即三角形中的第三个节点）
-        common_neighbors = neighbors & neighbors_of_neighbor
+s = ('qwhjahsnwnu Thought1:..........................'
+     'Act1:..................')
+thought_idx = s.find('Thought')
+act_idx = s.find('Act')
+thought = s[thought_idx:act_idx-1]
+act = s[act_idx:-1]
+print(thought + '\n' + act)
 
-        # 记录共享三角形
-        for common_neighbor in common_neighbors:
-            triangle = tuple(sorted((node, neighbor, common_neighbor)))
-            shared_triangles[neighbor].append(triangle)
 
-    # 将所有共享三角形收集到一个列表中
-    all_shared_triangles = []
-    for triangles in shared_triangles.values():
-        all_shared_triangles.extend(triangles)
+def find_requests(s):
+     start_idx = s.find('Request[')
+     end_idx = s.find(']')
+     if start_idx != -1:
+          return s[start_idx + 8: end_idx]
+     return -1
+print(find_requests('Requst[end]'))
 
-    # 找出前 top_n 个共享次数最多的三角形
-    top_shared_triangles = nlargest(top_n, set(all_shared_triangles), key=lambda t: all_shared_triangles.count(t))
+def find_code(s):
+     start_idx = s.find('<code>')
+     end_idx = s.find("</code>")
+     return s[start_idx + 6: end_idx]
 
-    # 构建包含这些三角形motif的子图
-    motif_graphs = []
-    for triangle in top_shared_triangles:
-        motif_graph = nx.Graph()
-        motif_graph.add_edges_from(
-            [(triangle[0], triangle[1]), (triangle[1], triangle[2]), (triangle[2], triangle[0])]
-        )
-        motif_graphs.append(motif_graph)
-
-    return motif_graphs
-
-# 示例使用
-G = nx.Graph()
-# 添加示例节点和边
-G.add_edges_from([
-    (1, 2), (1, 3), (1, 4),
-    (2, 3), (2, 4),
-    (3, 4), (3, 5),
-    (4, 5)
-])
-
-node = 1
-top_n = 5
-
-motifs = find_top_shared_triangles(G, node, top_n)
-for i, motif in enumerate(motifs):
-    print(f"Motif {i+1}:")
-    print(motif.edges())
+s  = '<code>2344455</code>'
+print(find_code(s))

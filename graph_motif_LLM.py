@@ -257,6 +257,44 @@ def find_four_cycles(G):
     return subgraphs
 
 
+import networkx as nx
+
+
+def create_star_motif_with_8_edges(graph, center_node, num_edges=5):
+    """
+    Create a star motif centered around the specified node in the graph, retaining up to num_edges edges.
+
+    Parameters:
+    graph (networkx.DiGraph): The input directed graph.
+    center_node (str/int): The node to be the center of the star motif.
+    num_edges (int): The maximum number of edges to retain in the star motif.
+
+    Returns:
+    networkx.DiGraph: A subgraph containing the star motif.
+    """
+    # Create a new directed graph for the star motif
+    star_motif = nx.DiGraph()
+
+    # Add the center node
+    star_motif.add_node(center_node)
+
+    # Get the outgoing and incoming edges of the center node
+    out_edges = list(graph.out_edges(center_node))
+    in_edges = list(graph.in_edges(center_node))
+
+    # Combine the edges and sort them to keep the order consistent
+    combined_edges = out_edges + in_edges
+    combined_edges = sorted(combined_edges, key=lambda edge: (edge[0], edge[1]))
+
+    # Keep only up to num_edges edges
+    combined_edges = combined_edges[:num_edges]
+
+    # Add the edges to the star motif
+    star_motif.add_edges_from(combined_edges)
+
+    return star_motif
+
+
 def find_star_motifs(graph, node):
     """
     Find all star motifs in the graph and return them as subgraphs.
@@ -272,6 +310,9 @@ def find_star_motifs(graph, node):
     if len(neighbors) > 1:  # Node has more than one neighbor
             star_nodes = [node] + neighbors
             star = graph.subgraph(star_nodes).copy()
+
+            star = create_star_motif_with_8_edges(star, node, 8)
+
             stars.append(star)
 
     return stars
@@ -599,7 +640,7 @@ class Entity:
         with open(subgraph_file, 'r') as f:
             for line in f.readlines():
                 edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
-        G = nx.Graph()
+        G = nx.DiGraph()
         G.add_edges_from(edges)
         motifs = find_star_motifs(G, node)
 
@@ -747,7 +788,7 @@ class Entity:
                    self.entity_name)
         return prompts
 
-    def get_prompts_without_motif(self):
+    def get_baseline_prompts(self):
         """
         :return:
         """
@@ -778,7 +819,9 @@ class Entity:
                 """.format(self.entity_name,
                            self.get_candidates(self.entity_name),
                            self.entity_name)
-        return prompts
+
+        return self.entity_name, self.get_candidates(self.entity_name), prompts
+
 
     def get_only_motif_information(self):
         """
@@ -797,6 +840,15 @@ class Entity:
         #
         # return star_motifs_prompts
 
+    def get_only_1_neighbor_information(self):
+        """
+        :return:
+        """
+        star_motifs = self.get_star_motif(self.entity_id)
+
+        star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
+
+        return star_motifs_prompts
 
 
     def get_LLM_output(self, prompts):
@@ -820,6 +872,6 @@ if __name__ == '__main__':
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
-    prompts = entity.get_only_motif_information()
+    prompts = entity.get_only_1_neighbor_information()
 
     print(prompts)

@@ -24,7 +24,7 @@ Ne Win Threaten,Express intent to meet or negotiate Military (Myanmar)
 Kyaw Win Express intent to meet or negotiate,fight with artillery and tanks Military (Myanmar)
 """
 
-prompts_generate_code = ("""
+code_motif_prompts_generate = """
 
 As a good Computer Science student good at coding, your task is to describe the graph structure in Python code format. Each Motif instance will be viewed as a function with specialized name and node involved in the Motif instance will be the parameters in the function. 
 <RULE>
@@ -89,26 +89,4 @@ if __name__ == '__main__':
 Given Graph, please generate its code description language.
 Given Entity, The triangle motif information is
 {}
-""".format(
-    """
-    30996 , Institutional_Revolutionary_Party , Motif 1:
-    ~ connected with Silvia_Pinal
-    ~ connected with Institutional_Revolutionary_Party
-    Silvia_Pinal country of citizenship Institutional_Revolutionary_Party
-    30996 , Institutional_Revolutionary_Party , Motif 2:
-    ~ connected with Institutional_Revolutionary_Party
-    ~ connected with Ricardo_Monreal
-    Institutional_Revolutionary_Party connected with Ricardo_Monreal
-    30996 , Institutional_Revolutionary_Party , Motif 3:
-    ~ connected with Institutional_Revolutionary_Party
-    ~ connected with Tomás_Yarrington
-    Institutional_Revolutionary_Party connected with Tomás_Yarrington
-    30996 , Institutional_Revolutionary_Party , Motif 4:
-    ~ connected with Institutional_Revolutionary_Party
-    ~ connected with Rodolfo_Torre_Cantú
-    Institutional_Revolutionary_Party connected with Rodolfo_Torre_Cantú
-    30996 , Institutional_Revolutionary_Party , Motif 5:
-    ~ connected with Institutional_Revolutionary_Party
-    ~ connected with Porfirio_Muñoz_Ledo
-    Institutional_Revolutionary_Party connected with Porfirio_Muñoz_Ledo
-    """))
+"""

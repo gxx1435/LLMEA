@@ -1,4 +1,4 @@
-example_prompt = """
+motif_ReAct_example_prompt = """
 You are an programmer. You can request useful entity from candidate list but you can not request irrelevant entities. Otherwise, you will be fired. 
 Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation, and Action only can be two types: 
 (1) Request[entity], which requests the entity context information from Knowledge Graphs. The context information may be given in code description. You can only request once per time and each time an entity in candidate list.
@@ -117,10 +117,10 @@ Act 4: Terminate['Abdulla Kurd']
 
 
 [USER (Boss)]: Give me the aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. Please select from candiates! The target entity is:
-Party of the Revolution	
+{}
 
 The Candidate entities list is: 
-['Party of Democratic Action', "Spanish Socialist Workers' Party", "Workers' Party of Korea", 'Justicialist Party', 'Institutional Revolutionary Party', 'National Resistance Movement', 'Carlos De León', 'Bank of Mexico', 'Rally of the Republicans', 'Liberal Party of Canada', 'Christine Boutin', 'Union for a Popular Movement', 'Conservative Party of Canada', 'State of Law Coalition', 'Park Tae-joon', 'John Bruton', 'Croatian Democratic Union', 'Party of Regions', 'Beatrix of the Netherlands', 'Communist Party of China', 'Chama Cha Mapinduzi']
+{}
 
 NOTE: Please follow my example between "Example{i} Start" and "Example{i} End" above to answer task with interleaving Thought, Code, Action, Result turns. Each turn contains one segment of the target code to solve the problem. 
 
