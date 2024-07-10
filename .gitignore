@@ -3,3 +3,17 @@ run/out_log
 run/llm_response
 data
 escape
+
+idx_prompt_dict_step_00.json
+idx_prompt_dict_step_00_format.json
+idx_prompt_dict_step_01.json
+idx_prompt_dict_step_02.json
+idx_prompt_dict_step_03.json
+idx_prompt_dict_step_04.json
+final_answer_01.json
+final_answer_02.json
+final_answer_03.json
+final_answer_04.json
+
+big_batches_API_call.zip
+big_batches_API_call

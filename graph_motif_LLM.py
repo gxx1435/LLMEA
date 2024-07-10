@@ -1,4 +1,6 @@
 import os.path
+import sys
+
 import networkx as nx
 from itertools import combinations
 from heapq import nlargest
@@ -471,64 +473,6 @@ def test_get_relation():
     #             triple2_dict.update({ent_id_1: {ent_id_2: []}})
     exit()
 
-dataset = 'icews_yago'
-
-id_ent_dict1 = get_id_entity_dict(
-    '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/ent_ids_1'.format(dataset))
-id_ent_dict2 = get_id_entity_dict(
-    '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/ent_ids_2'.format(dataset))
-# ent_id_dict1 = get_ent_id_dict(
-#     '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/ent_ids_1'.format(dataset))
-
-
-ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
-ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
-
-sematic_embedding_candidates_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/candiadtes_semantic_embed_10_3765_all_corrected.txt'.format(dataset)
-entity_keys = [line.split('\t')[0].strip() for line in open(sematic_embedding_candidates_path).readlines()]
-cand_list_values = [line.split('\t')[1].strip().split(',') for line in open(sematic_embedding_candidates_path).readlines()]
-candidates = dict(zip(entity_keys, cand_list_values))
-
-##  获取relation of two nodes
-triple1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/triples_1'.format(dataset)
-triple2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/triples_2'.format(dataset)
-new_triples1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_triples_1'.format(dataset)
-new_triples2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_triples_2'.format(dataset)
-G1 = nx.MultiDiGraph()
-with open(new_triples1) as f:
-    for line in f.readlines():
-        ent_id_1 = line.split('\t')[0].strip()
-        rel_id = line.split('\t')[1].strip()
-        ent_id_2 = line.split('\t')[2].strip()
-        G1.add_edge(ent_id_1, ent_id_2, relation=rel_id)
-
-
-G2 = nx.MultiDiGraph()
-# ent_ids = []
-with open(new_triples2) as f:
-    for line in f.readlines():
-        ent_id_1 = line.split('\t')[0].strip()
-        rel_id = line.split('\t')[1].strip()
-        ent_id_2 = line.split('\t')[2].strip()
-        G2.add_edge(ent_id_1, ent_id_2, relation=rel_id)
-
-rel_1_dict = dict()
-rel_ids_1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_wiki/rel_ids_1'
-with open(rel_ids_1) as f:
-    for line in f.readlines():
-        rel_1_dict.update({line.split('\t')[0]: line.split('\t')[1].strip()})
-
-rel_2_dict = dict()
-rel_ids_2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_wiki/rel_ids_2'
-with open(rel_ids_2)as f:
-    for line in f.readlines():
-        rel_2_dict.update({line.split('\t')[0]: line.split('\t')[1].strip()})
-
-_2_neighbor_subgraph1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/2_neighbor_subgraph_1'.format(dataset)
-_1_neighbor_subgraph1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/1_neighbor_subgraph_1'.format(dataset)
-_2_neighbor_subgraph2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/2_neighbor_subgraph_2'.format(dataset)
-_1_neighbor_subgraph2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/1_neighbor_subgraph_2'.format(dataset)
-
 class Entity:
 
     def __init__(self, entity_name, entity_id, entity_type):
@@ -687,8 +631,8 @@ class Entity:
         :param node:
         :return:
         """
-
         return candidates[entity_name]
+
 
 
     def get_prompts_with_text_motif(self):
@@ -859,6 +803,70 @@ class Entity:
 
 
 if __name__ == '__main__':
+
+    dataset = sys.argv[1]
+
+    id_ent_dict1 = get_id_entity_dict(
+        '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/ent_ids_1'.format(dataset))
+    id_ent_dict2 = get_id_entity_dict(
+        '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/ent_ids_2'.format(dataset))
+    # ent_id_dict1 = get_ent_id_dict(
+    #     '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/ent_ids_1'.format(dataset))
+
+    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
+    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
+
+    sematic_embedding_candidates_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/candiadtes_semantic_embed_10_3765_all_corrected.txt'.format(
+        dataset)
+    entity_keys = [line.split('\t')[0].strip() for line in open(sematic_embedding_candidates_path).readlines()]
+    cand_list_values = [line.split('\t')[1].strip().split(',') for line in
+                        open(sematic_embedding_candidates_path).readlines()]
+    candidates = dict(zip(entity_keys, cand_list_values))
+
+    ##  获取relation of two nodes
+    triple1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/triples_1'.format(dataset)
+    triple2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/triples_2'.format(dataset)
+    new_triples1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_triples_1'.format(dataset)
+    new_triples2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_triples_2'.format(dataset)
+    G1 = nx.MultiDiGraph()
+    with open(new_triples1) as f:
+        for line in f.readlines():
+            ent_id_1 = line.split('\t')[0].strip()
+            rel_id = line.split('\t')[1].strip()
+            ent_id_2 = line.split('\t')[2].strip()
+            G1.add_edge(ent_id_1, ent_id_2, relation=rel_id)
+
+    G2 = nx.MultiDiGraph()
+    # ent_ids = []
+    with open(new_triples2) as f:
+        for line in f.readlines():
+            ent_id_1 = line.split('\t')[0].strip()
+            rel_id = line.split('\t')[1].strip()
+            ent_id_2 = line.split('\t')[2].strip()
+            G2.add_edge(ent_id_1, ent_id_2, relation=rel_id)
+
+    rel_1_dict = dict()
+    rel_ids_1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/rel_ids_1'.format(dataset)
+    with open(rel_ids_1) as f:
+        for line in f.readlines():
+            rel_1_dict.update({line.split('\t')[0]: line.split('\t')[1].strip()})
+
+    rel_2_dict = dict()
+    rel_ids_2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/rel_ids_2'.format(dataset)
+    with open(rel_ids_2) as f:
+        for line in f.readlines():
+            rel_2_dict.update({line.split('\t')[0]: line.split('\t')[1].strip()})
+
+    _2_neighbor_subgraph1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/2_neighbor_subgraph_1'.format(
+        dataset)
+    _1_neighbor_subgraph1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/1_neighbor_subgraph_1'.format(
+        dataset)
+    _2_neighbor_subgraph2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/2_neighbor_subgraph_2'.format(
+        dataset)
+    _1_neighbor_subgraph2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/1_neighbor_subgraph_2'.format(
+        dataset)
+
+    #######################################################################################################################
 
     entity_type = 'candidate'
     # entity_type = 'target'

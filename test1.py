@@ -494,27 +494,35 @@ from heapq import nlargest
 
 
 
-s = ('qwhjahsnwnu Thought1:..........................'
-     'Act1:..................')
-thought_idx = s.find('Thought')
-act_idx = s.find('Act')
-thought = s[thought_idx:act_idx-1]
-act = s[act_idx:-1]
-print(thought + '\n' + act)
+# s = ('qwhjahsnwnu Thought1:..........................'
+#      'Act1:..................')
+# thought_idx = s.find('Thought')
+# act_idx = s.find('Act')
+# thought = s[thought_idx:act_idx-1]
+# act = s[act_idx:-1]
+# print(thought + '\n' + act)
+#
+#
+# def find_requests(s):
+#      start_idx = s.find('Request[')
+#      end_idx = s.find(']')
+#      if start_idx != -1:
+#           return s[start_idx + 8: end_idx]
+#      return -1
+# print(find_requests('Requst[end]'))
+#
+# def find_code(s):
+#      start_idx = s.find('<code>')
+#      end_idx = s.find("</code>")
+#      return s[start_idx + 6: end_idx]
+#
+# s  = '<code>2344455</code>'
+# print(find_code(s))
 
+import json
 
-def find_requests(s):
-     start_idx = s.find('Request[')
-     end_idx = s.find(']')
-     if start_idx != -1:
-          return s[start_idx + 8: end_idx]
-     return -1
-print(find_requests('Requst[end]'))
+with open('idx_prompt_dict_step_00.json', 'r') as f:
+     step_00 = json.load(f)
 
-def find_code(s):
-     start_idx = s.find('<code>')
-     end_idx = s.find("</code>")
-     return s[start_idx + 6: end_idx]
-
-s  = '<code>2344455</code>'
-print(find_code(s))
+with open('idx_prompt_dict_step_00_format.json', 'w') as f:
+     json.dump(step_00, f, indent=4)

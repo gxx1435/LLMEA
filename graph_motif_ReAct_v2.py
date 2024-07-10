@@ -122,7 +122,7 @@ Act 4: Terminate['Abdulla Kurd']
 The Candidate entities list is: 
 {}
 
-NOTE: Please follow my example between "Example{i} Start" and "Example{i} End" above to answer task with interleaving Thought, Code, Action, Result turns. Each turn contains one segment of the target code to solve the problem. 
+NOTE: Please follow my example between "Example i Start" and "Example i End" above to answer task with interleaving Thought, Code, Action, Result turns. Each turn contains one segment of the target code to solve the problem. 
 
 [YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment task turn by turn! 
 ################### Your Answer Starts Here: ################### 

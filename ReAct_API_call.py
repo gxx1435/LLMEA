@@ -1,7 +1,8 @@
 import json
 import sys
+import random
 from run.utils import get_ent_id_dict
-from API_call_multithread import collect_response
+# from API_call_multithread import collect_response
 from graph_motif_ReAct_v2 import motif_ReAct_example_prompt
 from graph_motif_LLM import Entity
 from graph_motif_prompt import code_motif_prompts_generate
@@ -21,7 +22,7 @@ def read_idx_entity_file():
 
     return  idx_entity_dict
 
-def generate_message_lists():
+def generate_message_lists(threshold):
     """
     generates all prompts list
     :return:
@@ -29,6 +30,7 @@ def generate_message_lists():
     idx_entity_dict = read_idx_entity_file()
     idx_prompt_dict = {}
     entity_list = []
+    i = 0
     for idx in idx_entity_dict.keys():
         entity_name = idx_entity_dict[idx]
 
@@ -39,19 +41,58 @@ def generate_message_lists():
         elif entity_type == 'candidate':
             ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-        entity_id = ent_id_dict[entity_name]
-        entity = Entity(entity_name, entity_id, entity_type)
+        try:
+            entity_id = ent_id_dict[entity_name]
+            entity = Entity(entity_name, entity_id, entity_type)
+            _, cand_list, _ = entity.get_baseline_prompts()
+        except:
+            continue
+
+        i += 1
+        if i == threshold: break
+
+        print(entity_name, cand_list)
+        prompt = motif_ReAct_example_prompt.format(entity_name, str(cand_list), i=i)
+        idx_prompt_dict.update({idx: prompt})
         entity_list.append(entity)
 
-        _, cand_list, _ = entity.get_baseline_prompts()
-
-        prompt = motif_ReAct_example_prompt.format(entity_name, cand_list)
-        idx_prompt_dict.update({idx: prompt})
-
     with open('idx_prompt_dict_step_00.json', 'w') as f:
-        json.dump(idx_prompt_dict, f)
+        json.dump(idx_prompt_dict, f, indent=4)
 
     return idx_prompt_dict, entity_list
+
+
+# def collect_response(message_list, model_name):
+#     """
+#
+#     :return:
+#     """
+#     responses = []
+#     for i in range(len(message_list)):
+#         seed = random.random()
+#         if seed > 0.5:
+#             response = """
+#             Thought 1: xxxxxxxxxxxxxxxxxxx.
+#             Act 1: Request[Institutional Revolutionary Party] xxxxxxxxxxxxxxxxxxx.
+#             <code>
+#             xxxxxxxxxxxxxx
+#             xxxxxxxxxxxxxx
+#             </code>
+#             """
+#         else:
+#
+#             response = """
+#             Thought 1: xxxxxxxxxxxxxxxxxxx.
+#             Act 1: Terminate[Institutional Revolutionary Party] xxxxxxxxxxxxxxxxxxx.
+#             <code>
+#             xxxxxxxxxxxxxx
+#             xxxxxxxxxxxxxx
+#             </code>
+#             """
+#         responses.append(
+#             response
+#         )
+#     return responses
 
 def step(info_type, idx_prompt_dict, entity_list, step):
     """
@@ -83,8 +124,13 @@ def step(info_type, idx_prompt_dict, entity_list, step):
         end_idx = s.find("</code>")
         return s[start_idx+6: end_idx]
 
+    kwargs = {
+        'max_tokens': 2000,
+        'stop': None
+    }
+    message_list = [[{'role': 'user', 'content': prompt}] for prompt in idx_prompt_dict.values()]
 
-    responses = collect_response(idx_prompt_dict.values(), 'gpt-4-turbo')
+    responses = collect_response(message_list, 'gpt-4-turbo', **kwargs)
     thought_and_acts = [find_thought_and_act(response) for response in responses]
     requests = [find_requests(thought_and_act) for thought_and_act in thought_and_acts]
 
@@ -106,22 +152,28 @@ def step(info_type, idx_prompt_dict, entity_list, step):
 
             if info_type == '1_neighbor':
                 _1_neighbor_info = request_entity.get_only_1_neighbor_information()
-                observations.update({entity_id:_1_neighbor_info})
+                observations.update({entity_id: 'Observation i: \n' + _1_neighbor_info})
             elif info_type == 'text_motif':
                 text_motif_info = request_entity.get_only_motif_information()
-                observations.update({entity_id:text_motif_info})
+                observations.update({entity_id: 'Observation i: \n' + text_motif_info})
             elif info_type == 'code_motif':
                 text_motif_info = request_entity.get_only_motif_information()
                 code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
-                code_motif_prompts.update({entity_id:code_motif_prompt})
+                code_motif_prompts.update({entity_id: code_motif_prompt})
 
 
     if info_type == 'code_motif':
-        code_generated_responses = collect_response(code_motif_prompts.values(), 'gpt-4-turbo')
-        code_generated = [find_code(code_response) for code_response in code_generated_responses]
+
+        kwargs = {
+            'max_tokens': 2000,
+            'stop': None
+        }
+        message_list = [[{'role': 'user', 'content': prompt}] for prompt in code_motif_prompts.values()]
+        code_generated_responses = collect_response(message_list, 'gpt-4-turbo', **kwargs)
+
+        code_generated = ['Observation i: \n' + find_code(code_response) for code_response in code_generated_responses]
         observations = dict(zip(code_motif_prompts.keys(), code_generated))
 
-    observations = [(idx, 'Observation 1: \n' + observation) for (idx, observation) in observations.items()]
 
     new_idx_prompt_dict = {}
     new_entity_list = []
@@ -138,10 +190,10 @@ def step(info_type, idx_prompt_dict, entity_list, step):
             terminate_dict.update({entity_list[i].entity_name: find_Terminate(thought_and_acts[i])})
 
     with open('final_answer_{}.json'.format(step), 'w') as f:
-        json.dump(terminate_dict, f)
+        json.dump(terminate_dict, f, indent=4)
 
     with open('idx_prompt_dict_step_{}.json'.format(step), 'w') as f:
-        json.dump(new_idx_prompt_dict, f)
+        json.dump(new_idx_prompt_dict, f, indent=4)
 
     return new_idx_prompt_dict, new_entity_list
 
@@ -149,11 +201,13 @@ def step(info_type, idx_prompt_dict, entity_list, step):
 
 if __name__ == '__main__':
     dataset = sys.argv[1]
+    threshold = 3000
 
     ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
     ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
 
-    step0_idx_prompt_dict, step0_entity_list = generate_message_lists()
+    step0_idx_prompt_dict, step0_entity_list = generate_message_lists(threshold)
+
     step1_idx_prompt_dict, step1_entity_list = step('text_motif', step0_idx_prompt_dict, step0_entity_list, '01')
     step2_idx_prompt_dict, step2_entity_list = step('text_motif', step1_idx_prompt_dict, step1_entity_list, '02')
     step3_idx_prompt_dict, step3_entity_list = step('text_motif', step2_idx_prompt_dict, step2_entity_list, '03')
