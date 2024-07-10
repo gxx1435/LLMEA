@@ -1,4 +1,5 @@
 import json
+import os.path
 import sys
 import random
 from run.utils import get_ent_id_dict
@@ -22,6 +23,61 @@ def read_idx_entity_file():
 
     return  idx_entity_dict
 
+def baseline():
+
+    """
+    generates all prompts list
+    :return:
+    """
+    idx_entity_dict = read_idx_entity_file()
+    idx_prompt_dict = {}
+    i = 0
+    for idx in idx_entity_dict.keys():
+        entity_name = idx_entity_dict[idx]
+        entity_id = idx
+        entity_type = 'target'
+        try:
+                entity = Entity(entity_name, entity_id, entity_type)
+                _, cand_list, prompt = entity.get_baseline_prompts()
+        except:
+                continue
+
+        i += 1
+        if i == threshold: break
+
+        print(entity_name, cand_list)
+
+        idx_prompt_dict.update({idx: prompt})
+
+    with open('output/{}/idx_prompt_dict_baseline.json'.format(dataset), 'w') as f:
+        json.dump(idx_prompt_dict, f, indent=4)
+
+    return idx_prompt_dict
+
+def get_baseline_responses(idx_prompt_dict):
+    kwargs = {
+        'max_tokens': 2000,
+        'stop': None
+    }
+    message_list = [[{'role': 'user', 'content': prompt}] for prompt in idx_prompt_dict.values()]
+
+    responses = collect_response(message_list, 'gpt-4-turbo', **kwargs)
+
+    def get_output(s):
+        start_idx = s.find('<output>')
+        end_idx = s.find('</output>')
+        output = s[start_idx+8: end_idx]
+        return output
+
+    responses = [get_output(response) for response in responses]
+
+    responses_dict = dict(zip(idx_prompt_dict.keys(), responses))
+
+    with open('output/{}/idx_prompt_dict_baseline_responses.json'.format(dataset), 'w') as f:
+        json.dump(responses_dict, f, indent=4)
+
+    return
+
 def generate_message_lists(threshold):
     """
     generates all prompts list
@@ -33,16 +89,10 @@ def generate_message_lists(threshold):
     i = 0
     for idx in idx_entity_dict.keys():
         entity_name = idx_entity_dict[idx]
-
         entity_type = 'target'
 
-        if entity_type == ('target'):
-            ent_id_dict = get_ent_id_dict(ent_id_1_path)
-        elif entity_type == 'candidate':
-            ent_id_dict = get_ent_id_dict(ent_id_2_path)
-
         try:
-            entity_id = ent_id_dict[entity_name]
+            entity_id = idx
             entity = Entity(entity_name, entity_id, entity_type)
             _, cand_list, _ = entity.get_baseline_prompts()
         except:
@@ -52,17 +102,17 @@ def generate_message_lists(threshold):
         if i == threshold: break
 
         print(entity_name, cand_list)
-        prompt = motif_ReAct_example_prompt.format(entity_name, str(cand_list), i=i)
+        prompt = motif_ReAct_example_prompt.format(entity_name, cand_list, i=i)
         idx_prompt_dict.update({idx: prompt})
         entity_list.append(entity)
 
-    with open('idx_prompt_dict_step_00.json', 'w') as f:
+    with open('output/{}/idx_prompt_dict_step_00.json'.format(dataset), 'w') as f:
         json.dump(idx_prompt_dict, f, indent=4)
 
     return idx_prompt_dict, entity_list
 
 
-# def collect_response(message_list, model_name):
+# def collect_response(message_list, model_name, num_threads = 10, **kwargs):
 #     """
 #
 #     :return:
@@ -78,6 +128,7 @@ def generate_message_lists(threshold):
 #             xxxxxxxxxxxxxx
 #             xxxxxxxxxxxxxx
 #             </code>
+#             <output>None</output>
 #             """
 #         else:
 #
@@ -88,6 +139,7 @@ def generate_message_lists(threshold):
 #             xxxxxxxxxxxxxx
 #             xxxxxxxxxxxxxx
 #             </code>
+#             <output>None</output>
 #             """
 #         responses.append(
 #             response
@@ -111,7 +163,9 @@ def step(info_type, idx_prompt_dict, entity_list, step):
         start_idx = s.find('Request[')
         end_idx = s.find(']')
         if start_idx != -1:
-            return s[start_idx + 8: end_idx]
+            entity = s[start_idx + 8: end_idx]
+            entity = entity.replace("'", '')
+            return entity
         return -1
 
     def find_Terminate(s):
@@ -141,7 +195,11 @@ def step(info_type, idx_prompt_dict, entity_list, step):
         if requests[i] != -1:
             request_entity = requests[i]
 
-            entity_type = 'target'
+            if request_entity == entity_list[i].entity_name:
+                entity_type = 'target'
+            else:
+                entity_type = 'candidate'
+
             if entity_type == ('target'):
                 ent_id_dict = get_ent_id_dict(ent_id_1_path)
             elif entity_type == 'candidate':
@@ -189,10 +247,10 @@ def step(info_type, idx_prompt_dict, entity_list, step):
         else:
             terminate_dict.update({entity_list[i].entity_name: find_Terminate(thought_and_acts[i])})
 
-    with open('final_answer_{}.json'.format(step), 'w') as f:
+    with open('output/{}/final_answer_{}_{}.json'.format(dataset, info_type, step), 'w') as f:
         json.dump(terminate_dict, f, indent=4)
 
-    with open('idx_prompt_dict_step_{}.json'.format(step), 'w') as f:
+    with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(dataset, info_type, step), 'w') as f:
         json.dump(new_idx_prompt_dict, f, indent=4)
 
     return new_idx_prompt_dict, new_entity_list
@@ -201,14 +259,21 @@ def step(info_type, idx_prompt_dict, entity_list, step):
 
 if __name__ == '__main__':
     dataset = sys.argv[1]
-    threshold = 3000
+    info_type = sys.argv[2]
+    threshold = 300
+
+    if not os.path.exists('output/{}'.format(dataset)):
+        os.mkdir('output/{}'.format(dataset))
 
     ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
     ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
 
+    idx_prompt_dict = baseline()
+    get_baseline_responses(idx_prompt_dict)
+
     step0_idx_prompt_dict, step0_entity_list = generate_message_lists(threshold)
 
-    step1_idx_prompt_dict, step1_entity_list = step('text_motif', step0_idx_prompt_dict, step0_entity_list, '01')
-    step2_idx_prompt_dict, step2_entity_list = step('text_motif', step1_idx_prompt_dict, step1_entity_list, '02')
-    step3_idx_prompt_dict, step3_entity_list = step('text_motif', step2_idx_prompt_dict, step2_entity_list, '03')
-    step('text_motif', step3_idx_prompt_dict, step3_entity_list, '04')
+    step1_idx_prompt_dict, step1_entity_list = step(info_type, step0_idx_prompt_dict, step0_entity_list, '01')
+    step2_idx_prompt_dict, step2_entity_list = step(info_type, step1_idx_prompt_dict, step1_entity_list, '02')
+    step3_idx_prompt_dict, step3_entity_list = step(info_type, step2_idx_prompt_dict, step2_entity_list, '03')
+    step(info_type, step3_idx_prompt_dict, step3_entity_list, '04')
