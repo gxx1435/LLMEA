@@ -33,9 +33,9 @@ As a good Computer Science student good at coding, your task is to describe the 
 3.  Please note that the inter-calling relationships within the functions should correspond to the given triangle motif relationships. 
 4.  Please note the left-right relationship between function calls and variable names.
 5.  The function name should represent some relations.
-6.  回答请在python代码块中呈现
+6.  Please encapsulate the answer code within <code> </code>
 </RULE>
-Please refer to the  example below and handle new tasks! 
+Please refer to the example below and handle new tasks! 
 
 === Example Starts: ===
 Given triangle information, generate its Code description.

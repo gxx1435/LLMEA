@@ -3,6 +3,7 @@ run/out_log
 run/llm_response
 data
 escape
+output
 
 idx_prompt_dict_step_00.json
 idx_prompt_dict_step_00_format.json
