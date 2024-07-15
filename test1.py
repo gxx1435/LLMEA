@@ -521,8 +521,33 @@ from heapq import nlargest
 
 import json
 
-with open('idx_prompt_dict_step_00.json', 'r') as f:
-     step_00 = json.load(f)
+# with open('idx_prompt_dict_step_00.json', 'r') as f:
+#      step_00 = json.load(f)
+#
+# with open('idx_prompt_dict_step_00_format.json', 'w') as f:
+#      json.dump(step_00, f, indent=4)
+import re
 
-with open('idx_prompt_dict_step_00_format.json', 'w') as f:
-     json.dump(step_00, f, indent=4)
+
+def extract_target_entity(text):
+     # 优先匹配带单引号的目标实体
+     pattern_single_quote = r"Terminate\['(.*?)'\]"
+     match_single_quote = re.search(pattern_single_quote, text)
+
+     if match_single_quote:
+          return match_single_quote.group(1)
+
+     # 如果没有匹配到带单引号的目标实体，则匹配不带引号的目标实体
+     pattern_no_quote = r"Terminate\[(.*?)\]"
+     match_no_quote = re.search(pattern_no_quote, text)
+
+     if match_no_quote:
+          return match_no_quote.group(1)
+
+     return -1
+
+with open('output/icews_yago/LLM_response_code_motif/thought_and_acts_01.json') as f:
+     lines = json.load(f)
+     for line in lines:
+          terminate = extract_target_entity(line)
+          print(terminate)

@@ -3,63 +3,11 @@ import re
 import os.path
 import sys
 import random
-
-import numpy as np
-
 from run.utils import get_ent_id_dict, get_id_entity_dict
-# from API_call_multithread import collect_response
+from API_bank_multi import collect_response
 from graph_motif_ReAct_v2 import motif_ReAct_example_prompt
 from graph_motif_LLM import Entity
 from graph_motif_prompt import code_motif_prompts_generate
-
-def hit_1_10_rate(final_anwser_file, type='hit1'):
-    """
-    """
-    ent_ids_1 = []
-    with open(ent_id_1_path, 'r') as f:
-        for line in f.readlines():
-            ent_ids_1.append(line.split('\t')[1].strip())
-
-    ent_ids_2_aligned = []
-    with open(ent_id_2_path, 'r') as f:
-        for line in f.readlines():
-            ent_ids_2_aligned.append(line.split('\t')[1].strip())
-
-    ent_ids_12_dict = dict(zip(ent_ids_1, ent_ids_2_aligned))
-
-    hit1 = 0
-    hit10 = 0
-    with open(final_anwser_file, 'r') as f:
-        final_answer = json.load(f)
-        for key in final_answer.keys():
-            if type == 'hit1':
-                if final_answer[key] == ent_ids_12_dict[key]:
-                    hit1 += 1
-            elif type == 'hit10':
-                if ent_ids_12_dict[key] in final_answer[key]:
-                    hit10 += 1
-
-    return float(hit1/len(final_answer)) if type == 'hit1' else float(hit10/len(final_answer))
-
-
-def mean_reciprocal_rank(final_ranks):
-    """
-    计算Mean Reciprocal Rank (MRR)
-
-    参数:
-    final_ranks (list): 每个查询的第一个相关结果的排名的列表
-
-    返回:
-    float: 平均MRR值
-    """
-    mrrs = []
-    for ranks in final_ranks:
-
-        reciprocal_ranks = [1.0 / rank for rank in ranks]
-
-        mrr = sum(reciprocal_ranks) / len(ranks)
-        mrrs.append(mrr)
-    return np.mean(mrrs)
 
 def read_idx_entity_file():
     """
@@ -102,7 +50,7 @@ def baseline():
 
         idx_prompt_dict.update({idx: prompt})
 
-    with open('output/{}/idx_prompt_dict_baseline.json'.format(dataset), 'w') as f:
+    with open('output/{}/idx_prompt_dict_baseline.json'.format(dataset+"_"+LLM_type), 'w') as f:
         json.dump(idx_prompt_dict, f, indent=4)
 
     return idx_prompt_dict
@@ -126,7 +74,7 @@ def get_baseline_responses(idx_prompt_dict):
 
     responses_dict = dict(zip(idx_prompt_dict.keys(), responses))
 
-    with open('output/{}/idx_prompt_dict_baseline_responses.json'.format(dataset), 'w') as f:
+    with open('output/{}/idx_prompt_dict_baseline_responses.json'.format(dataset+"_"+LLM_type), 'w') as f:
         json.dump(responses_dict, f, indent=4)
 
     return
@@ -137,7 +85,7 @@ def generate_message_lists(threshold):
     :return:
     """
     try:
-        with open('output/{}/idx_prompt_dict_step_00.json'.format(dataset), 'r') as f:
+        with open('output/{}/idx_prompt_dict_step_00.json'.format(dataset+"_"+LLM_type), 'r') as f:
             idx_prompt_dict = json.load(f)
 
         entity_list = []
@@ -171,45 +119,10 @@ def generate_message_lists(threshold):
             idx_prompt_dict.update({idx: prompt})
             entity_list.append(entity)
 
-        with open('output/{}/idx_prompt_dict_step_00.json'.format(dataset), 'w') as f:
+        with open('output/{}/idx_prompt_dict_step_00.json'.format(dataset+"_"+LLM_type), 'w') as f:
             json.dump(idx_prompt_dict, f, indent=4)
 
     return idx_prompt_dict, entity_list
-
-
-def collect_response(message_list, model_name, num_threads = 10, **kwargs):
-    """
-
-    :return:
-    """
-    responses = []
-    for i in range(len(message_list)):
-        seed = random.random()
-        if seed > 0.5:
-            response = """
-            Thought 1: xxxxxxxxxxxxxxxxxxx.
-            Act 1: Request[Institutional Revolutionary Party] xxxxxxxxxxxxxxxxxxx.
-            <code>
-            xxxxxxxxxxxxxx
-            xxxxxxxxxxxxxx
-            </code>
-            <output>None</output>
-            """
-        else:
-
-            response = """
-            Thought 1: xxxxxxxxxxxxxxxxxxx.
-            Act 1: Terminate['Institutional Revolutionary Party'] xxxxxxxxxxxxxxxxxxx.
-            <code>
-            xxxxxxxxxxxxxx
-            xxxxxxxxxxxxxx
-            </code>
-            <output>None</output>
-            """
-        responses.append(
-            response
-        )
-    return responses
 
 def step(info_type, idx_prompt_dict, entity_list, step, idx):
     """
@@ -280,13 +193,13 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
         return s[start_idx+6: end_idx]
 
     try:
-        with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset, info_type, step), 'r') as f:
+        with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
             thoughts_and_acts = json.load(f)
 
-        with open('output/{}/final_answer_{}_{}.json'.format(dataset, info_type, step), 'r') as f:
+        with open('output/{}/final_answer_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
             terminate_dict = json.load(f)
 
-        with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(dataset, info_type, step), 'r') as f:
+        with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
             new_idx_prompt_dict = json.load(f)
 
 
@@ -299,8 +212,8 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
     except:
 
-        if not os.path.exists('output/{}/LLM_response_{}'.format(dataset, info_type)):
-            os.mkdir('output/{}/LLM_response_{}'.format(dataset, info_type))
+        if not os.path.exists('output/{}/LLM_response_{}'.format(dataset+"_"+LLM_type, info_type)):
+            os.mkdir('output/{}/LLM_response_{}'.format(dataset+"_"+LLM_type, info_type))
 
         kwargs = {
             'max_tokens': 2000,
@@ -311,7 +224,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
         responses = collect_response(message_list, 'gpt_4_turbo', **kwargs)
         thought_and_acts = [response for response in responses]
-        with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset, info_type, step), 'w') as f:
+        with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
             json.dump(responses, f, indent=4)
         requests = [find_requests(response) for response in responses]
 
@@ -360,7 +273,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
             message_list = [[{'role': 'user', 'content': prompt}] for prompt in code_motif_prompts.values()]
             code_generated_responses = collect_response(message_list, 'gpt_4_turbo', **kwargs)
 
-            with open('output/{}/LLM_response_{}/code_generated_{}.json'.format(dataset, info_type, step), 'w') as f:
+            with open('output/{}/LLM_response_{}/code_generated_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
                 json.dump(code_generated_responses, f, indent=4)
 
             code_generated = ['Observation {}: \n'.format(idx) + find_code(code_response) for code_response in code_generated_responses]
@@ -381,10 +294,10 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
             else:
                 terminate_dict.update({entity_list[i].entity_name: find_Terminate(thought_and_acts[i])})
 
-        with open('output/{}/final_answer_{}_{}.json'.format(dataset, info_type, step), 'w') as f:
+        with open('output/{}/final_answer_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
             json.dump(terminate_dict, f, indent=4)
 
-        with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(dataset, info_type, step), 'w') as f:
+        with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
             json.dump(new_idx_prompt_dict, f, indent=4)
 
 
@@ -392,18 +305,17 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
 
 
-
-
 if __name__ == '__main__':
     dataset = sys.argv[1]
     info_type = sys.argv[2]
-    threshold = 300
+    LLM_type = sys.argv[3]
+    threshold = 3000
 
-    if not os.path.exists('output/{}'.format(dataset)):
-        os.mkdir('output/{}'.format(dataset))
+    if not os.path.exists('output/{}'.format(dataset+"_"+LLM_type)):
+        os.mkdir('output/{}'.format(dataset+"_"+LLM_type))
 
-    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
-    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
+    ent_id_1_path = '/Users/jinyangli/Desktop/big_batches_API_call/data/{}/new_ent_ids_1'.format(dataset)
+    ent_id_2_path = '/Users/jinyangli/Desktop/big_batches_API_call/data/{}/new_ent_ids_2_aligned'.format(dataset)
 
     if info_type == 'baseline':
         idx_prompt_dict = baseline()

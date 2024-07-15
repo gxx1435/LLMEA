@@ -485,7 +485,7 @@ id_ent_dict2 = get_id_entity_dict(
 ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
 ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
 
-sematic_embedding_candidates_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/candiadtes_semantic_embed_10_3765_all_corrected.txt'.format(
+sematic_embedding_candidates_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/candiadtes_semantic_embed_100_3765_all add_corrected.txt'.format(
         dataset)
 entity_keys = [line.split('\t')[0].strip() for line in open(sematic_embedding_candidates_path).readlines()]
 cand_list_values = [line.split('\t')[1].strip().split(',') for line in
@@ -869,17 +869,19 @@ if __name__ == '__main__':
     #######################################################################################################################
 
     entity_type = 'candidate'
-    # entity_type = 'target'
+    entity_type = 'target'
     if entity_type == ('target'):
         ent_id_dict = get_ent_id_dict(ent_id_1_path)
 
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Institutional Revolutionary Party"""
+    entity = """Salauddin"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
-    prompts = entity.get_only_1_neighbor_information()
+
+    _, _, prompts = entity.get_baseline_prompts()
+    # prompts = entity.get_only_motif_information()
 
     print(prompts)
