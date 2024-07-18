@@ -77,16 +77,19 @@ def get_subgraph_within_k_per_node(G, node, k):
     :param k:
     :return:
     """
-    subgraph = nx.Graph()
-    frontier = set([node])
-    for _ in range(k):
-        next_frontier = set()
-        for n in frontier:
-            neighbors = set(G.neighbors(n))
-            subgraph.add_node(n)
-            subgraph.add_edges_from((n, nbr) for nbr in neighbors)
-            next_frontier.update(neighbors)
-        frontier = next_frontier
+    try:
+        subgraph = nx.Graph()
+        frontier = set([node])
+        for _ in range(k):
+            next_frontier = set()
+            for n in frontier:
+                    neighbors = set(G.neighbors(n))
+                    subgraph.add_node(n)
+                    subgraph.add_edges_from((n, nbr) for nbr in neighbors)
+                    next_frontier.update(neighbors)
+            frontier = next_frontier
+    except:
+        subgraph = nx.Graph()
 
     return subgraph
 

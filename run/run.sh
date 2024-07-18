@@ -8,7 +8,11 @@
 #python3 machine_translation.py
 
 echo "Start encoding and EA"
-python3 LLMEA_zero_base.py ../data/DBP15K/zh_en/text_input_no_train_11_wxt.txt ../data/DBP15K/zh_en/text_input_no_train_22_wxt.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_zh_en.json' > out_log/Output_LLMEA_zero_base_3000_cos_ed_csls_union_zh_en.txt # you can change the input file dirs as you like
+python3 LLMEA_base_icews.py ../data/icews_yago/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/icews_yago/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_icews_yago/ > out_log/Output_LLMEA_base_rs_30%_icews_yago_all_add.txt
+
+#python3 LLMEA_zero_base_icews.py ../data/icews_yago/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/icews_yago/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_zeroembed_icews_yago/ > out_log/Output_LLMEA_zero_base_random_sample_30%_icews_yago_all_add.txt
+
+#python3 LLMEA_zero_base.py ../data/DBP15K/zh_en/text_input_no_train_11_wxt.txt ../data/DBP15K/zh_en/text_input_no_train_22_wxt.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_zh_en.json' > out_log/Output_LLMEA_zero_base_3000_cos_ed_csls_union_zh_en.txt # you can change the input file dirs as you like
 
 #python3 LLMEA_base.py ../data/DBP15K/zh_en/text_input_no_train_11_wxt.txt ../data/DBP15K/zh_en/text_input_no_train_22_wxt.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_zh_en.json' > out_log/Output_LLMEA_base_15000_cos_ed_csls_union_zh_en.txt # you can change the input file dirs as you like
 

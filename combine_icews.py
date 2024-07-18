@@ -2,8 +2,10 @@ import json
 
 import numpy as np
 
-from run.utils import coverage_eval, get_candidates, get_entity_names
+from run.utils import coverage_eval, get_candidates, get_entity_names,coverage_eval_segment
 # from Test import get_hits
+
+
 def get_performance_of_semantic_embedding_similarity(
         semantic_embedding_matrix_left,
         semantic_embedding_matrix_right,
@@ -21,9 +23,7 @@ def get_performance_of_semantic_embedding_similarity(
     :return:
     """
 
-    assert len(semantic_embedding_matrix_left) == thres_hold and\
-            len(semantic_embedding_matrix_right) == thres_hold,\
-            '语义向量或结构向量长度必须等于threshold'
+    assert len(semantic_embedding_matrix_left) == len(semantic_embedding_matrix_right), '向量维度需要相等'
 
 
     matrix1 = semantic_embedding_matrix_left
@@ -45,7 +45,7 @@ def get_performance_of_semantic_embedding_similarity(
     # entity_right = get_entity_names(entity_ids_2_path, thres_hold)
 
 
-    n_cand = 200
+    n_cand = 100
     method = 'all add'
     candidates_idx_list, ent_left, ent_right = get_candidates(matrix1,
                                                               matrix2,
@@ -54,34 +54,38 @@ def get_performance_of_semantic_embedding_similarity(
                                                               n_cand=n_cand,
                                                               method=method)
 
-
     candidates_save_path = candidates_save_path + 'candiadtes_{}_{}_{}_{}.txt'.format('semantic_embed', n_cand, thres_hold, method)
 
-    if method != 'all':
-        np.savetxt(candidates_save_path, candidates_idx_list, delimiter=',', fmt='%d')
-    else:
-        with open(candidates_save_path, 'w') as f:
-            for cand_list in candidates_idx_list:
-                cand_list = [str(cand) for cand in cand_list]
-                if len(cand_list) != 1:
-                    f.write(','.join(cand_list)+'\n')
-                else:
-                    f.write(cand_list[0] + '\n')
+    # if method != 'all':
+    #     np.savetxt(candidates_save_path, candidates_idx_list, delimiter=',', fmt='%d')
+    # else:
+    #     with open(candidates_save_path, 'w') as f:
+    #         for cand_list in candidates_idx_list:
+    #             cand_list = [str(cand) for cand in cand_list]
+    #             if len(cand_list) != 1:
+    #                 f.write(','.join(cand_list)+'\n')
+    #             else:
+    #                 f.write(cand_list[0] + '\n')
 
 
     out_file = candidates_save_path.split('.')[0] + '_corrected.txt'
     print(out_file)
-    print("语义向量的覆盖率为：\n", coverage_eval(ent_left,
-                                                 candidates_idx_list,
+    print("语义向量的覆盖率为：\n", coverage_eval(candidates_idx_list,
+                                                 ent_left,
                                                  ent_right,
                                                  ent_right,
                                                  out_file
                                                  ))
 
+    # cut_indices = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200]
+    # for cut_indice in cut_indices:
+    #     coverage = coverage_eval_segment(candidates_idx_list, ent_left, ent_right, ent_right, cut_indice)
+    #     print("{} candidates, Coverage is:".format(cut_indice), coverage)
+
 if __name__ == '__main__':
     type = 'yago'
-    threshold = 3765
-    mid_reuslts = '/mid_results_3765_zeroembed_icews_yago/'
+    threshold = 'rs_0.3'
+    mid_reuslts = '/mid_results_rs_0.3_zeroembed_icews_yago/'
 
     llm_resp_save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json'
 
@@ -93,6 +97,8 @@ if __name__ == '__main__':
     semantic_embedding_matrix_left = np.loadtxt(llm_resp_save_dir.replace("/llm_response/", mid_reuslts).replace("gpt4_turbo_", "entity_embed_left_"), delimiter=',')
     semantic_embedding_matrix_right = np.loadtxt(llm_resp_save_dir.replace("/llm_response/", mid_reuslts).replace("gpt4_turbo_", "entity_embed_right_"), delimiter=',')
 
+    print(len(semantic_embedding_matrix_left))
+    print(len(semantic_embedding_matrix_right))
     candidates_save_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_{}/'.format(type)
 
     get_performance_of_semantic_embedding_similarity(

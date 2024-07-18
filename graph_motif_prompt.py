@@ -89,4 +89,8 @@ if __name__ == '__main__':
 Given Graph, please generate its code description language.
 Given Entity, The triangle motif information is
 {}
-"""
+""".format("""
+34185 , SWAPO_Party_Youth_League , Motif 1:
+SWAPO_Party_Youth_League memberOf World_Federation_of_Democratic_Youth
+
+""")

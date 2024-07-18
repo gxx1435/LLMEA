@@ -76,24 +76,32 @@ def refine_all(ent_left, candidates, entity_text_right, save_dir):
 
 
 def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100):
-    sim = 1 - np.array(cosine_similarity(Lvec, Rvec))
+    sim_cosine = 1 - np.array(cosine_similarity(Lvec, Rvec))
 
     sim_edit_dis = np.zeros((len(entity_text_left), len(entity_text_right)))
-    for i, text_left in enumerate(entity_text_left):
-        for j, text_right in enumerate(entity_text_right):
-            sim_edit_dis[i][j] = editdistance.eval(text_left, text_right)
+
+    for i in range(len(entity_text_left)):
+        for j in range(len(entity_text_right)):
+            sim_edit_dis[i][j] = editdistance.eval(entity_text_left[i], entity_text_right[j])
 
     sim_csls = 1 - compute_csls(np.array(Lvec), np.array(Rvec))
 
-    candidates = []
+    sim = sim_cosine + sim_edit_dis + sim_csls
+
+    candidates = [0] * len(Lvec)
+    ent_left = [0] * len(Lvec)
+    ent_right = [0] * len(Lvec)
+    ranks = [0] * len(Lvec)
+
     for i in range(len(Lvec)):
-        rank1 = sim[i, :].argsort()
-        rank2 = sim_edit_dis[i, :].argsort()
-        rank3 = sim_csls[i, :].argsort()
+        rank = sim[i, :].argsort()
+        ranks[i] = rank
+        candidates[i] = rank[0:n_cand]
 
-        candidates.append(list(set(rank1[:n_cand]).union(set(rank2[:n_cand])).union(set(rank3[:n_cand]))))
+        ent_left[i] = entity_text_left[i]
+        ent_right[i] = entity_text_right[i]
 
-    return candidates, entity_text_left, entity_text_right
+    return ranks, candidates, ent_left, ent_right
 
 
 def get_target_embed(filename, tokenizer, model, type=1):
@@ -104,10 +112,15 @@ def get_target_embed(filename, tokenizer, model, type=1):
 
         for line in input_f:
             counter += 1
-            if type == 1:
-                entity_text = line.split('\t')[1].strip()
-            elif type == 2:
-                entity_text = line.split('\t')[1].split('/')[-1].strip()
+            tmp = line.strip().replace("...", "")
+            real_label = tmp.replace("\n", '')
+
+            ### Adding wrod_embed
+            entity_text = real_label.split(":")[0].strip()
+            # if type == 1:
+            #     entity_text = line.split('\t')[1].strip()
+            # elif type == 2:
+            #     entity_text = line.split('\t')[1].split('/')[-1].strip()
 
             # entity_text = entity_text.translate(str.maketrans('', '', string.punctuation + punctuation))
 
@@ -201,7 +214,7 @@ if __name__ == '__main__':
     input_ent_dir_2 = sys.argv[2]
     llm_resp_save_dir = sys.argv[3]
     mid_results_dir = sys.argv[4]
-    thresh_num = 3000
+    thresh_num = 30000
     bert_model = 'bert-base-uncased'
 
 
@@ -250,12 +263,12 @@ if __name__ == '__main__':
             "gpt4_turbo_", "entity_embed_right_")
 
         entity_text_left, entity_embed_left = get_target_embed(input_ent_dir_1, tokenizer, model, 1)
-        entity_text_right, entity_embed_right = get_target_embed(input_ent_dir_2, tokenizer, model, 1)
+        entity_text_right, entity_embed_right = get_target_embed(input_ent_dir_2, tokenizer, model, 2)
 
         np.savetxt(entity_embed_left_save_dir, np.array(entity_embed_left), delimiter=',', fmt='%f')
         np.savetxt(entity_embed_right_save_dir, np.array(entity_embed_right), delimiter=',', fmt='%f')
 
-        candidates_idx_list, ent_left, ent_right = get_candidates(entity_embed_left, entity_embed_right,
+        _, candidates_idx_list, ent_left, ent_right = get_candidates(entity_embed_left, entity_embed_right,
                                                                   entity_text_left, entity_text_right)
 
         save_dir = llm_resp_save_dir.replace("/llm_response/", sys.argv[4]).replace(

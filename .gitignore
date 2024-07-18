@@ -4,6 +4,7 @@ run/llm_response
 data
 escape
 output
+icews_yago_gpt_4_turbo-5
 
 idx_prompt_dict_step_00.json
 idx_prompt_dict_step_00_format.json

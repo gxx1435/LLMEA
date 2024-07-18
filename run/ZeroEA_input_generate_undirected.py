@@ -85,8 +85,10 @@ KI_flg = int(sys.argv[4])
 ent_ids = {}
 ent_ids_cn = {}
 rel_ids = {}
+random_sample = 0.3
 
-with open(data_dir+"ent_ids_1", "r") as ent_1:
+# with open(data_dir+"new_ent_ids_1_random_sample_{}".format(random_sample), "r") as ent_1:
+with open(data_dir + "ent_ids_1", "r") as ent_1:
     print('ent_ids_1')
     for line in tqdm(ent_1):
         tmp = line.strip()
@@ -99,7 +101,9 @@ with open(data_dir+"ent_ids_1", "r") as ent_1:
         text = content[1].split("/")[-1]
         ent_ids[content[0]] = text.replace('/', ' ')     
         
-with open(data_dir+"ent_ids_2", "r") as ent_2:
+# with open(data_dir+"new_ent_ids_2_aligned_random_sample_{}".format(random_sample), "r") as ent_2:
+with open(data_dir + "ent_ids_2", "r") as ent_2:
+
     print('ent_ids_2')
     for line in tqdm(ent_2):
         tmp = line.strip()
@@ -202,9 +206,8 @@ with open(data_dir+"new_ref_ent_ids", "r") as GT_file:
             ent_r_text = ent_ids[content[1]]
 
 
-            print('1')
             text_to_add_l, head_text_en_l, error_flg_l = entity2text(text_id_l, content[0], ent_l_text, ent_ids, rel_ids, nodes, "G1: ", False)
-            print('2')
+
             text_to_add_r, head_text_en_r, error_flg_r = entity2text(text_id_r, content[1], ent_r_text, ent_ids, rel_ids, nodes, "G2: ", False)
 
 
@@ -244,10 +247,10 @@ with open(data_dir+"new_ref_ent_ids", "r") as GT_file:
             print(text_input_1)
             print(text_input_2)
 
-            # text_input_1 = ent_l_text + ':' +'The node not in graph.'
-            # text_input_2 = ent_r_text + ':' +'The node not in graph.'
-            # text_input_all_1.append(text_input_1)
-            # text_input_all_2.append(text_input_2)
+            text_input_1 = ent_l_text + ':' +'The node not in graph.'
+            text_input_2 = ent_r_text + ':' +'The node not in graph.'
+            text_input_all_1.append(text_input_1)
+            text_input_all_2.append(text_input_2)
 
 
 text_save(data_dir+fn_save_1, text_input_all_1)

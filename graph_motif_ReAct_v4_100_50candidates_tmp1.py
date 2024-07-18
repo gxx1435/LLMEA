@@ -37,85 +37,59 @@ NOTE: You have at most 4 turns to generate final results, which means you have t
 [YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
 ################### Your Answer Starts Here: ################### 
 Turn 1:
-# 4 turns left to provide final answer. Please select one answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.
-Thought 1: I cannot find an entity in the candidate list that is a direct match for "Salauddin." I need to request more information about the target entity "Salauddin" to increase my confidence and make an informed decision.
-Act 1: Request['Salauddin']
+# 4 turns left to provide the final answer. The target entity 'Salauddin' likely needs a comparison with someone of similar regional or functional background.
+Thought 1: I need to focus on entities that have backgrounds in the Middle East, South Asia, or regions with similar socio-political contexts.
+Act 1: Request['Abdulla Kurd']
 Observation 1: 
-Observation 1: import engage_in_symbolic_act, provide_aid, impose_curfew, praise_or_endorse, express_intent_to_change_institutions_regime, occupy_territory, express_intent_to_cooperate_militarily
-import express_intent_to_engage_in_diplomatic_cooperation, express_intent_to_meet_or_negotiate, host_a_visit, make_optimistic_comment, make_statement, connected_with, reduce_or_stop_material_aid, accuse
+import is_connected_with
 
-def Salauddin_Engage_in_symbolic_act(Salauddin, Government_Bangladesh, Bangladesh):
-    Salauddin = engage_in_symbolic_act(Government_Bangladesh)
-    Salauddin += provide_aid(Bangladesh)
-    Government_Bangladesh = impose_curfew(Bangladesh)
-    Government_Bangladesh += praise_or_endorse(Bangladesh)
-    Government_Bangladesh += express_intent_to_change_institutions_regime(Bangladesh)
-    Government_Bangladesh += occupy_territory(Bangladesh)
-    Government_Bangladesh += express_intent_to_cooperate_militarily(Bangladesh)
-    return Salauddin, Government_Bangladesh, Bangladesh
+def Abdulla_Kurd_connected_with(Abdulla_Kurd, Turkey):
+    Turkey = is_connected_with(Abdulla_Kurd)
+    return Abdulla_Kurd, Turkey
 
-def Salauddin_Express_intent_to_engage_in_diplomatic_cooperation(Salauddin, Ali_Ahsan_Mohammad_Mujahid, Political_Parties_Bangladesh):
-    Salauddin = express_intent_to_engage_in_diplomatic_cooperation(Ali_Ahsan_Mohammad_Mujahid)
-    Salauddin += express_intent_to_meet_or_negotiate(Political_Parties_Bangladesh)
-    Ali_Ahsan_Mohammad_Mujahid = express_intent_to_meet_or_negotiate(Political_Parties_Bangladesh)
-    return Salauddin, Ali_Ahsan_Mohammad_Mujahid, Political_Parties_Bangladesh
+if __name__ == '__main__':
+    Abdulla_Kurd, Turkey = Abdulla_Kurd_connected_with('Abdulla_Kurd', 'Turkey')
 
-def Salauddin_Express_intent_to_engage_in_diplomatic_cooperation_with_Qatar(Salauddin, Head_of_Government_Qatar, Pervez_Musharraf):
-    Salauddin = express_intent_to_engage_in_diplomatic_cooperation(Head_of_Government_Qatar)
-    Salauddin += connected_with(Pervez_Musharraf)
-    Head_of_Government_Qatar = host_a_visit(Pervez_Musharraf)
-    Head_of_Government_Qatar += make_optimistic_comment(Pervez_Musharraf)
-    return Salauddin, Head_of_Government_Qatar, Pervez_Musharraf
-
-def Salauddin_Make_statement(Salauddin, Israel, Pervez_Musharraf):
-    Salauddin = make_statement(Israel)
-    Salauddin += connected_with(Pervez_Musharraf)
-    Israel = connected_with(Pervez_Musharraf)
-    return Salauddin, Israel, Pervez_Musharraf
-
-def Salauddin_Connected_with_Police(Salauddin, Police_India, Bangladesh):
-    Salauddin = connected_with(Police_India)
-    Salauddin += provide_aid(Bangladesh)
-    Police_India = make_statement(Bangladesh)
-    Police_India += express_intent_to_meet_or_negotiate(Bangladesh)
-    Police_India += reduce_or_stop_material_aid(Bangladesh)
-    Police_India += accuse(Bangladesh)
-    Police_India += express_intent_to_engage_in_diplomatic_cooperation(Bangladesh)
-    return Salauddin, Police_India, Bangladesh
 
 Turn 2:
-[Important!] 3 turns left to provide final answer. Based on the observation, 'Salauddin' has connections with Bangladesh, India, and Pervez Musharraf. Considering this information, I should now request information about the most relevant candidate entity.
-Thought 2: I need more information to increase my confidence in selecting the correct aligned entity. Given the context, I will request information about 'Abdulla Kurd,' as it seems a potentially relevant candidate.
-Act 2: Request['Abdulla Kurd']
+[Important!] 3 turns left to provide final answer. 
+Thought 2: Given the regional and functional similarity, 'Abdulla Kurd' aligns closely with 'Salauddin'. To ensure a comprehensive comparison, I'll examine another related entity from the list.
+Act 2: Request['Hamid Mir']
 Observation 2: 
+import is_connected_with
 
-import connected_with
+def Hamid_Mir_connected_with(Hamid_Mir, Pakistan):
+    Hamid_Mir = is_connected_with(Pakistan)
+    Pakistan = is_connected_with(Hamid_Mir)
+    return Hamid_Mir, Pakistan
 
-def Abdulla_Kurd_connected_with_1(Abdulla_Kurd, Turkey):
-    unknown_entity = connected_with(Turkey)
-    unknown_entity += connected_with(Abdulla_Kurd)
-    Turkey = connected_with(Abdulla_Kurd)
-    return unknown_entity, Turkey, Abdulla_Kurd
+if __name__ == '__main__':
+    Hamid_Mir, Pakistan = Hamid_Mir_connected_with('Hamid_Mir', 'Pakistan')
+
 
 Turn 3:
-[Important!] 2 turns left to provide final answer. Based on the observation, 'Abdulla Kurd' has connections with Turkey. Since 'Salauddin' has connections with regions including Bangladesh and India, I need to evaluate if there is a stronger match in the candidate list. Given this context, I should now request information about another potentially relevant candidate entity.
-Thought 3: I need to request information about another candidate to ensure the most aligned entity is identified. 'Salahuddin of Selangor' could be a relevant entity to explore further connections.
-Act 3: Request['Salahuddin of Selangor']
-Observation 3: import connected_with, educated_at, continent
+[Important!] 2 turns left to provide final answer. 
+Thought 3: 'Hamid Mir' has a different background compared to 'Abdulla Kurd', who aligns more closely with the target entity 'Salauddin'. I need to confirm if there is another candidate with a similar background.
+Act 3: Request['Salam Fayyad']
+Observation 3: 
+import birthDate, hasOccupation, alumniOf
 
-def Kuala_Lumpur_connected_with_Salahuddin_of_Selangor(Kuala_Lumpur, Salahuddin_of_Selangor, Malaysia):
-    Kuala_Lumpur = connected_with(Salahuddin_of_Selangor)
-    Kuala_Lumpur += educated_at(Malaysia)
-    Salahuddin_of_Selangor = continent(Malaysia)
-    return Kuala_Lumpur, Salahuddin_of_Selangor, Malaysia
+def Salam_Fayyad_relations(Salam_Fayyad):
+    Salam_Fayyad = birthDate()
+    Salam_Fayyad += hasOccupation('Politician')
+    Salam_Fayyad += hasOccupation('Economist')
+    Salam_Fayyad += alumniOf('American_University_of_Beirut')
+    Salam_Fayyad += alumniOf('University_of_Texas_at_Austin')
+    return Salam_Fayyad
+
+if __name__ == '__main__':
+    Salam_Fayyad = Salam_Fayyad_relations('Salam_Fayyad')
 
 Turn 4:
-[Important!] 1 turn left to provide final answer. Based on the observation, 'Salahuddin of Selangor' is connected with Kuala Lumpur and Malaysia. This information is not as relevant as the connections 'Salauddin' has with Bangladesh, India, and Pervez Musharraf. The connections of 'Abdulla Kurd' with Turkey seem more aligned with the context of 'Salauddin'.
-Thought 4: Considering all the observations, 'Abdulla Kurd' appears to be the most aligned entity given its connection with Turkey, which aligns with the regional context related to 'Salauddin'. Therefore, I am confident in selecting 'Abdulla Kurd' as the aligned entity.
-Act 4:The most similar 50 entities are: ['Abdulla Kurd', 'Sule Lamido','Salam Fayyad','Saad Hariri','Shwe Mann','Shaul Mofaz','Soe Thein','Susan Rice','Sukarno','Suharto','Sam Sesay','Sung Kim','Sima Samar','Sylvia Lim','Sam Nujoma','Su Chi','Samoa','Shas','San Marino','Sinn Féin','Kalyan Singh','Aung Min','Sirindhorn','Hamid Mir','Fatah','Kadima','Babar Awan','Gilad Erdan','Paul Martin','Joe Biden','Ma Kai','Chea Sim','Ron Wyden','Imran Khan','Jawed Ludin','Mali','Malawi','Cambodia','Sweden','Spain','Somalia','Slovenia','Qatar','Kuwait','Oman','Bahrain','Malaysia','Raila Odinga','Benin','Jamaica']. Terminate['Abdulla Kurd']
-
+[Important!] 1 turn left to provide final answer.
+Thought 4: 'Abdulla Kurd' and 'Salam Fayyad' both have political backgrounds, but 'Abdulla Kurd' is more directly aligned with the regional and functional background of 'Salauddin'.
+Act 4:The most similar 50 entities are: ['Abdulla Kurd', 'Salam Fayyad', 'Hamid Mir', 'Salou Djibo', 'Soe Thein', 'Sukarno', 'Jean Ping', 'Chea Sim', 'Shwe Mann', 'Aung Min', 'Ne Win', 'Gilad Erdan', 'Ramdev', 'Paul Martin', 'Sam Sesay', 'Ma Kai', 'Fatah', 'Sinn Féin', 'Somalia', 'Mao Zedong', 'Hla Min', 'Hla Tun', 'Panama', 'Hamas', 'Suharto', 'Attajdid', 'Talal Arslan', 'Isa Yuguda', 'Saad Hariri', 'Shaul Mofaz', 'Alexandria', 'Carl Levin', 'Sam Nujoma', 'Dan Burton', 'Ron Wyden', 'Kadima', 'Raila Odinga', 'Sylvia Lim', 'Susan Rice', 'Babar Awan', 'Sima Samar', 'Aung San', 'Jawed Ludin', 'Imran Khan', 'Navarre', 'Poland', 'Wales', 'Soe Aung', 'Malawi', 'Benin', 'Tatarstan']. Terminate['Abdulla Kurd'].
 ------------------------------ Example2 End ------------------------------ 
-
 
 [USER (Boss)]: Give me the 50 most aligned entity and the most aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. Please select from candiates! The target entity is:
 Swaziland Youth Congress

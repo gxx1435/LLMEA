@@ -529,25 +529,100 @@ import json
 import re
 
 
-def extract_target_entity(text):
-     # 优先匹配带单引号的目标实体
-     pattern_single_quote = r"Terminate\['(.*?)'\]"
-     match_single_quote = re.search(pattern_single_quote, text)
+# def extract_target_entity(text):
+#      # 优先匹配带单引号的目标实体
+#      pattern_single_quote = r"Terminate\['(.*?)'\]"
+#      match_single_quote = re.search(pattern_single_quote, text)
+#
+#      if match_single_quote:
+#           return match_single_quote.group(1)
+#
+#      # 如果没有匹配到带单引号的目标实体，则匹配不带引号的目标实体
+#      pattern_no_quote = r"Terminate\[(.*?)\]"
+#      match_no_quote = re.search(pattern_no_quote, text)
+#
+#      if match_no_quote:
+#           return match_no_quote.group(1)
+#
+#      return -1
+#
+# with open('output/icews_yago/LLM_response_code_motif/thought_and_acts_01.json') as f:
+#      lines = json.load(f)
+#      for line in lines:
+#           terminate = extract_target_entity(line)
+#           print(terminate)
 
-     if match_single_quote:
-          return match_single_quote.group(1)
+import argparse
 
-     # 如果没有匹配到带单引号的目标实体，则匹配不带引号的目标实体
-     pattern_no_quote = r"Terminate\[(.*?)\]"
-     match_no_quote = re.search(pattern_no_quote, text)
+# # 创建 ArgumentParser 对象
+# parser = argparse.ArgumentParser(description="It's a test")
+#
+# parser.add_argument('-d', '--dataset', type=str, help='dataset name')
+#
+# parser.add_argument('-i', '--info_type', type=str, help='code_motif,text_motif,1_neighbor')
+#
+# parser.add_argument('-l', '--llm_type', type=str, help='LLM type')
+#
+# # # 添加可选参数（带默认值）
+# # parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
+#
+# # 解析参数
+# args = parser.parse_args()
+#
+# dataset = args.dataset
+# info_type = args.info_type
+# LLM_type = args.llm_type
+# print(dataset)
+# print(info_type)
+# print(LLM_type)
+# random_sample = 0.3
+# f = "new_ent_ids_1_random_sample_{}".format(random_sample)
+# print(f)
 
-     if match_no_quote:
-          return match_no_quote.group(1)
+from ReAct_API_call_Nan import hit_1_10_rate, motif_ReAct_example_prompt,mean_reciprocal_rank
+# final_answers = {}
+# for i in [1, 2, 3, 4]:
+#     with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/icews_yago_gpt_4_turbo-5/final_answer_code_motif_{}.json'.format(i), 'r') as f:
+#         final_answer = json.load(f)
+#         final_answers.update(final_answer)
+#
+# with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/icews_yago_gpt_4_turbo-5/final_answer_code_motif_all.json', 'w') as f:
+#     json.dump(final_answers, f, indent=4)
 
-     return -1
+# dataset = 'icews_yago'
+# ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_strip'.format(dataset)
+# ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned_strip'.format(dataset)
 
-with open('output/icews_yago/LLM_response_code_motif/thought_and_acts_01.json') as f:
-     lines = json.load(f)
-     for line in lines:
-          terminate = extract_target_entity(line)
-          print(terminate)
+# hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/icews_yago_gpt_4_turbo-5/final_answer_code_motif_all.json', 'hit1')
+# print(hit_rate)
+
+# id_ent_dict = {}
+# idxs = []
+# ents =[]
+# with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/new_ent_ids_2_aligned') as f:
+#
+#     for line in f.readlines():
+#         idx = line.split('\t')[0]
+#         ent = line.split('\t')[1].strip()
+#         # ent = ent.split('(')[0]
+#         idxs.append(idx)
+#         ents.append(ent)
+# id_ent_dict = dict(zip(idxs, ents))
+#
+# print(len(id_ent_dict))
+#
+# with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/new_ent_ids_2_aligned_strip', 'w') as f:
+#     for idx in id_ent_dict.keys():
+#         f.write(idx +'\t'+id_ent_dict[idx] +'\n')
+
+coverage_list = dict(zip(range(13), np.zeros(13)))
+print(coverage_list)
+
+import numpy as np
+
+arr = np.array([3, 1, 2])
+sorted_indices = np.argsort(arr)
+
+print("原数组:", arr)
+print("排序后的索引:", sorted_indices)
+print("排序后的数组:", arr[sorted_indices])

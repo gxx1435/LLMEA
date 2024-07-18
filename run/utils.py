@@ -94,7 +94,7 @@ def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100, 
     if method == 'cosine':
 
         sim = 1 - np.array(cosine_similarity(Lvec, Rvec))
-        print(sim)
+
 
     elif method == 'ed':
 
@@ -155,7 +155,6 @@ def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100, 
         ent_left = [0] * len(Lvec)
         ent_right = [0] * len(Lvec)
         for i in range(len(Lvec)):
-
             rank = sim[i, :].argsort()
             candidates[i] = rank[0:n_cand]
             # # 用文本格式转存
@@ -225,7 +224,30 @@ def get_id_entity_dict(ent_id_path):
             id_entity_dict.update({idx: entity})
     return id_entity_dict
 
-def coverage_eval(ent_left, candidates_idx_list, ent_right, entity_text_right, out_file=''):
+def coverage_eval_segment(candidates_idx_list, ent_left, ent_right, entity_text_right, cut_indice):
+    """
+
+    :param candidate_idx_list:
+    :param ent_left:
+    :param ent_right:
+    :return:
+    """
+    cnt = 0
+    for i in range(len(ent_left)):
+        cand_list = candidates_idx_list[i][:cut_indice]
+        candidates = []
+        for idx in cand_list:
+                cand_txt = entity_text_right[idx]
+                candidates.append(cand_txt)
+
+        if ent_right[i] in candidates:
+                cnt += 1
+
+    return cnt / len(ent_left)
+
+
+
+def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, out_file=''):
     """
     :param ent_left: source entity
     :param candidates_idx_list: candidates idx list
@@ -242,6 +264,7 @@ def coverage_eval(ent_left, candidates_idx_list, ent_right, entity_text_right, o
         cand_list = candidates_idx_list[i]
         candidates = []
         for j in cand_list:
+
             cand_txt = entity_text_right[j]
             candidates.append(cand_txt)
 

@@ -6,7 +6,7 @@ from itertools import combinations
 from heapq import nlargest
 import numpy as np
 from collections import Counter, defaultdict
-
+from graph_motif_counts import get_subgraph_within_k_per_node, read_graph
 
 from run.utils import get_id_entity_dict, get_ent_id_dict
 
@@ -65,49 +65,55 @@ def find_triangle_or_star_motifs(graph, node, top_n=5):
     :param top_n:
     :return:
     """
-    # 获取目标节点的邻居
-    neighbors = set(graph.neighbors(node))
+    try:
+        # 获取目标节点的邻居
+        neighbors = set(graph.neighbors(node))
 
-    # 字典来记录每个邻居节点与目标节点共享的三角形列表
-    shared_triangles = {neighbor: [] for neighbor in neighbors}
+        # 字典来记录每个邻居节点与目标节点共享的三角形列表
+        shared_triangles = {neighbor: [] for neighbor in neighbors}
 
-    # 遍历每个邻居节点，找出共享三角形
-    for neighbor in neighbors:
-        # 获取邻居节点的邻居
-        neighbors_of_neighbor = set(graph.neighbors(neighbor))
+        # 遍历每个邻居节点，找出共享三角形
+        for neighbor in neighbors:
+                # 获取邻居节点的邻居
+                neighbors_of_neighbor = set(graph.neighbors(neighbor))
 
-        # 找出共同邻居（即三角形中的第三个节点）
-        common_neighbors = neighbors & neighbors_of_neighbor
+                # 找出共同邻居（即三角形中的第三个节点）
+                common_neighbors = neighbors & neighbors_of_neighbor
 
-        # 记录共享三角形
-        for common_neighbor in common_neighbors:
-            triangle = tuple(sorted((node, neighbor, common_neighbor)))
-            shared_triangles[neighbor].append(triangle)
+                # 记录共享三角形
+                for common_neighbor in common_neighbors:
+                    triangle = tuple(sorted((node, neighbor, common_neighbor)))
+                    shared_triangles[neighbor].append(triangle)
 
-    # 将所有共享三角形收集到一个列表中
-    all_shared_triangles = []
-    for triangles in shared_triangles.values():
-        all_shared_triangles.extend(triangles)
 
-    # 找出前 top_n 个共享次数最多的三角形
-    top_shared_triangles = nlargest(top_n, set(all_shared_triangles), key=lambda t: all_shared_triangles.count(t))
+        # 将所有共享三角形收集到一个列表中
+        all_shared_triangles = []
+        for triangles in shared_triangles.values():
+                all_shared_triangles.extend(triangles)
 
-    # 构建包含这些三角形motif的子图
-    motif_graphs = []
-    for triangle in top_shared_triangles:
-        motif_graph = nx.Graph()
-        motif_graph.add_edges_from(
-            [(triangle[0], triangle[1]),
-             (triangle[1], triangle[2]),
-             (triangle[2], triangle[0])]
-        )
-        motif_graphs.append(motif_graph)
+        # 找出前 top_n 个共享次数最多的三角形
+        top_shared_triangles = nlargest(top_n, set(all_shared_triangles), key=lambda t: all_shared_triangles.count(t))
 
-    ## if the triangle is empty list, then give its star information
-    if len(motif_graphs) == 0:
-        motif_graphs = find_top_star_motif(graph, node, top_n)
 
-    return motif_graphs
+        # 构建包含这些三角形motif的子图
+        motif_graphs = []
+        for triangle in top_shared_triangles:
+            motif_graph = nx.Graph()
+            motif_graph.add_edges_from(
+                [(triangle[0], triangle[1]),
+                 (triangle[1], triangle[2]),
+                 (triangle[2], triangle[0])]
+            )
+            motif_graphs.append(motif_graph)
+
+        ## if the triangle is empty list, then give its star information
+        if len(motif_graphs) == 0:
+            motif_graphs = find_top_star_motif(graph, node, top_n)
+
+        return motif_graphs
+
+    except:
+        return []
 
 def find_top_star_motif(G, node, top_n):
     def build_star_motif(graph, center_node, top_n):
@@ -617,11 +623,25 @@ class Entity:
         subgraph_file = subgraph_path + '/{}.graph'.format(node)
 
         edges = []
-        with open(subgraph_file, 'r') as f:
-            for line in f.readlines():
-                edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
-        G = nx.DiGraph()
-        G.add_edges_from(edges)
+        try:
+            with open(subgraph_file, 'r') as f:
+                for line in f.readlines():
+                    edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
+            G = nx.DiGraph()
+            G.add_edges_from(edges)
+        except:
+
+            if self.entity_type == 'target':
+                newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_1'.format(dataset)
+            elif self.entity_type == 'candidate':
+                newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_2'.format(dataset)
+
+            graph_edges_kg = read_graph(newgraph_path)
+            kg = nx.Graph()
+            kg.add_edges_from(graph_edges_kg)
+
+            G = get_subgraph_within_k_per_node(kg, node, 2)
+
 
         motifs = find_triangle_or_star_motifs(G, node)
 
@@ -869,19 +889,19 @@ if __name__ == '__main__':
     #######################################################################################################################
 
     entity_type = 'candidate'
-    entity_type = 'target'
+    # entity_type = 'target'
     if entity_type == ('target'):
         ent_id_dict = get_ent_id_dict(ent_id_1_path)
 
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Salauddin"""
+    entity = """World Uyghur Congress"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
 
-    _, _, prompts = entity.get_baseline_prompts()
-    # prompts = entity.get_only_motif_information()
+    # _, _, prompts = entity.get_baseline_prompts()
+    prompts = entity.get_only_motif_information()
 
     print(prompts)
