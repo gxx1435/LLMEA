@@ -45,7 +45,7 @@ def get_performance_of_semantic_embedding_similarity(
     # entity_right = get_entity_names(entity_ids_2_path, thres_hold)
 
 
-    n_cand = 100
+    n_cand = 10
     method = 'all add'
     candidates_idx_list, ent_left, ent_right = get_candidates(matrix1,
                                                               matrix2,
@@ -84,8 +84,8 @@ def get_performance_of_semantic_embedding_similarity(
 
 if __name__ == '__main__':
     type = 'yago'
-    threshold = 'rs_0.3'
-    mid_reuslts = '/mid_results_rs_0.3_zeroembed_icews_yago/'
+    threshold = 3765
+    mid_reuslts = '/mid_results_3765_zeroembed_icews_yago/'
 
     llm_resp_save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json'
 

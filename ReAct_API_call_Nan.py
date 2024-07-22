@@ -7,10 +7,13 @@ import numpy as np
 import argparse
 from run.utils import get_ent_id_dict, get_id_entity_dict
 # from API_bank_multi import collect_response
-from graph_motif_ReAct_v2 import motif_ReAct_example_prompt
-from graph_motif_LLM import Entity
+# from graph_motif_ReAct_v4_100_50candidates_tmp2 import motif_ReAct_example_prompt
 from graph_motif_prompt import code_motif_prompts_generate
 
+
+def dynamic_import(module_name):
+    module = __import__(module_name)
+    return module
 
 def hit_1_10_rate(final_anwser_file, type='hit1'):
     """
@@ -92,6 +95,8 @@ def baseline():
     generates all prompts list
     :return:
     """
+    from entity import Entity
+
     idx_entity_dict = read_idx_entity_file()
     idx_prompt_dict = {}
     i = 0
@@ -146,6 +151,7 @@ def generate_message_lists(threshold):
     generates all prompts list
     :return:
     """
+    from entity import Entity
     try:
         with open('output/{}/idx_prompt_dict_step_00.json'.format(dataset+"_"+LLM_type), 'r') as f:
             idx_prompt_dict = json.load(f)
@@ -226,7 +232,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
     :param info_type: 1_neighbor, text_motif, code_motif
     :return:
     """
-
+    from entity import Entity
     def find_thought_and_act(s):
         thought_idx = s.find('Thought')
         act_idx = s.find('Act')
@@ -283,6 +289,11 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
         return extract_target_entity(s)
 
+    def find_most_list(s):
+        start_idx = s.find('<most>')
+        end_idx = s.find('</msot>')
+        return s[start_idx+6: end_idx]
+
     def find_code(s):
         start_idx = s.find('<code>')
         end_idx = s.find("</code>")
@@ -294,6 +305,9 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
         with open('output/{}LLM_response_{}/requests_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
             requests = json.load(f)
+
+        with open('output/{}/most_list_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
+            most_list_dict = json.load(f)
 
         with open('output/{}/final_answer_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
             terminate_dict = json.load(f)
@@ -411,6 +425,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
         new_idx_prompt_dict = {}
         new_entity_list = []
         terminate_dict = {}
+        most_list_dict ={}
         for i in range(len(entity_list)):
             if requests[i] != -1:
                 entity_id = entity_list[i].entity_id
@@ -420,7 +435,11 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                         idx_prompt_dict[entity_id] + thought_and_acts[i] + observations[entity_id]
                 })
             else:
+                most_list_dict.update({entity_list[i].entity_name: find_most_list(thought_and_acts[i])})
                 terminate_dict.update({entity_list[i].entity_name: find_Terminate(thought_and_acts[i])})
+
+        with open('output/{}/most_list_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
+            json.dump(most_list_dict, f, indent=4)
 
         with open('output/{}/final_answer_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
             json.dump(terminate_dict, f, indent=4)
@@ -431,37 +450,47 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
     return new_idx_prompt_dict, new_entity_list
 
+# 创建 ArgumentParser 对象
+parser = argparse.ArgumentParser(description="It's a test")
 
+parser.add_argument('-d', '--dataset', type=str, help='dataset name')
+
+parser.add_argument('-i', '--info_type', type=str, help='code_motif,text_motif,1_neighbor')
+
+parser.add_argument('-l', '--llm_type', type=str, help='LLM type')
+
+parser.add_argument('-t', '--threshold', type=int, default=300, help='阈值')
+
+parser.add_argument('-r', '--react_file', type=str, default='graph_motif_ReAct_v4_100_50candidates_tmp2', help='ReAct File')
+
+parser.add_argument('-s', '--sematic_embedding_candidates_path', default='/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/candiadtes_semantic_embed_100_3765_all add_corrected.txt',
+                                                                               type=str, help='semantic cadidate path')
+
+
+# # 添加可选参数（带默认值）
+# parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
+
+# 解析参数
+args = parser.parse_args()
+
+dataset = args.dataset
+info_type = args.info_type
+LLM_type = args.llm_type
+threshold = args.threshold
+module_name = args.react_file
+
+ReAct_module = dynamic_import(module_name)
+motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
+sematic_embedding_candidates_path = args.sematic_embedding_candidates_path
+
+ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_strip'.format(dataset)
+ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned_strip'.format(dataset)
 
 if __name__ == '__main__':
-
-    # 创建 ArgumentParser 对象
-    parser = argparse.ArgumentParser(description="It's a test")
-
-    parser.add_argument('-d', '--dataset', type=str, help='dataset name')
-
-    parser.add_argument('-i', '--info_type', type=str, help='code_motif,text_motif,1_neighbor')
-
-    parser.add_argument('-l', '--llm_type', type=str, help='LLM type')
-
-    parser.add_argument('-t', '--threshold', type=int, default=300, help='阈值')
-
-    # # 添加可选参数（带默认值）
-    # parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
-
-    # 解析参数
-    args = parser.parse_args()
-
-    dataset = args.dataset
-    info_type = args.info_type
-    LLM_type = args.llm_type
-    threshold = args.threshold
 
     if not os.path.exists('output/{}'.format(dataset+"_"+LLM_type)):
         os.mkdir('output/{}'.format(dataset+"_"+LLM_type))
 
-    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_strip'.format(dataset)
-    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned_strip'.format(dataset)
 
     if info_type == 'baseline':
         idx_prompt_dict = baseline()

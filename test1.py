@@ -579,7 +579,7 @@ import argparse
 # f = "new_ent_ids_1_random_sample_{}".format(random_sample)
 # print(f)
 
-from ReAct_API_call_Nan import hit_1_10_rate, motif_ReAct_example_prompt,mean_reciprocal_rank
+# from ReAct_API_call_Nan import hit_1_10_rate, motif_ReAct_example_prompt,mean_reciprocal_rank
 # final_answers = {}
 # for i in [1, 2, 3, 4]:
 #     with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/icews_yago_gpt_4_turbo-5/final_answer_code_motif_{}.json'.format(i), 'r') as f:
@@ -615,14 +615,33 @@ from ReAct_API_call_Nan import hit_1_10_rate, motif_ReAct_example_prompt,mean_re
 #     for idx in id_ent_dict.keys():
 #         f.write(idx +'\t'+id_ent_dict[idx] +'\n')
 
-coverage_list = dict(zip(range(13), np.zeros(13)))
-print(coverage_list)
+# import numpy as np
+#
+# arr = np.array([3, 1, 2])
+# sorted_indices = np.argsort(arr)
+#
+# print("原数组:", arr)
+# print("排序后的索引:", sorted_indices)
+# print("排序后的数组:", arr[sorted_indices])
 
-import numpy as np
 
-arr = np.array([3, 1, 2])
-sorted_indices = np.argsort(arr)
+# # 添加可选参数（带默认值）
+# parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
+import argparse
 
-print("原数组:", arr)
-print("排序后的索引:", sorted_indices)
-print("排序后的数组:", arr[sorted_indices])
+def dynamic_import(module_name):
+    module = __import__(module_name)
+    return module
+
+parser = argparse.ArgumentParser(description="It's a test")
+parser.add_argument('-r', '--react_file', type=str, default='graph_motif_ReAct_v4_100_50candidates_tmp2',
+                    help='ReAct File')
+
+# 解析参数
+args = parser.parse_args()
+
+module_name = args.react_file
+
+ReAct_module = dynamic_import(module_name)
+motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
+print(motif_ReAct_example_prompt)

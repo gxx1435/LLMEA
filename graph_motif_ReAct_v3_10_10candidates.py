@@ -2,17 +2,17 @@ motif_ReAct_example_prompt = """
 You are an programmer. You can request useful entity from candidate list but you can not request irrelevant entities. Otherwise, you will be fired. 
 Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation, and Action only can be two types: 
 (1) Request[entity], which requests the entity context information from Knowledge Graphs. The context information may be given in code description. You can only request once per time and each time an entity in candidate list.
-(2) The most similar 50 entities are: []. Terminate[answer], which returns the answer and finishes the task.
+(2) The most similar 50 entities after sort are: <most>[]</most> and Terminate[answer], which returns the answer and finishes the task.
 Here are two examples.
 Compare the background information of entities carefully to see if they are similar. 
 ------------------------------# Example1 Start ------------------------------ 
 
-[USER (Boss)]: Give me the most aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. The target entity is:
+[USER (Boss)]: Please sort the candidate list according to similarity to target entity and select the most aligned entity of the target entity from candidates list. If there is same entity, please select directly. The target entity is:
 'Ne Win'
 
 The Candidate entities list is: 
-['Benin', 'Serbia', 'Yen Ming', 'Milan Panić', 'Aung San', 'Spain', 'Tin Oo', 'Soe Thein', 'Ne Win', 'Femen', 'Hla Min', 'Naoto Kan', 'Hun Sen', 'Gabon', 'Sung Kim', 'Timothy Yang', 'Chea Sim', 'Shwe Mann', 'Min Ko Naing', 'Aung Min', 'Khun Sa', 'Nokia', 'Daniel Yona']
-
+['Ne Win', 'Benin', 'Hla Min', 'Femen', 'Yen Ming', 'Nokia', 'Chea Sim', 'Soe Thein', 'Jean Ping', 'Hun Sen']
+ 
 NOTE: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
 
 [YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
@@ -20,16 +20,16 @@ NOTE: You have at most 4 turns to generate final results, which means you have t
 Turn 1:
 # 4 turns left to provide final answer. Please select 10 most similar answer from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.
 Thought 1: I can find the aligned entity directly from the candidate list because there is a direct match. 
-Act 1: The most similar 10 entities are: ['Ne Win', 'Aung San', 'Tin Oo', 'Soe Thein', 'Hla Min', 'Shwe Mann', 'Min Ko Naing', 'Aung Min', 'Khun Sa', 'Hun Sen']. Terminate['Ne Win']
+Act 1: The most similar 10 entities are: <most>['Ne Win', 'Benin', 'Hla Min', 'Femen', 'Yen Ming', 'Nokia', 'Chea Sim', 'Soe Thein', 'Jean Ping', 'Hun Sen']</most> and Terminate['Ne Win']
 ------------------------------# Example1 End ------------------------------ 
 
 ------------------------------ Example2 Start ------------------------------ 
 
-[USER (Boss)]: Give me the most aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. The target entity is:
+[USER (Boss)]: Please sort the candidate list according to similarity to target entity and select the most aligned entity of the target entity from candidates list. If there is same entity, please select directly. The target entity is:
 'Salauddin'
 
 The Candidate entities list is: 
-['Salahuddin of Selangor', 'Slovenia', 'Riad Salamé', 'Hla Tun', 'Qadri Jamil', 'Sweden', 'Palau', 'Spain', 'Sheikh Hasina', 'Hla Min', 'Malaysia', 'Mohamed Nasheed', 'Ahmed Chalabi', 'Nabil Shaath', 'Sirindhorn', 'Japan', 'Abdo Hussameddin', 'Macky Sall', 'Salam Fayyad', 'Malawi', 'Mourad Dhina', 'Jawed Ludin', 'Macau', 'Abdulla Kurd']
+['Palau', 'Hla Min', 'Salou Djibo', 'Attajdid', 'Malawi', 'Bahrain', 'Malaysia', 'Raila Odinga', 'Spain', 'Valdivia', 'Abdulla Kurd']
 
 NOTE: You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
 
@@ -111,16 +111,16 @@ def Kuala_Lumpur_connected_with_Salahuddin_of_Selangor(Kuala_Lumpur, Salahuddin_
 Turn 4:
 [Important!] 1 turn left to provide final answer. Based on the observation, 'Salahuddin of Selangor' is connected with Kuala Lumpur and Malaysia. This information is not as relevant as the connections 'Salauddin' has with Bangladesh, India, and Pervez Musharraf. The connections of 'Abdulla Kurd' with Turkey seem more aligned with the context of 'Salauddin'.
 Thought 4: Considering all the observations, 'Abdulla Kurd' appears to be the most aligned entity given its connection with Turkey, which aligns with the regional context related to 'Salauddin'. Therefore, I am confident in selecting 'Abdulla Kurd' as the aligned entity.
-Act 4:The most similar 10 entities are: ['Abdulla Kurd', 'Salahuddin of Selangor', 'Sheikh Hasina', 'Salam Fayyad', 'Ahmed Chalabi'.'Mohamed Nasheed', 'Nabil Shaath', 'Hla Min', 'Hla Tun', 'Qadri Jamil']. Terminate['Abdulla Kurd']
+Act 4:The most similar 10 entities are: <most>['Palau', 'Hla Min', 'Salou Djibo', 'Attajdid', 'Malawi', 'Bahrain', 'Malaysia', 'Raila Odinga', 'Spain', 'Valdivia', 'Abdulla Kurd']</most> and Terminate['Abdulla Kurd']
 
 ------------------------------ Example2 End ------------------------------ 
 
 
-[USER (Boss)]: Give me the 10 most aligned entity of the target entity from candidates entity list. If there is same entity, please select directly. Please select from candiates! The target entity is:
-Swaziland Youth Congress
+[USER (Boss)]:  Please sort the candidate list according to similarity to target entity and select the most aligned entity of the target entity from candidates list. If there is same entity, please select directly. Please select from candiates! The target entity is:
+Jomo Gbomo
 
 The Candidate entities list is: 
-['Jharkhand Mukti Morcha', 'World Jewish Congress', 'South African Communist Party', 'Iraqi National Congress', 'Sandra Torres', 'Inkatha Freedom Party', 'African National Congress Youth League', 'Sandinista National Liberation Front', 'UMkhonto we Sizwe', 'Armenian National Congress', 'Trades Union Congress', 'Mauritian Militant Movement', 'Pan Africanist Congress of Azania', 'Lesotho Congress for Democracy', "Uganda People's Congress", 'Action Congress of Nigeria', 'World Uyghur Congress', "National People's Congress", 'Kenya African National Union', 'Hassan Younes', "People's United Democratic Movement"]
+['John Nkomo', 'Comoros', 'Fred Gumo', 'Tony Momoh', 'José Bové', 'Jaime Trobo', 'John Hogg', 'Colombia', 'Morocco', 'Bode George', 'Henry Okah']
 
 NOTE: Please follow my example between "Example i Start" and "Example i End" above to answer task with interleaving Thought, Code, Action, Result turns. Each turn contains one segment of the target code to solve the problem. 
 
