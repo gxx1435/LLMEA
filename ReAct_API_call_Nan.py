@@ -290,14 +290,45 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
         return extract_target_entity(s)
 
     def find_most_list(s):
-        start_idx = s.find('<most>')
-        end_idx = s.find('</msot>')
-        return s[start_idx+6: end_idx]
+        # start_idx = s.find('<most>')
+        # end_idx = s.find('</msot>')
+        # return s[start_idx+6: end_idx]
+
+        # 正则表达式模式，匹配 <most> 和 </most> 标签之间的内容
+        pattern = r'<most>(.*?)</most>'
+        # 使用 re.findall() 提取所有匹配的内容
+        matches = re.search(pattern, s)
+        if matches:
+            return matches.group(1)
+
+        return -1
 
     def find_code(s):
         start_idx = s.find('<code>')
         end_idx = s.find("</code>")
-        return s[start_idx+6: end_idx]
+        if start_idx != -1:
+            return s[start_idx+6: end_idx]
+
+        start_idx = s.find('<CODE>')
+        end_idx = s.find("</CODE>")
+        if start_idx != -1:
+            return s[start_idx+6: end_idx]
+
+        start_idx = s.find('python')
+        if start_idx != -1:
+            return s[start_idx+6: -1]
+
+        return 'no code observation for this entity.'
+
+        # # 正则表达式模式，匹配 <code> 和 </code> 标签之间的内容
+        # pattern = r'<code>(.*?)</code>'
+        # # 使用 re.findall() 提取所有匹配的内容
+        # matches = re.search(pattern, s)
+        # print(s, matches)
+        # if matches:
+        #     return matches.group(1)
+        #
+        # return 'no code observation for this entity.'
 
     try:
         with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
@@ -365,7 +396,8 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
             if requests[i] != -1:
                 request_entity = requests[i]
 
-                if request_entity == entity_list[i].entity_name:
+                if (request_entity == entity_list[i].entity_name
+                        or request_entity.lower() == entity_list[i].entity_name.lower()):
                     entity_type = 'target'
                 else:
                     entity_type = 'candidate'
@@ -376,10 +408,13 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                 elif entity_type == 'candidate':
                     ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-
+                print(request_entity, entity_list[i].entity_name, entity_type)
                 # try:
-                request_entity_id = ent_id_dict[request_entity]
-                # print(request_entity, request_entity_id)
+                if entity_type == 'target':
+                    request_entity_id = ent_id_dict[entity_list[i].entity_name]
+                else:
+                    request_entity_id = ent_id_dict[request_entity]
+
                 request_entity = Entity(request_entity, request_entity_id, entity_type)
                 # except:
                 #     # introduce noise
@@ -419,6 +454,9 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                     json.dump(code_generated_responses, f, indent=4)
 
             code_generated = ['Observation {}: \n'.format(step) + find_code(code_response) for code_response in code_generated_responses]
+
+            with open('output/{}/LLM_response_{}/code_{}.json'.format(dataset + "_" + LLM_type, info_type, step), 'w') as f:
+                json.dump(code_generated, f, indent=4)
             observations = dict(zip(code_motif_prompts.keys(), code_generated))
 
 
@@ -501,6 +539,6 @@ if __name__ == '__main__':
         step0_idx_prompt_dict, step0_entity_list = generate_message_lists(threshold)
 
         step1_idx_prompt_dict, step1_entity_list = step(info_type, step0_idx_prompt_dict, step0_entity_list, '1', 1)
-        # step2_idx_prompt_dict, step2_entity_list = step(info_type, step1_idx_prompt_dict, step1_entity_list, '2', 2)
-        # step3_idx_prompt_dict, step3_entity_list = step(info_type, step2_idx_prompt_dict, step2_entity_list, '3', 3)
-        # step(info_type, step3_idx_prompt_dict, step3_entity_list, '4', 4)
+        step2_idx_prompt_dict, step2_entity_list = step(info_type, step1_idx_prompt_dict, step1_entity_list, '2', 2)
+        step3_idx_prompt_dict, step3_entity_list = step(info_type, step2_idx_prompt_dict, step2_entity_list, '3', 3)
+        step(info_type, step3_idx_prompt_dict, step3_entity_list, '4', 4)

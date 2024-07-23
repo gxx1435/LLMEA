@@ -94,6 +94,7 @@ def get_rel_dict():
 
     return rel_1_dict, rel_2_dict
 rel_1_dict, rel_2_dict = get_rel_dict()
+
 class Entity:
 
     def __init__(self, entity_name, entity_id, entity_type):

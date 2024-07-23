@@ -627,21 +627,34 @@ import argparse
 
 # # 添加可选参数（带默认值）
 # parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
-import argparse
+# import argparse
+#
+# def dynamic_import(module_name):
+#     module = __import__(module_name)
+#     return module
+#
+# parser = argparse.ArgumentParser(description="It's a test")
+# parser.add_argument('-r', '--react_file', type=str, default='graph_motif_ReAct_v4_100_50candidates_tmp2',
+#                     help='ReAct File')
+#
+# # 解析参数
+# args = parser.parse_args()
+#
+# module_name = args.react_file
+#
+# ReAct_module = dynamic_import(module_name)
+# motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
+# print(motif_ReAct_example_prompt)
 
-def dynamic_import(module_name):
-    module = __import__(module_name)
-    return module
+text = """
+This is a sample text with <code>some code</code> and more text.
+Here is another <code>example code</code> snippet.
+"""
 
-parser = argparse.ArgumentParser(description="It's a test")
-parser.add_argument('-r', '--react_file', type=str, default='graph_motif_ReAct_v4_100_50candidates_tmp2',
-                    help='ReAct File')
+# 正则表达式模式，匹配 <code> 和 </code> 标签之间的内容
+pattern = r'<code>(.*?)</code>'
 
-# 解析参数
-args = parser.parse_args()
+# 使用 re.findall() 提取所有匹配的内容
+matches = re.search(pattern, text)
 
-module_name = args.react_file
-
-ReAct_module = dynamic_import(module_name)
-motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
-print(motif_ReAct_example_prompt)
+print(matches.group(1))
