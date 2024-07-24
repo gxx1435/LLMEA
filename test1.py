@@ -646,15 +646,107 @@ import argparse
 # motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
 # print(motif_ReAct_example_prompt)
 
-text = """
-This is a sample text with <code>some code</code> and more text.
-Here is another <code>example code</code> snippet.
-"""
+# text = """
+# This is a sample text with <code>some code</code> and more text.
+# Here is another <code>example code</code> snippet.
+# """
+#
+# # 正则表达式模式，匹配 <code> 和 </code> 标签之间的内容
+# pattern = r'<code>(.*?)</code>'
+#
+# # 使用 re.findall() 提取所有匹配的内容
+# matches = re.search(pattern, text)
+#
+# print(matches.group(1))
 
-# 正则表达式模式，匹配 <code> 和 </code> 标签之间的内容
-pattern = r'<code>(.*?)</code>'
+import networkx as nx
+from itertools import combinations
+from collections import Counter
+import numpy as np
+import matplotlib.pyplot as plt
 
-# 使用 re.findall() 提取所有匹配的内容
-matches = re.search(pattern, text)
+# 创建图结构
+G = nx.Graph()
+edges = [(1, 2), (2, 3), (3, 1), (3, 4), (4, 5), (5, 6), (6, 4), (6, 7), (7, 8), (8, 9), (9, 7)]
+G.add_edges_from(edges)
 
-print(matches.group(1))
+# 枚举三角形
+def find_triangles(G):
+    triangles = []
+    for node in G.nodes():
+        neighbors = list(G.neighbors(node))
+        for u, v in combinations(neighbors, 2):
+            if G.has_edge(u, v):
+                triangles.append((node, u, v))
+    return triangles
+
+# 枚举星形（中心节点连接多个外围节点）
+def find_stars(G):
+    stars = []
+    for node in G.nodes():
+        neighbors = list(G.neighbors(node))
+        if len(neighbors) >= 3:
+            stars.append((node, tuple(neighbors)))
+    return stars
+
+# 枚举四边形
+def find_quadrilaterals(G):
+    quadrilaterals = []
+    for node in G.nodes():
+        neighbors = list(G.neighbors(node))
+        for u, v in combinations(neighbors, 2):
+            if G.has_edge(u, v):
+                for w in neighbors:
+                    if w != u and w != v and G.has_edge(u, w) and G.has_edge(v, w):
+                        quadrilaterals.append((node, u, v, w))
+    return quadrilaterals
+
+# 计算图中各个motif的数量
+triangles = find_triangles(G)
+stars = find_stars(G)
+quadrilaterals = find_quadrilaterals(G)
+
+# 计算各个motif的频率
+motif_frequencies = {
+    "triangle": len(triangles),
+    "star": len(stars),
+    "quadrilateral": len(quadrilaterals)
+}
+
+# 找到频率最高的motif
+most_frequent_motif = max(motif_frequencies, key=motif_frequencies.get)
+
+# 输出最有代表性的motif
+print(f"The most representative motif is: {most_frequent_motif} with count: {motif_frequencies[most_frequent_motif]}")
+
+most_frequent_motif = "star"
+# 提取包含最有代表性motif的实例
+if most_frequent_motif == "triangle":
+    motif_instances = triangles
+elif most_frequent_motif == "star":
+    motif_instances = stars
+elif most_frequent_motif == "quadrilateral":
+    motif_instances = quadrilaterals
+
+# 提取最有代表性的motif实例
+print(motif_instances)
+most_representative_motif_instance = motif_instances[0]
+
+print(f"The most representative motif instance is: {most_representative_motif_instance}")
+
+# 提取子图
+motif_nodes = set(most_representative_motif_instance)
+
+subgraph = G.subgraph(motif_nodes).copy()
+
+
+# 输出子图中的节点和边
+print(f"Nodes in the most representative motif subgraph: {list(subgraph.nodes())}")
+print(f"Edges in the most representative motif subgraph: {list(subgraph.edges())}")
+
+# 可视化子图
+pos = nx.spring_layout(subgraph)
+nx.draw(subgraph, pos, with_labels=True, node_color='skyblue', edge_color='gray', node_size=1500, font_size=20)
+plt.title("Most Representative Motif Subgraph")
+plt.show()
+

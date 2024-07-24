@@ -94,6 +94,7 @@ def get_rel_dict():
 
     return rel_1_dict, rel_2_dict
 rel_1_dict, rel_2_dict = get_rel_dict()
+
 class Entity:
 
     def __init__(self, entity_name, entity_id, entity_type):
@@ -142,24 +143,61 @@ class Entity:
 
         return rel
 
-    def get_subgraph(self, node):
+    def get_subgraph_offline(self, node):
         """
-
+        :param node:
         :return:
         """
-
         if self.entity_type == 'target':
-            subgraph_path = _1_neighbor_subgraph1_path
+            subgraph_path = _2_neighbor_subgraph1_path
         elif self.entity_type == 'candidate':
-            subgraph_path = _1_neighbor_subgraph2_path
+            subgraph_path = _2_neighbor_subgraph2_path
 
         subgraph_file = subgraph_path + '/{}.graph'.format(node)
+
         edges = []
         with open(subgraph_file, 'r') as f:
             for line in f.readlines():
                 edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
-        G = nx.Graph()
+        G = nx.DiGraph()
         G.add_edges_from(edges)
+        return G
+
+    def get_subgraph_online(self, node, k=2):
+        """
+        :param node:
+        :return:
+        """
+        if self.entity_type == 'target':
+            newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_1'.format(dataset)
+        elif self.entity_type == 'candidate':
+            newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_2'.format(dataset)
+
+        graph_edges_kg = read_graph(newgraph_path)
+        kg = nx.Graph()
+        kg.add_edges_from(graph_edges_kg)
+
+        G = get_subgraph_within_k_per_node(kg, node, k)
+
+        return G
+
+    def get_subgraph_of_node(self, node, k=2):
+        """
+        Default setting: offline and 2 neighbors
+        try, except: online computing
+        :return:
+        """
+
+        if k == 2:
+            try:
+                G = self.get_subgraph_offline(node)
+            except:
+
+                G = self.get_subgraph_online(node, k)
+        else:
+
+            G = self.get_subgraph_online(node, k)
+
         return G
 
     def get_triangle_motif(self, node):
@@ -169,32 +207,7 @@ class Entity:
         :return:
         """
 
-        if self.entity_type == 'target':
-            subgraph_path = _2_neighbor_subgraph1_path
-        elif self.entity_type == 'candidate':
-            subgraph_path = _2_neighbor_subgraph2_path
-
-        subgraph_file = subgraph_path + '/{}.graph'.format(node)
-
-        edges = []
-        try:
-            with open(subgraph_file, 'r') as f:
-                for line in f.readlines():
-                    edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
-            G = nx.DiGraph()
-            G.add_edges_from(edges)
-        except:
-
-            if self.entity_type == 'target':
-                newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_1'.format(dataset)
-            elif self.entity_type == 'candidate':
-                newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_2'.format(dataset)
-
-            graph_edges_kg = read_graph(newgraph_path)
-            kg = nx.Graph()
-            kg.add_edges_from(graph_edges_kg)
-
-            G = get_subgraph_within_k_per_node(kg, node, 2)
+        G = self.get_subgraph_of_node(node)
 
         motifs = find_triangle_or_star_motifs(G, node)
 
@@ -206,22 +219,18 @@ class Entity:
         :param node:
         :return:
         """
-        if self.entity_type == 'target':
-            subgraph_path = _1_neighbor_subgraph1_path
-        elif self.entity_type == 'candidate':
-            subgraph_path = _1_neighbor_subgraph2_path
+        G = self.get_subgraph_of_node(node)
 
-        subgraph_file = subgraph_path + '/{}.graph'.format(node)
-
-        edges = []
-        with open(subgraph_file, 'r') as f:
-            for line in f.readlines():
-                edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
-        G = nx.DiGraph()
-        G.add_edges_from(edges)
         motifs = find_star_motifs(G, node)
 
         return motifs
+
+    def get_most_representative_motifs(self):
+        """
+        :return:
+        """
+
+
 
     def get_motifs_promts(self, node, motifs):
         """
@@ -406,11 +415,16 @@ class Entity:
 
         return triangle_motifs_prompts
 
-        # star_motifs = self.get_star_motif(self.entity_id)
-        #
-        # star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
-        #
-        # return star_motifs_prompts
+    def get_only_star_information(self):
+        """
+        :return:
+        """
+
+        star_motifs = self.get_star_motif(self.entity_id)
+
+        star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
+
+        return star_motifs_prompts
 
     def get_only_1_neighbor_information(self):
         """
@@ -421,6 +435,12 @@ class Entity:
         star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
 
         return star_motifs_prompts
+
+    def get_dynamic_motifs_information(self):
+        """
+        :return:
+        """
+
 
     def get_LLM_output(self, prompts):
         """
@@ -438,6 +458,7 @@ def main():
     entity_type = 'candidate'
     # entity_type = 'target'
 
+    ent_id_dict = {}
     if entity_type == ('target'):
         ent_id_dict = get_ent_id_dict(ent_id_1_path)
 
@@ -450,7 +471,7 @@ def main():
     entity = Entity(entity, entity_id, entity_type)
 
     # _, _, prompts = entity.get_baseline_prompts()
-    prompts = entity.get_only_motif_information()
+    prompts = entity.get_only_triangle_information()
 
     print(prompts)
 

@@ -1,6 +1,7 @@
 import os.path
 from itertools import combinations
 from heapq import nlargest
+import networkx as nx
 from run.utils import get_id_entity_dict, get_ent_id_dict
 
 
@@ -11,6 +12,31 @@ def find_triangle_or_star_motifs(graph, node, top_n=5):
     :param top_n:
     :return:
     """
+
+    def find_top_star_motif(G, node, top_n):
+        def build_star_motif(graph, center_node, top_n):
+            # 获取节点的出边和入边
+            out_edges = list(graph.out_edges(center_node))
+            in_edges = list(graph.in_edges(center_node))
+
+            # 对出边和入边分别按度数排序，并保留最多五条边
+            top_out_edges = sorted(out_edges, key=lambda edge: graph.degree(edge[1]), reverse=True)[:top_n]
+            top_in_edges = sorted(in_edges, key=lambda edge: graph.degree(edge[0]), reverse=True)[:top_n]
+
+            # 构建星型motif子图
+            star_motif = nx.DiGraph()
+            for edge in top_out_edges:
+                star_motif.add_edge(*edge)
+            for edge in top_in_edges:
+                star_motif.add_edge(*edge)
+
+            return star_motif
+
+        # 指定要查找star型motif的节点
+        star_motif = build_star_motif(G, node, top_n)
+
+        return [star_motif]
+
     try:
         # 获取目标节点的邻居
         neighbors = set(graph.neighbors(node))
@@ -61,29 +87,6 @@ def find_triangle_or_star_motifs(graph, node, top_n=5):
     except:
         return []
 
-def find_top_star_motif(G, node, top_n):
-    def build_star_motif(graph, center_node, top_n):
-        # 获取节点的出边和入边
-        out_edges = list(graph.out_edges(center_node))
-        in_edges = list(graph.in_edges(center_node))
-
-        # 对出边和入边分别按度数排序，并保留最多五条边
-        top_out_edges = sorted(out_edges, key=lambda edge: graph.degree(edge[1]), reverse=True)[:top_n]
-        top_in_edges = sorted(in_edges, key=lambda edge: graph.degree(edge[0]), reverse=True)[:top_n]
-
-        # 构建星型motif子图
-        star_motif = nx.DiGraph()
-        for edge in top_out_edges:
-            star_motif.add_edge(*edge)
-        for edge in top_in_edges:
-            star_motif.add_edge(*edge)
-
-        return star_motif
-
-    # 指定要查找star型motif的节点
-    star_motif = build_star_motif(G, node, top_n)
-
-    return [star_motif]
 
 # def find_triangle_motifs(graph, node, top_n=5):
 #     """
@@ -191,6 +194,64 @@ def find_top_star_motif(G, node, top_n):
     #
     # return motif_graphs
 
+
+def find_star_motifs(graph, node):
+    """
+    Find all star motifs in the graph and return them as subgraphs.
+    :param graph: A NetworkX graph
+    :return: A list of subgraphs, each representing a star motif
+    """
+
+    def create_star_motif_with_how_many_edges(graph, center_node, num_edges=5):
+        """
+        Create a star motif centered around the specified node in the graph, retaining up to num_edges edges.
+
+        Parameters:
+        graph (networkx.DiGraph): The input directed graph.
+        center_node (str/int): The node to be the center of the star motif.
+        num_edges (int): The maximum number of edges to retain in the star motif.
+
+        Returns:
+        networkx.DiGraph: A subgraph containing the star motif.
+        """
+        # Create a new directed graph for the star motif
+        star_motif = nx.DiGraph()
+
+        # Add the center node
+        star_motif.add_node(center_node)
+
+        # Get the outgoing and incoming edges of the center node
+        out_edges = list(graph.out_edges(center_node))
+        in_edges = list(graph.in_edges(center_node))
+
+        # Combine the edges and sort them to keep the order consistent
+        combined_edges = out_edges + in_edges
+        combined_edges = sorted(combined_edges, key=lambda edge: (edge[0], edge[1]))
+
+        # Keep only up to num_edges edges
+        combined_edges = combined_edges[:num_edges]
+
+        # Add the edges to the star motif
+        star_motif.add_edges_from(combined_edges)
+
+        return star_motif
+
+    stars = []
+
+    # Iterate over nodes to find stars
+
+    neighbors = list(graph.neighbors(node))
+    if len(neighbors) > 1:  # Node has more than one neighbor
+            star_nodes = [node] + neighbors
+            star = graph.subgraph(star_nodes).copy()
+
+            star = create_star_motif_with_how_many_edges(star, node, 8)
+
+            stars.append(star)
+
+    return stars
+
+
 def find_four_cycles(G):
     """
     Find all 4 cycle motifs in the graph and return them as subgraphs.
@@ -209,67 +270,6 @@ def find_four_cycles(G):
     subgraphs = [G.subgraph(cycle).copy() for cycle in four_cycles]
 
     return subgraphs
-
-
-import networkx as nx
-
-
-def create_star_motif_with_8_edges(graph, center_node, num_edges=5):
-    """
-    Create a star motif centered around the specified node in the graph, retaining up to num_edges edges.
-
-    Parameters:
-    graph (networkx.DiGraph): The input directed graph.
-    center_node (str/int): The node to be the center of the star motif.
-    num_edges (int): The maximum number of edges to retain in the star motif.
-
-    Returns:
-    networkx.DiGraph: A subgraph containing the star motif.
-    """
-    # Create a new directed graph for the star motif
-    star_motif = nx.DiGraph()
-
-    # Add the center node
-    star_motif.add_node(center_node)
-
-    # Get the outgoing and incoming edges of the center node
-    out_edges = list(graph.out_edges(center_node))
-    in_edges = list(graph.in_edges(center_node))
-
-    # Combine the edges and sort them to keep the order consistent
-    combined_edges = out_edges + in_edges
-    combined_edges = sorted(combined_edges, key=lambda edge: (edge[0], edge[1]))
-
-    # Keep only up to num_edges edges
-    combined_edges = combined_edges[:num_edges]
-
-    # Add the edges to the star motif
-    star_motif.add_edges_from(combined_edges)
-
-    return star_motif
-
-
-def find_star_motifs(graph, node):
-    """
-    Find all star motifs in the graph and return them as subgraphs.
-
-    :param graph: A NetworkX graph
-    :return: A list of subgraphs, each representing a star motif
-    """
-    stars = []
-
-    # Iterate over nodes to find stars
-
-    neighbors = list(graph.neighbors(node))
-    if len(neighbors) > 1:  # Node has more than one neighbor
-            star_nodes = [node] + neighbors
-            star = graph.subgraph(star_nodes).copy()
-
-            star = create_star_motif_with_8_edges(star, node, 8)
-
-            stars.append(star)
-
-    return stars
 
 
 def find_chain_motifs(graph, length):
@@ -395,7 +395,7 @@ def test_find_different_motifs_from_subgraphs():
                 print("Edges:", edges)
 
 def test_get_relation():
-    #         ent_ids.append((ent_id_1, rel_id, ent_id_2))
+    # ent_ids.append((ent_id_1, rel_id, ent_id_2))
     # ent_ids = set(ent_ids)
     # ent_ids = sorted(ent_ids, key=lambda x: (int(x[0]), int(x[2])))
     # with open(new_triples2, 'w') as f:

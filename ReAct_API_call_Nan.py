@@ -117,7 +117,7 @@ def baseline():
 
         idx_prompt_dict.update({idx: prompt})
 
-    with open('output/{}/idx_prompt_dict_baseline.json'.format(dataset+"_"+LLM_type), 'w') as f:
+    with open('output/{}/idx_prompt_dict_baseline.json'.format(save_dir), 'w') as f:
         json.dump(idx_prompt_dict, f, indent=4)
 
     return idx_prompt_dict
@@ -141,7 +141,7 @@ def get_baseline_responses(idx_prompt_dict):
 
     responses_dict = dict(zip(idx_prompt_dict.keys(), responses))
 
-    with open('output/{}/idx_prompt_dict_baseline_responses.json'.format(dataset+"_"+LLM_type), 'w') as f:
+    with open('output/{}/idx_prompt_dict_baseline_responses.json'.format(save_dir), 'w') as f:
         json.dump(responses_dict, f, indent=4)
 
     return
@@ -153,7 +153,7 @@ def generate_message_lists(threshold):
     """
     from entity import Entity
     try:
-        with open('output/{}/idx_prompt_dict_step_00.json'.format(dataset+"_"+LLM_type), 'r') as f:
+        with open('output/{}/idx_prompt_dict_step_00.json'.format(save_dir), 'r') as f:
             idx_prompt_dict = json.load(f)
 
         entity_list = []
@@ -187,7 +187,7 @@ def generate_message_lists(threshold):
             idx_prompt_dict.update({idx: prompt})
             entity_list.append(entity)
 
-        with open('output/{}/idx_prompt_dict_step_00.json'.format(dataset+"_"+LLM_type), 'w') as f:
+        with open('output/{}/idx_prompt_dict_step_00.json'.format(save_dir), 'w') as f:
             json.dump(idx_prompt_dict, f, indent=4)
 
     return idx_prompt_dict, entity_list
@@ -331,19 +331,19 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
         # return 'no code observation for this entity.'
 
     try:
-        with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
+        with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(save_dir, info_type, step), 'r') as f:
             thought_and_acts = json.load(f)
 
-        with open('output/{}LLM_response_{}/requests_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
+        with open('output/{}LLM_response_{}/requests_{}.json'.format(save_dir, info_type, step), 'r') as f:
             requests = json.load(f)
 
-        with open('output/{}/most_list_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
+        with open('output/{}/most_list_{}_{}.json'.format(save_dir, info_type, step), 'r') as f:
             most_list_dict = json.load(f)
 
-        with open('output/{}/final_answer_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
+        with open('output/{}/final_answer_{}_{}.json'.format(save_dir, info_type, step), 'r') as f:
             terminate_dict = json.load(f)
 
-        with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'r') as f:
+        with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(save_dir, info_type, step), 'r') as f:
             new_idx_prompt_dict = json.load(f)
 
         # new_idx_prompt_dict = {}
@@ -361,8 +361,8 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
     except:
 
-        if not os.path.exists('output/{}/LLM_response_{}'.format(dataset+"_"+LLM_type, info_type)):
-            os.mkdir('output/{}/LLM_response_{}'.format(dataset+"_"+LLM_type, info_type))
+        if not os.path.exists('output/{}/LLM_response_{}'.format(save_dir, info_type)):
+            os.mkdir('output/{}/LLM_response_{}'.format(save_dir, info_type))
 
         kwargs = {
             'max_tokens': 2000,
@@ -371,22 +371,22 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
         message_list = [[{'role': 'user', 'content': prompt}] for prompt in idx_prompt_dict.values()]
 
-        if os.path.exists('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset+"_"+LLM_type, info_type, step)):
-            with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset+"_"+LLM_type, info_type, step)) as f:
+        if os.path.exists('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(save_dir, info_type, step)):
+            with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(save_dir, info_type, step)) as f:
                 thought_and_acts = json.load(f)
 
-            with open('output/{}/LLM_response_{}/requests_{}.json'.format(dataset+"_"+LLM_type, info_type, step)) as f:
+            with open('output/{}/LLM_response_{}/requests_{}.json'.format(save_dir, info_type, step)) as f:
                 requests = json.load(f)
 
         else:
             responses = collect_response(message_list, LLM_type, **kwargs)
             thought_and_acts = [response for response in responses]
 
-            with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
+            with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(save_dir, info_type, step), 'w') as f:
                 json.dump(thought_and_acts, f, indent=4)
 
             requests = [find_requests(response) for response in responses]
-            with open('output/{}/LLM_response_{}/requests_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
+            with open('output/{}/LLM_response_{}/requests_{}.json'.format(save_dir, info_type, step), 'w') as f:
                 json.dump(requests, f, indent=4)
 
         observations = {}
@@ -395,6 +395,10 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
             entity_id = entity_list[i].entity_id
             if requests[i] != -1:
                 request_entity = requests[i]
+                if "\"" in request_entity[0] and "\"" in request_entity[-1]:
+                    request_entity = request_entity[1:-1]
+                elif "'" in request_entity[0] and "'" in request_entity[-1]:
+                    request_entity = request_entity[1:-1]
 
                 if (request_entity == entity_list[i].entity_name
                         or request_entity.lower() == entity_list[i].entity_name.lower()):
@@ -424,10 +428,10 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                     _1_neighbor_info = request_entity.get_only_1_neighbor_information()
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + _1_neighbor_info})
                 elif info_type == 'text_motif':
-                    text_motif_info = request_entity.get_only_motif_information()
+                    text_motif_info = request_entity.get_only_triangle_information
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + text_motif_info})
                 elif info_type == 'code_motif':
-                    text_motif_info = request_entity.get_only_motif_information()
+                    text_motif_info = request_entity.get_only_triangle_information
                     print(text_motif_info)
                     code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
                     code_motif_prompts.update({entity_id: code_motif_prompt})
@@ -441,21 +445,21 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
             }
             message_list = [[{'role': 'user', 'content': prompt}] for prompt in code_motif_prompts.values()]
 
-            if os.path.exists('output/{}/LLM_response_{}/code_generated_{}.json'.format(dataset+"_"+LLM_type, info_type, step)):
-                with open('output/{}/LLM_response_{}/code_generated_{}.json'.format(dataset+"_"+LLM_type, info_type, step)) as f:
+            if os.path.exists('output/{}/LLM_response_{}/code_generated_{}.json'.format(save_dir, info_type, step)):
+                with open('output/{}/LLM_response_{}/code_generated_{}.json'.format(save_dir, info_type, step)) as f:
 
                     code_generated_responses = json.load(f)
 
             else:
                 code_generated_responses = collect_response(message_list, LLM_type, **kwargs)
 
-                with open('output/{}/LLM_response_{}/code_generated_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
+                with open('output/{}/LLM_response_{}/code_generated_{}.json'.format(save_dir, info_type, step), 'w') as f:
 
                     json.dump(code_generated_responses, f, indent=4)
 
             code_generated = ['Observation {}: \n'.format(step) + find_code(code_response) for code_response in code_generated_responses]
 
-            with open('output/{}/LLM_response_{}/code_{}.json'.format(dataset + "_" + LLM_type, info_type, step), 'w') as f:
+            with open('output/{}/LLM_response_{}/code_{}.json'.format(save_dir, info_type, step), 'w') as f:
                 json.dump(code_generated, f, indent=4)
             observations = dict(zip(code_motif_prompts.keys(), code_generated))
 
@@ -476,13 +480,13 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                 most_list_dict.update({entity_list[i].entity_name: find_most_list(thought_and_acts[i])})
                 terminate_dict.update({entity_list[i].entity_name: find_Terminate(thought_and_acts[i])})
 
-        with open('output/{}/most_list_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
+        with open('output/{}/most_list_{}_{}.json'.format(save_dir, info_type, step), 'w') as f:
             json.dump(most_list_dict, f, indent=4)
 
-        with open('output/{}/final_answer_{}_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
+        with open('output/{}/final_answer_{}_{}.json'.format(save_dir, info_type, step), 'w') as f:
             json.dump(terminate_dict, f, indent=4)
 
-        with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(dataset+"_"+LLM_type, info_type, step), 'w') as f:
+        with open('output/{}/idx_prompt_dict_{}_step_{}.json'.format(save_dir, info_type, step), 'w') as f:
             json.dump(new_idx_prompt_dict, f, indent=4)
 
 
@@ -503,7 +507,9 @@ parser.add_argument('-r', '--react_file', type=str, default='graph_motif_ReAct_v
 
 parser.add_argument('-s', '--sematic_embedding_candidates_path', default='/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/candiadtes_semantic_embed_100_3765_all add_corrected.txt',
                                                                                type=str, help='semantic cadidate path')
+parser.add_argument('-cn1', '--candidate_num_1', type=int, help='candidate number of target entity in start')
 
+parser.add_argument('-cn2', '--candidate_num_2', type=int, help='candidate number of target entity in the answer')
 
 # # 添加可选参数（带默认值）
 # parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
@@ -520,15 +526,18 @@ module_name = args.react_file
 ReAct_module = dynamic_import(module_name)
 motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
 sematic_embedding_candidates_path = args.sematic_embedding_candidates_path
+candidate_num_1 = str(args.candidate_num_1)
+candifate_num_2 = str(args.candidate_num_2)
 
 ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_strip'.format(dataset)
 ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned_strip'.format(dataset)
 
+save_dir = dataset+"_"+LLM_type+"_"+'t'+str(threshold)+'_'+candidate_num_1+"_"+candifate_num_2
+
 if __name__ == '__main__':
 
-    if not os.path.exists('output/{}'.format(dataset+"_"+LLM_type)):
-        os.mkdir('output/{}'.format(dataset+"_"+LLM_type))
-
+    if not os.path.exists('output/{}'.format(save_dir)):
+        os.mkdir('output/{}'.format(save_dir))
 
     if info_type == 'baseline':
         idx_prompt_dict = baseline()
