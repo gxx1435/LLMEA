@@ -6,7 +6,7 @@ from graph_motif_counts import get_subgraph_within_k_per_node, read_graph
 #                              rel_1_dict, rel_2_dict, G1, G2,
 #                              _1_neighbor_subgraph1_path, _2_neighbor_subgraph1_path,
 #                              _1_neighbor_subgraph2_path, _2_neighbor_subgraph2_path)
-from graph_motif_LLM import find_triangle_or_star_motifs, find_star_motifs
+from graph_motif_LLM import find_triangle_or_star_motifs, find_star_motifs, find_tree_motifs, find_four_cycles, find_chain_motifs
 
 
 def get_paths():
@@ -179,6 +179,7 @@ class Entity:
 
         G = get_subgraph_within_k_per_node(kg, node, k)
 
+
         return G
 
     def get_subgraph_of_node(self, node, k=2):
@@ -198,6 +199,14 @@ class Entity:
 
             G = self.get_subgraph_online(node, k)
 
+        # G1 = self.get_subgraph_online(node, k)
+        # G2 = self.get_subgraph_offline(node)
+        # if sorted(G1.edges) == sorted(G2.edges):
+        #     return G1
+        # else:
+        #     return G1
+
+
         return G
 
     def get_triangle_motif(self, node):
@@ -207,7 +216,7 @@ class Entity:
         :return:
         """
 
-        G = self.get_subgraph_of_node(node)
+        G = self.get_subgraph_of_node(node, 2)
 
         motifs = find_triangle_or_star_motifs(G, node)
 
@@ -222,6 +231,39 @@ class Entity:
         G = self.get_subgraph_of_node(node)
 
         motifs = find_star_motifs(G, node)
+
+        return motifs
+
+    def get_tree_motif(self, node):
+        """
+        :param node
+        :return:
+        """
+        G = self.get_subgraph_of_node(node)
+
+        motifs = find_tree_motifs(G, node, 3)
+
+        return  motifs
+
+    def get_4_cycle_motif(self, node):
+        """
+        :param node:
+        :return:
+        """
+        G = self.get_subgraph_of_node(node)
+
+        motifs = find_four_cycles(G)
+
+        return motifs
+
+    def get_chain_motifs(self, node):
+        """
+                :param node:
+                :return:
+                """
+        G = self.get_subgraph_of_node(node)
+
+        motifs = find_chain_motifs(G, 3)
 
         return motifs
 
@@ -436,6 +478,36 @@ class Entity:
 
         return star_motifs_prompts
 
+    def get_only_tree_information(self):
+        """
+        :return:
+        """
+        tree_motifs = self.get_tree_motif(self.entity_id)
+
+        tree_motif_prompts = self.get_motifs_promts(self.entity_id, tree_motifs)
+
+        return tree_motif_prompts
+
+    def get_only_4_cycles_information(self):
+        """
+        :return:
+        """
+        _4_cycle = self.get_4_cycle_motif(self.entity_id)
+
+        _4_cycle_prompts = self.get_motifs_promts(self.entity_id, _4_cycle)
+
+        return _4_cycle_prompts
+
+    def get_only_chain_information(self):
+        """
+        :return:
+        """
+        chain_motifs = self.get_chain_motifs(self.entity_id)
+
+        chain_motifs_prompts = self.get_motifs_promts(self.entity_id, chain_motifs)
+
+        return chain_motifs_prompts
+
     def get_dynamic_motifs_information(self):
         """
         :return:
@@ -465,7 +537,7 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """José Bové"""
+    entity = """OECD"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)

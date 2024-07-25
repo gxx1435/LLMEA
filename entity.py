@@ -6,7 +6,9 @@ from graph_motif_counts import get_subgraph_within_k_per_node, read_graph
 #                              rel_1_dict, rel_2_dict, G1, G2,
 #                              _1_neighbor_subgraph1_path, _2_neighbor_subgraph1_path,
 #                              _1_neighbor_subgraph2_path, _2_neighbor_subgraph2_path)
-from graph_motif_LLM import find_triangle_or_star_motifs, find_star_motifs
+from graph_motif_LLM import (find_triangle_or_star_motifs, find_star_motifs,
+                             find_tree_motifs, find_four_cycles, find_chain_motifs,
+                             find_star_triangle_motifs)
 
 
 def get_paths():
@@ -94,6 +96,7 @@ def get_rel_dict():
 
     return rel_1_dict, rel_2_dict
 rel_1_dict, rel_2_dict = get_rel_dict()
+
 class Entity:
 
     def __init__(self, entity_name, entity_id, entity_type):
@@ -142,24 +145,70 @@ class Entity:
 
         return rel
 
-    def get_subgraph(self, node):
+    def get_subgraph_offline(self, node):
         """
-
+        :param node:
         :return:
         """
-
         if self.entity_type == 'target':
-            subgraph_path = _1_neighbor_subgraph1_path
+            subgraph_path = _2_neighbor_subgraph1_path
         elif self.entity_type == 'candidate':
-            subgraph_path = _1_neighbor_subgraph2_path
+            subgraph_path = _2_neighbor_subgraph2_path
 
         subgraph_file = subgraph_path + '/{}.graph'.format(node)
+
         edges = []
         with open(subgraph_file, 'r') as f:
             for line in f.readlines():
                 edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
-        G = nx.Graph()
+        G = nx.DiGraph()
         G.add_edges_from(edges)
+        return G
+
+    def get_subgraph_online(self, node, k=2):
+        """
+        :param node:
+        :return:
+        """
+        if self.entity_type == 'target':
+            newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_1'.format(dataset)
+        elif self.entity_type == 'candidate':
+            newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_2'.format(dataset)
+
+        graph_edges_kg = read_graph(newgraph_path)
+        kg = nx.Graph()
+        kg.add_edges_from(graph_edges_kg)
+
+        G = get_subgraph_within_k_per_node(kg, node, k)
+
+
+        return G
+
+    def get_subgraph_of_node(self, node, k=2):
+        """
+        Default setting: offline and 2 neighbors
+        try, except: online computing
+        :return:
+        """
+
+        if k == 2:
+            try:
+                G = self.get_subgraph_offline(node)
+            except:
+
+                G = self.get_subgraph_online(node, k)
+        else:
+
+            G = self.get_subgraph_online(node, k)
+
+        # G1 = self.get_subgraph_online(node, k)
+        # G2 = self.get_subgraph_offline(node)
+        # if sorted(G1.edges) == sorted(G2.edges):
+        #     return G1
+        # else:
+        #     return G1
+
+
         return G
 
     def get_triangle_motif(self, node):
@@ -169,32 +218,7 @@ class Entity:
         :return:
         """
 
-        if self.entity_type == 'target':
-            subgraph_path = _2_neighbor_subgraph1_path
-        elif self.entity_type == 'candidate':
-            subgraph_path = _2_neighbor_subgraph2_path
-
-        subgraph_file = subgraph_path + '/{}.graph'.format(node)
-
-        edges = []
-        try:
-            with open(subgraph_file, 'r') as f:
-                for line in f.readlines():
-                    edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
-            G = nx.DiGraph()
-            G.add_edges_from(edges)
-        except:
-
-            if self.entity_type == 'target':
-                newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_1'.format(dataset)
-            elif self.entity_type == 'candidate':
-                newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_2'.format(dataset)
-
-            graph_edges_kg = read_graph(newgraph_path)
-            kg = nx.Graph()
-            kg.add_edges_from(graph_edges_kg)
-
-            G = get_subgraph_within_k_per_node(kg, node, 2)
+        G = self.get_subgraph_of_node(node, 2)
 
         motifs = find_triangle_or_star_motifs(G, node)
 
@@ -206,22 +230,191 @@ class Entity:
         :param node:
         :return:
         """
-        if self.entity_type == 'target':
-            subgraph_path = _1_neighbor_subgraph1_path
-        elif self.entity_type == 'candidate':
-            subgraph_path = _1_neighbor_subgraph2_path
+        G = self.get_subgraph_of_node(node)
 
-        subgraph_file = subgraph_path + '/{}.graph'.format(node)
-
-        edges = []
-        with open(subgraph_file, 'r') as f:
-            for line in f.readlines():
-                edges.append((line.split(' ')[0], line.split(' ')[1].strip()))
-        G = nx.DiGraph()
-        G.add_edges_from(edges)
         motifs = find_star_motifs(G, node)
 
         return motifs
+
+    def get_tree_motif(self, node):
+        """
+        :param node
+        :return:
+        """
+        G = self.get_subgraph_of_node(node)
+
+        motifs = find_tree_motifs(G, node, 3)
+
+        return motifs
+
+    def get_4_cycle_motif(self, node):
+        """
+        :param node:
+        :return:
+        """
+        G = self.get_subgraph_of_node(node, 3)
+
+        motifs = find_four_cycles(G, node)
+
+
+        return motifs
+
+    def get_chain_motifs(self, node):
+        """
+                :param node:
+                :return:
+                """
+        G = self.get_subgraph_of_node(node)
+
+        motifs = find_chain_motifs(G, 3)
+
+        return motifs
+
+    def get_star_triangles(self, node):
+        """
+                :param node:
+                :return:
+                """
+        G = self.get_subgraph_of_node(node,3)
+
+        motifs = find_star_triangle_motifs(G, node)
+
+        return motifs
+
+    def get_most_representative_motifs(self, node):
+        """
+        :return:
+        """
+        def find_all_triangle_motifs(G, node):
+            try:
+                triangles = []
+                neighbors = list(G.neighbors(node))
+
+                for i in range(len(neighbors)):
+                    for j in range(i + 1, len(neighbors)):
+                        if G.has_edge(neighbors[i], neighbors[j]):
+                            triangles.append((node, neighbors[i], neighbors[j]))
+
+                return triangles
+            except:
+                return []
+
+        def find_all_star_motifs(G, node):
+            try:
+                star_motifs = []
+                neighbors = list(G.neighbors(node))
+
+                for neighbor in neighbors:
+                    star_motifs.append((node, neighbor))
+
+                return star_motifs
+            except:
+                return []
+
+        def find_all_chain_motifs(node):
+            try:
+                chain_motifs = []
+                neighbors = list(G.neighbors(node))
+
+                for neighbor in neighbors:
+                    second_neighbors = list(G.neighbors(neighbor))
+                    for second_neighbor in second_neighbors:
+                        if second_neighbor != node:
+                            chain_motifs.append((node, neighbor, second_neighbor))
+
+                return chain_motifs
+            except:
+                return []
+
+        def find_all_four_cycles(G, node):
+            try:
+                quadrilaterals = []
+                neighbors = list(G.neighbors(node))
+
+                for i in range(len(neighbors)):
+                    for j in range(i + 1, len(neighbors)):
+                        for k in range(j + 1, len(neighbors)):
+                            if G.has_edge(neighbors[i], neighbors[j]) and G.has_edge(neighbors[j],
+                                                                                     neighbors[k]) and G.has_edge(
+                                    neighbors[k], neighbors[i]):
+                                quadrilaterals.append((node, neighbors[i], neighbors[j], neighbors[k]))
+
+                return quadrilaterals
+            except:
+                return []
+
+        def find_all_star_triangle_motifs(G, node):
+            try:
+                star_triangles = []
+                neighbors = list(G.neighbors(node))
+
+                for i in range(len(neighbors)):
+                    for j in range(i + 1, len(neighbors)):
+                        if G.has_edge(neighbors[i], neighbors[j]):
+                            star_triangles.append((node, neighbors[i], neighbors[j]))
+
+                return star_triangles
+            except:
+                return []
+
+        G = self.get_subgraph_of_node(node, 3)
+
+        triangles = find_all_triangle_motifs(G, node)
+
+        stars = find_all_star_motifs(G, node)
+
+        chains = find_all_chain_motifs(G)
+
+        quadrilaterals = find_all_four_cycles(G, node)
+
+        star_triangles = find_all_star_triangle_motifs(G, node)
+
+        motif_frequencies = {
+            "triangle": len(triangles),
+            "star": len(stars),
+            'chain': len(chains),
+            "quadrilateral": len(quadrilaterals),
+            "star_triangle": len(star_triangles)
+        }
+
+        most_frequent_motif = max(motif_frequencies, key=motif_frequencies.get)
+
+        print(
+            f"The most representative motif is: {most_frequent_motif} with count: {motif_frequencies[most_frequent_motif]}")
+
+        if most_frequent_motif == "triangle":
+            motifs = find_triangle_or_star_motifs(G, node)
+        elif most_frequent_motif == "star":
+            motifs = find_star_motifs(G, node)
+        elif most_frequent_motif == "quadrilateral":
+            motifs = find_four_cycles(G, node)
+        elif most_frequent_motif == 'chain':
+            motifs = find_chain_motifs(G, node)
+        elif most_frequent_motif == 'star_triangle':
+            motifs = find_star_triangle_motifs(G, node)
+
+        return motifs
+
+        # if most_frequent_motif == "triangle":
+        #     motif_instances = triangles
+        # elif most_frequent_motif == "star":
+        #     motif_instances = stars
+        # elif most_frequent_motif == "quadrilateral":
+        #     motif_instances = quadrilaterals
+        # elif most_frequent_motif == 'chain':
+        #     motif_instances = chains
+        # elif most_frequent_motif == 'star_triangle':
+        #     motif_instances = star_triangles
+        #
+        # motif_nodes = set()
+        # for instance in motif_instances:
+        #     motif_nodes.update(instance if isinstance(instance, tuple) else instance[1])
+        #
+        # valid_motif_nodes = [node for node in motif_nodes if node in G.nodes()]
+        #
+        # subgraph = G.subgraph(valid_motif_nodes).copy()
+        #
+        # return [subgraph]
 
     def get_motifs_promts(self, node, motifs):
         """
@@ -232,7 +425,8 @@ class Entity:
         ##获取三角形prompts
         motifs_prompts = ''
         for idx, subgraph in enumerate(motifs):
-            if node in subgraph.nodes:
+            # print(node, subgraph.nodes)
+            # if node in subgraph.nodes:
                 # try:
                 if self.entity_type == 'target':
                     motifs_prompts += ' , '.join([node, id_ent_dict1[node], f"Motif {idx + 1}:\n"])
@@ -406,11 +600,16 @@ class Entity:
 
         return triangle_motifs_prompts
 
-        # star_motifs = self.get_star_motif(self.entity_id)
-        #
-        # star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
-        #
-        # return star_motifs_prompts
+    def get_only_star_information(self):
+        """
+        :return:
+        """
+
+        star_motifs = self.get_star_motif(self.entity_id)
+
+        star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
+
+        return star_motifs_prompts
 
     def get_only_1_neighbor_information(self):
         """
@@ -421,6 +620,57 @@ class Entity:
         star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
 
         return star_motifs_prompts
+
+    def get_only_tree_information(self):
+        """
+        :return:
+        """
+        tree_motifs = self.get_tree_motif(self.entity_id)
+
+        tree_motif_prompts = self.get_motifs_promts(self.entity_id, tree_motifs)
+
+        return tree_motif_prompts
+
+    def get_only_4_cycles_information(self):
+        """
+        :return:
+        """
+        _4_cycle = self.get_4_cycle_motif(self.entity_id)
+
+        _4_cycle_prompts = self.get_motifs_promts(self.entity_id, _4_cycle)
+
+        return _4_cycle_prompts
+
+    def get_only_chain_information(self):
+        """
+        :return:
+        """
+        chain_motifs = self.get_chain_motifs(self.entity_id)
+
+        chain_motifs_prompts = self.get_motifs_promts(self.entity_id, chain_motifs)
+
+        return chain_motifs_prompts
+
+    def get_only_star_triangle_information(self):
+        """
+        :return:
+        """
+        star_traiagles = self.get_star_triangles(self.entity_id)
+
+        star_traiagles_prompts = self.get_motifs_promts(self.entity_id, star_traiagles)
+
+        return star_traiagles_prompts
+
+    def get_dynamic_motifs_information(self):
+        """
+        :return:
+        """
+        motifs = self.get_most_representative_motifs(self.entity_id)
+
+        prompts = self.get_motifs_promts(self.entity_id, motifs)
+
+        return prompts
+
 
     def get_LLM_output(self, prompts):
         """
@@ -438,19 +688,20 @@ def main():
     entity_type = 'candidate'
     # entity_type = 'target'
 
+    ent_id_dict = {}
     if entity_type == ('target'):
         ent_id_dict = get_ent_id_dict(ent_id_1_path)
 
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """José Bové"""
+    entity = """OECD"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
 
     # _, _, prompts = entity.get_baseline_prompts()
-    prompts = entity.get_only_motif_information()
+    prompts = entity.get_only_triangle_information()
 
     print(prompts)
 

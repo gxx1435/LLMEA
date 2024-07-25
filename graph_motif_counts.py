@@ -19,7 +19,7 @@ def save_graph(G, save_path):
     with open(save_path, 'w') as f:
         # f.write(str(len(G.nodes))+' '+str(len(G.edges))+'\n')
         for edge in G.edges():
-            f.write(str(edge[0])+' '+str(edge[1])+'\n')
+            f.write(str(edge[0])+'\t'+str(edge[1])+'\n')
 
 def read_graph(save_path):
     """
@@ -30,8 +30,8 @@ def read_graph(save_path):
     with open(save_path, 'r') as f:
         # next(f)
         for line in f.readlines():
-            line = line.split(' ')
-            edges.append((int(line[0]), int(line[1].strip())))
+            line = line.split('\t')
+            edges.append((line[0], line[1].strip()))
     return edges
 
 def get_graph_without_relation(kg_path, newkg_path):
@@ -77,19 +77,20 @@ def get_subgraph_within_k_per_node(G, node, k):
     :param k:
     :return:
     """
+
+    subgraph = nx.DiGraph()
     try:
-        subgraph = nx.Graph()
         frontier = set([node])
         for _ in range(k):
-            next_frontier = set()
-            for n in frontier:
-                    neighbors = set(G.neighbors(n))
-                    subgraph.add_node(n)
-                    subgraph.add_edges_from((n, nbr) for nbr in neighbors)
-                    next_frontier.update(neighbors)
-            frontier = next_frontier
+                next_frontier = set()
+                for n in frontier:
+                        neighbors = set(G.neighbors(n))
+                        subgraph.add_node(n)
+                        subgraph.add_edges_from((n, nbr) for nbr in neighbors)
+                        next_frontier.update(neighbors)
+                frontier = next_frontier
     except:
-        subgraph = nx.Graph()
+        pass
 
     return subgraph
 

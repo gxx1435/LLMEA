@@ -334,7 +334,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
         with open('output/{}/LLM_response_{}/thought_and_acts_{}.json'.format(save_dir, info_type, step), 'r') as f:
             thought_and_acts = json.load(f)
 
-        with open('output/{}LLM_response_{}/requests_{}.json'.format(save_dir, info_type, step), 'r') as f:
+        with open('output/{}/LLM_response_{}/requests_{}.json'.format(save_dir, info_type, step), 'r') as f:
             requests = json.load(f)
 
         with open('output/{}/most_list_{}_{}.json'.format(save_dir, info_type, step), 'r') as f:
@@ -425,19 +425,30 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                 #     request_entity = Entity('Armenia', ent_id_dict['Armenia'], entity_type)
 
                 if info_type == '1_neighbor':
+
                     _1_neighbor_info = request_entity.get_only_1_neighbor_information()
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + _1_neighbor_info})
-                elif info_type == 'text_motif':
-                    text_motif_info = request_entity.get_only_triangle_information
+
+                elif info_type == 'text_motif_lite':
+
+                    text_motif_info = request_entity.get_only_triangle_information()
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + text_motif_info})
-                elif info_type == 'code_motif':
-                    text_motif_info = request_entity.get_only_triangle_information
+
+                elif info_type == 'code_motif_lite':
+
+                    text_motif_info = request_entity.get_dynamic_motifs_information()
                     print(text_motif_info)
                     code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
                     code_motif_prompts.update({entity_id: code_motif_prompt})
 
+                elif info_type == 'text_motif_base':
+                    """To do"""
 
-        if info_type == 'code_motif':
+                elif info_type == 'code_motif_lite':
+                    """To do"""
+
+
+        if 'code_motif' in info_type:
 
             kwargs = {
                 'max_tokens': 2000,

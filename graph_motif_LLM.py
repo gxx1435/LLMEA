@@ -3,6 +3,7 @@ from itertools import combinations
 from heapq import nlargest
 import networkx as nx
 from run.utils import get_id_entity_dict, get_ent_id_dict
+from collections import Counter
 
 
 def find_triangle_or_star_motifs(graph, node, top_n=5):
@@ -252,7 +253,7 @@ def find_star_motifs(graph, node):
     return stars
 
 
-def find_four_cycles(G):
+def find_four_cycles(G, node):
     """
     Find all 4 cycle motifs in the graph and return them as subgraphs.
 
@@ -260,19 +261,40 @@ def find_four_cycles(G):
     :return: A list of subgraphs, each representing a 4 cycle motif
     :return:
     """
-    four_cycles = []
-    nodes = list(G.nodes())
-    for combo in combinations(nodes, 4):
-        subgraph = G.subgraph(combo)
-        if len(subgraph.edges()) == 4:
-            four_cycles.append(combo)
+    quadrilaterals = []
+    neighbors = list(G.neighbors(node))
 
-    subgraphs = [G.subgraph(cycle).copy() for cycle in four_cycles]
+    for i in range(len(neighbors)):
+        for j in range(i + 1, len(neighbors)):
+            for k in range(j + 1, len(neighbors)):
+                if G.has_edge(neighbors[i], neighbors[j]) and G.has_edge(neighbors[j], neighbors[k]) and G.has_edge(
+                        neighbors[k], neighbors[i]):
+                    quadrilaterals.append((node, neighbors[i], neighbors[j], neighbors[k]))
 
-    return subgraphs
+
+    quad_counter = Counter(quadrilaterals)
+    top_5_quads = quad_counter.most_common(5)
+
+    motif_graphs = []
+    for idx, (quad, count) in enumerate(top_5_quads):
+        motif_graph = nx.Graph()
+        motif_graph.add_edges_from(
+            [(quad[0], quad[1]),
+             (quad[1], quad[2]),
+             (quad[2], quad[3]),
+             (quad[3], quad[0])]
+        )
+        motif_graphs.append(motif_graph)
+
+        # # print(quad)
+        # motif_nodes = set(quad)
+        # subgraph = G.subgraph(motif_nodes).copy()
+        # subgraphs.append(subgraph)
+
+    return motif_graphs
 
 
-def find_chain_motifs(graph, length):
+def find_chain_motifs(G, node):
     """
     Find all chain motifs of the specified length in the graph and return them as subgraphs.
 
@@ -280,17 +302,27 @@ def find_chain_motifs(graph, length):
     :param length: The length of the chain motif
     :return: A list of subgraphs, each representing a chain motif of the specified length
     """
-    chains = []
+    chain_motifs = []
+    neighbors = list(G.neighbors(node))
 
-    # Iterate over nodes to find chains
-    for node in graph.nodes():
-        paths = nx.single_source_shortest_path(graph, node, cutoff=length - 1)
-        for path in paths.values():
-            if len(path) == length:
-                chain = graph.subgraph(path).copy()
-                chains.append(chain)
+    for neighbor in neighbors:
+        second_neighbors = list(G.neighbors(neighbor))
+        for second_neighbor in second_neighbors:
+            if second_neighbor != node:
+                chain_motifs.append((node, neighbor, second_neighbor))
 
-    return chains
+    chain_counter = Counter(chain_motifs)
+
+    # 找出出现次数最多的前五个chain motif
+    top_5_chains = chain_counter.most_common(5)
+
+    subgraphs = []
+    for idx, (chain, count) in enumerate(top_5_chains):
+        motif_nodes = set(chain)
+        subgraph = G.subgraph(motif_nodes).copy()
+        subgraphs.append(subgraph)
+
+    return subgraphs
 
 def find_tree_motifs(graph, root, size):
     """
@@ -315,31 +347,39 @@ def find_tree_motifs(graph, root, size):
                 motifs.append(subgraph)
     return motifs
 
-def find_star_triangle_motifs(graph):
+def find_star_triangle_motifs(G, node):
     """
     Find all star-triangle motifs in the graph and return them as subgraphs.
 
     :param graph: A NetworkX graph
     :return: A list of subgraphs, each representing a star-triangle motif
     """
+
     motifs = []
+    try:
+        for neighbor1 in G.neighbors(node):
+            for neighbor2 in G.neighbors(neighbor1):
+                if neighbor2 != node and G.has_edge(node, neighbor2):
+                    for neighbor3 in G.neighbors(node):
+                        if neighbor3 != neighbor1 and neighbor3 != neighbor2 and G.has_edge(neighbor1,
+                                                                                            neighbor3) and G.has_edge(
+                                neighbor2, neighbor3):
+                            motif = tuple(sorted([node, neighbor1, neighbor2, neighbor3]))
+                            motifs.append(motif)
 
-    for node in graph.nodes():
-        neighbors = list(graph.neighbors(node))
-        for i in range(len(neighbors)):
-            for j in range(i + 1, len(neighbors)):
-                neighbor1 = neighbors[i]
-                neighbor2 = neighbors[j]
-                if graph.has_edge(neighbor1, neighbor2):
-                    # Add the third node to complete the triangle
-                    for k in range(j + 1, len(neighbors)):
-                        neighbor3 = neighbors[k]
-                        if graph.has_edge(neighbor1, neighbor3) and graph.has_edge(neighbor2, neighbor3):
-                            motif_nodes = {node, neighbor1, neighbor2, neighbor3}
-                            subgraph = graph.subgraph(motif_nodes).copy()
-                            motifs.append(subgraph)
+        motif_counter = Counter(motifs)
+        top_5_motifs = motif_counter.most_common(5)
 
-    return motifs
+        subgraphs = []
+        for idx, (motif, count) in enumerate(top_5_motifs):
+            motif_nodes = set(motif)
+            subgraph = G.subgraph(motif_nodes).copy()
+            subgraphs.append(subgraph)
+
+        return subgraphs
+    except:
+        return []
+
 def test_find_motifs():
     # 创建图
     G = nx.Graph()
@@ -424,3 +464,104 @@ def test_get_relation():
     #         except:
     #             triple2_dict.update({ent_id_1: {ent_id_2: []}})
     exit()
+
+def test_most_representative_motif():
+    import networkx as nx
+    from itertools import combinations
+    from collections import Counter
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import random
+
+    # 创建图结构
+    G = nx.Graph()
+    edges = [(1, 2), (2, 3), (3, 1), (3, 4), (4, 5), (5, 6), (6, 4), (6, 7), (7, 8), (8, 9), (9, 10), (7, 10)]
+    G.add_edges_from(edges)
+
+    # 枚举三角形
+    def find_triangles(G):
+        triangles = []
+        for node in G.nodes():
+            neighbors = list(G.neighbors(node))
+            for u, v in combinations(neighbors, 2):
+                if G.has_edge(u, v):
+                    triangles.append((node, u, v))
+        return triangles
+
+    # 枚举星形（中心节点连接多个外围节点）
+    def find_stars(G):
+        stars = []
+        for node in G.nodes():
+            neighbors = list(G.neighbors(node))
+            if len(neighbors) >= 3:
+                stars.append((node, tuple(neighbors)))
+        return stars
+
+    # 枚举四边形
+    def find_quadrilaterals(G):
+        quadrilaterals = []
+        for node in G.nodes():
+            neighbors = list(G.neighbors(node))
+            for u, v in combinations(neighbors, 2):
+                if G.has_edge(u, v):
+                    for w in neighbors:
+                        if w != u and w != v and G.has_edge(u, w) and G.has_edge(v, w):
+                            quadrilaterals.append((node, u, v, w))
+        return quadrilaterals
+
+    # 计算图中各个motif的数量
+    triangles = find_triangles(G)
+    stars = find_stars(G)
+    quadrilaterals = find_quadrilaterals(G)
+
+    # 计算各个motif的频率
+    motif_frequencies = {
+        "triangle": len(triangles),
+        "star": len(stars),
+        "quadrilateral": len(quadrilaterals)
+    }
+
+    # 比较频率最高的motif
+    most_frequent_motif = max(motif_frequencies, key=motif_frequencies.get)
+
+    # 输出最有代表性的motif
+    print(
+        f"The most representative motif is: {most_frequent_motif} with count: {motif_frequencies[most_frequent_motif]}")
+
+    # most_frequent_motif = "quadrilateral"
+    # 提取包含最有代表性motif的实例
+    if most_frequent_motif == "triangle":
+        motif_instances = triangles
+    elif most_frequent_motif == "star":
+        motif_instances = stars
+    elif most_frequent_motif == "quadrilateral":
+        motif_instances = quadrilaterals
+
+
+    # 提取最有代表性的motif实例
+    most_representative_motif_instance = motif_instances[0]
+
+    print(f"The most representative motif instance is: {most_representative_motif_instance}")
+
+    # 提取子图
+    motif_nodes = set()
+    for instance in motif_instances:
+        motif_nodes.update(instance if isinstance(instance, tuple) else instance[1])
+
+    # 过滤无效节点
+    valid_motif_nodes = [node for node in motif_nodes if node in G.nodes()]
+
+    subgraph = G.subgraph(valid_motif_nodes).copy()
+
+    # 输出子图中的节点和边
+    print(f"Nodes in the most representative motif subgraph: {list(subgraph.nodes())}")
+    print(f"Edges in the most representative motif subgraph: {list(subgraph.edges())}")
+
+    # 可视化子图
+    pos = nx.spring_layout(subgraph)
+    nx.draw(subgraph, pos, with_labels=True, node_color='skyblue', edge_color='gray', node_size=1500, font_size=20)
+    plt.title("Most Representative Motif Subgraph")
+    plt.show()
+
+if __name__ == '__main__':
+    test_most_representative_motif()
