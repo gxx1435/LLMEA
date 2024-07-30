@@ -1,5 +1,6 @@
 import networkx as nx
 from collections import Counter, defaultdict
+from run.utils import split_camel_case, standarlize_entity
 from run.utils import get_id_entity_dict, get_ent_id_dict
 from graph_motif_counts import get_subgraph_within_k_per_node, read_graph
 # from graph_motif_LLM import (id_ent_dict1, id_ent_dict2,
@@ -11,19 +12,20 @@ from graph_motif_LLM import (find_triangle_or_star_motifs, find_star_motifs,
                              find_star_triangle_motifs)
 
 
+save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data'
 def get_paths():
     dataset = 'icews_yago'
-    sematic_embedding_candidates_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/candiadtes_semantic_embed_100_3765_all add_corrected.txt'
+    sematic_embedding_candidates_path = '{}/icews_yago/candiadtes_semantic_embed_100_3765_all add_corrected.txt'.format(save_dir)
 
     from ReAct_API_call_Nan import dataset, sematic_embedding_candidates_path
 
-    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
-    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
+    ent_id_1_path = '{}/{}/new_ent_ids_1'.format(save_dir, dataset)
+    ent_id_2_path = '{}/{}/new_ent_ids_2_aligned'.format(save_dir, dataset)
 
-    _2_neighbor_subgraph1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/2_neighbor_subgraph_1'.format(dataset)
-    _1_neighbor_subgraph1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/1_neighbor_subgraph_1'.format(dataset)
-    _2_neighbor_subgraph2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/2_neighbor_subgraph_2'.format(dataset)
-    _1_neighbor_subgraph2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/1_neighbor_subgraph_2'.format(dataset)
+    _2_neighbor_subgraph1_path = '{}/{}/2_neighbor_subgraph_1'.format(save_dir,dataset)
+    _1_neighbor_subgraph1_path = '{}/{}/1_neighbor_subgraph_1'.format(save_dir,dataset)
+    _2_neighbor_subgraph2_path = '{}/{}/2_neighbor_subgraph_2'.format(save_dir,dataset)
+    _1_neighbor_subgraph2_path = '{}/{}/1_neighbor_subgraph_2'.format(save_dir,dataset)
 
     return (dataset, sematic_embedding_candidates_path,
             ent_id_1_path, ent_id_2_path,
@@ -37,16 +39,17 @@ def get_paths():
 
 def get_id_ent_dict():
     id_ent_dict1 = get_id_entity_dict(
-            '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/ent_ids_1'.format(dataset))
+            '{}/{}/ent_ids_1'.format(save_dir, dataset))
     id_ent_dict2 = get_id_entity_dict(
-            '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/ent_ids_2'.format(dataset))
+            '{}/{}/ent_ids_2'.format(save_dir, dataset))
     return id_ent_dict1, id_ent_dict2
 id_ent_dict1, id_ent_dict2 = get_id_ent_dict()
 
 
 def get_candidates():
     ## 获取candidates文件
-    entity_keys = [line.split('\t')[0].strip() for line in open(sematic_embedding_candidates_path).readlines()]
+    entity_keys = [line.split('\t')[0].strip() for line in
+                   open(sematic_embedding_candidates_path).readlines()]
     cand_list_values = [line.split('\t')[1].strip().split(',') for line in
                         open(sematic_embedding_candidates_path).readlines()]
     candidates = dict(zip(entity_keys, cand_list_values))
@@ -57,10 +60,10 @@ def get_Graph():
     """
     :return:
     """
-    triple1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/triples_1'.format(dataset)
-    triple2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/triples_2'.format(dataset)
-    new_triples1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_triples_1'.format(dataset)
-    new_triples2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_triples_2'.format(dataset)
+    triple1 = '{}/{}/triples_1'.format(save_dir,dataset)
+    triple2 = '{}/{}/triples_2'.format(save_dir,dataset)
+    new_triples1 = '{}/{}/new_triples_1'.format(save_dir,dataset)
+    new_triples2 = '{}/{}/new_triples_2'.format(save_dir, dataset)
     G1 = nx.MultiDiGraph()
     with open(new_triples1) as f:
             for line in f.readlines():
@@ -83,13 +86,13 @@ G1, G2 = get_Graph()
 def get_rel_dict():
     ##  获取relation of two nodes
     rel_1_dict = dict()
-    rel_ids_1 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/rel_ids_1'.format(dataset)
+    rel_ids_1 = '{}/{}/rel_ids_1'.format(save_dir, dataset)
     with open(rel_ids_1) as f:
             for line in f.readlines():
                 rel_1_dict.update({line.split('\t')[0]: line.split('\t')[1].strip()})
 
     rel_2_dict = dict()
-    rel_ids_2 = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/rel_ids_2'.format(dataset)
+    rel_ids_2 = '{}/{}/rel_ids_2'.format(save_dir, dataset)
     with open(rel_ids_2) as f:
             for line in f.readlines():
                 rel_2_dict.update({line.split('\t')[0]: line.split('\t')[1].strip()})
@@ -127,6 +130,7 @@ class Entity:
             relation_counter = Counter(relations)
             top_5_relations = relation_counter.most_common(5)
             top_5_relations = [relation for relation, _ in top_5_relations]
+            top_5_relations = [split_camel_case(relation) for relation in top_5_relations]
 
             return ' ' + ','.join(top_5_relations) + ' '
 
@@ -385,7 +389,7 @@ class Entity:
         if most_frequent_motif == "triangle":
             motifs = find_triangle_or_star_motifs(G, node)
         elif most_frequent_motif == "star":
-            motifs = find_star_motifs(G, node)
+            motifs = find_triangle_or_star_motifs(G, node)
         elif most_frequent_motif == "quadrilateral":
             motifs = find_four_cycles(G, node)
         elif most_frequent_motif == 'chain':
@@ -429,19 +433,19 @@ class Entity:
             # if node in subgraph.nodes:
                 # try:
                 if self.entity_type == 'target':
-                    motifs_prompts += ' , '.join([node, id_ent_dict1[node], f"Motif {idx + 1}:\n"])
+                    motifs_prompts += ' , '.join([node, standarlize_entity(id_ent_dict1[node]), f"Motif {idx + 1}:\n"])
                 elif self.entity_type == 'candidate':
-                    motifs_prompts += ' , '.join([node, id_ent_dict2[node], f"Motif {idx + 1}:\n"])
+                    motifs_prompts += ' , '.join([node, standarlize_entity(id_ent_dict2[node]), f"Motif {idx + 1}:\n"])
                 # nodes = ','.join([id_ent_dict[idx] for idx in subgraph.nodes()])
                 # edges = ','.join(['(' + id_ent_dict[i] + ',' + id_ent_dict[j] + ')' for i, j in subgraph.edges()])
                 for i, j in subgraph.edges():
 
                     if self.entity_type == 'target':
                         relationship = self.get_relation(G1, i, j)
-                        motifs_prompts += id_ent_dict1[i] + relationship + id_ent_dict1[j] + '\n'
+                        motifs_prompts += standarlize_entity(id_ent_dict1[i]) + relationship + standarlize_entity(id_ent_dict1[j]) + '\n'
                     elif self.entity_type == 'candidate':
                         relationship = self.get_relation(G2, i, j)
-                        motifs_prompts += id_ent_dict2[i] + relationship + id_ent_dict2[j] + '\n'
+                        motifs_prompts += standarlize_entity(id_ent_dict2[i]) + relationship + standarlize_entity(id_ent_dict2[j]) + '\n'
 
                 # motifs_prompts += nodes + '\n\n'
                 # motifs_prompts += edges + '\n\n'
@@ -686,7 +690,7 @@ def main():
     ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
 
     entity_type = 'candidate'
-    # entity_type = 'target'
+    entity_type = 'target'
 
     ent_id_dict = {}
     if entity_type == ('target'):
@@ -695,13 +699,13 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """OECD"""
+    entity = """Ne Win"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
 
-    # _, _, prompts = entity.get_baseline_prompts()
-    prompts = entity.get_only_triangle_information()
+    _, _, prompts = entity.get_baseline_prompts()
+    # prompts = entity.get_only_triangle_information()
 
     print(prompts)
 

@@ -7,6 +7,15 @@ from run.utils import get_id_entity_dict, get_ent_id_dict
 # tmp1 = Please encapsulate the answer code within <code> </code>.
 # tmp2 = 回答请在python代码块中呈现
 # Example functions for motif instances based on provided triangle information
+# 6.  Please encapsulate the answer code within <code> </code>
+"""
+1.  The function name is a relation between the nodes
+2.  Please import relation
+3.  Please note that the inter-calling relationships within the functions should correspond to the given triangle motif relationships. 
+4.  Please note the left-right relationship between function calls and variable names.
+5.  The function name should represent some relations.
+6.  回答请在python代码块中呈现
+"""
 
 
 triagles_infomation = """
@@ -28,12 +37,15 @@ code_motif_prompts_generate = """
 
 As a good Computer Science student good at coding, your task is to describe the graph structure in Python code format. Each Motif instance will be viewed as a function with specialized name and node involved in the Motif instance will be the parameters in the function. 
 <RULE>
-1.  The function name is a relation between the nodes
-2.  Please import relation
-3.  Please note that the inter-calling relationships within the functions should correspond to the given triangle motif relationships. 
-4.  Please note the left-right relationship between function calls and variable names.
-5.  The function name should represent some relations.
-6.  Please encapsulate the answer code within <code> </code>
+  1. Function Name: Use a descriptive name for the function that represents the relationship between the nodes. The function name should indicate the type of relationship or action involving the nodes.
+  2. Import Statements: Import the necessary relations or actions. Use descriptive names that match the relationships in the motif information.
+  3. Function Parameters: Include all nodes involved in the motif as parameters to the function.
+  4. Function Implementation: Implement the function by calling the imported relations with the appropriate parameters. Each relation call should correspond to the connections or actions described in the motif information.
+  5. Connection Relationships: For simple connections between nodes, use the connected_with relation.
+  6. Complex Relationships: For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
+  7. Return Values: Return all the nodes involved in the motif as part of the function’s result. Ensure that the function returns the state or outcome after applying the relationships.
+  8. Execution: In the if __name__ == '__main__': block, call the defined functions with sample nodes to demonstrate how the motif relationships are applied.
+  
 </RULE>
 Please refer to the example below and handle new tasks! 
 
@@ -90,7 +102,24 @@ Given Graph, please generate its code description language.
 Given Entity, The triangle motif information is
 {}
 """.format("""
-33037 , Sinopec , Motif 1:
-Sinopec foundingLocation Beijing
-
+9483 , Organization for Economic Cooperation and Development , Motif 1:
+Austria Express intent to engage in diplomatic cooperation (such as policy support),Express intent to meet or negotiate,Engage in negotiation,Engage in diplomatic cooperation,Meet at a 'third' location Slovenia
+Austria connected with Organization for Economic Cooperation and Development
+Slovenia Express intent to meet or negotiate Organization for Economic Cooperation and Development
+9483 , Organization for Economic Cooperation and Development , Motif 2:
+Arab League connected with Vietnam
+Arab League Rally opposition against Organization for Economic Cooperation and Development
+Vietnam connected with Organization for Economic Cooperation and Development
+9483 , Organization for Economic Cooperation and Development , Motif 3:
+Lee Myung Bak Make an appeal or request,Express intent to meet or negotiate,Make a visit Canada
+Lee Myung Bak Make an appeal or request Organization for Economic Cooperation and Development
+Canada connected with Organization for Economic Cooperation and Development
+9483 , Organization for Economic Cooperation and Development , Motif 4:
+Ethiopia Engage in diplomatic cooperation,Consult,Sign formal agreement,Make a visit,Praise or endorse Canada
+Ethiopia connected with Organization for Economic Cooperation and Development
+Canada connected with Organization for Economic Cooperation and Development
+9483 , Organization for Economic Cooperation and Development , Motif 5:
+Ukraine Declare truce, ceasefire,Engage in negotiation,Praise or endorse,Engage in diplomatic cooperation,Consult Lithuania
+Ukraine Engage in diplomatic cooperation Organization for Economic Cooperation and Development
+Lithuania Engage in negotiation,Engage in diplomatic cooperation,Host a visit Organization for Economic Cooperation and Development
 """)

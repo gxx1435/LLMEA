@@ -45,7 +45,7 @@ def get_performance_of_semantic_embedding_similarity(
     # entity_right = get_entity_names(entity_ids_2_path, thres_hold)
 
 
-    n_cand = 10
+    n_cand = 20
     method = 'all add'
     candidates_idx_list, ent_left, ent_right = get_candidates(matrix1,
                                                               matrix2,

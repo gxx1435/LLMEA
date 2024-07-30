@@ -1,7 +1,15 @@
 import  numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import editdistance
+import json
+import re
 
+def split_camel_case(s):
+    return re.sub('([a-z])([A-Z])', r'\1 \2', s)
+
+def standarlize_entity(s):
+    s = s.replace("_", ' ')
+    return s
 def get_entity_names(ent_id_path, thres_hold=3000):
     """
     :param ent_id_path:
@@ -284,3 +292,126 @@ def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, o
 
 
     return float(cnt / len(ent_left))
+
+def hit_1_10_rate(final_anwser_file, type='hit1'):
+    """
+    :param final_anwser_file:
+    :param type:
+    :return:
+    """
+    dataset = 'icews_yago'
+    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
+    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
+
+    ent_ids_1 = []
+    with open(ent_id_1_path, 'r') as f:
+        for line in f.readlines():
+            ent_ids_1.append(line.split('\t')[1].strip())
+
+    ent_ids_2_aligned = []
+    with open(ent_id_2_path, 'r') as f:
+        for line in f.readlines():
+            ent_ids_2_aligned.append(line.split('\t')[1].strip())
+
+    ent_ids_12_dict = dict(zip(ent_ids_1, ent_ids_2_aligned))
+    print(ent_ids_12_dict)
+
+    hit1 = 0
+    hit10 = 0
+    with open(final_anwser_file, 'r') as f:
+        final_answer = json.load(f)
+        for key in final_answer.keys():
+
+            if type == 'hit1':
+                if final_answer[key] == ent_ids_12_dict[key]:
+                    hit1 += 1
+            elif type == 'hit10':
+                if final_answer[key] == -1:
+                    continue
+                if ent_ids_12_dict[key] in final_answer[key]:
+                    print(key, final_answer[key])
+                    hit10 += 1
+
+    return float(hit1/len(final_answer)) if type == 'hit1' else float(hit10/len(final_answer))
+
+def mean_reciprocal_rank(final_answers):
+    """
+    计算Mean Reciprocal Rank (MRR)
+
+    参数:
+    final_ranks (list): 每个查询的第一个相关结果的排名的列表
+
+    返回:
+    float: 平均MRR值
+    """
+
+    dataset = 'icews_yago'
+    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_strip'.format(dataset)
+    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned_strip'.format(dataset)
+
+    ent_ids_1 = []
+    with open(ent_id_1_path, 'r') as f:
+        for line in f.readlines():
+            ent_ids_1.append(line.split('\t')[1].strip())
+
+    ent_ids_2_aligned = []
+    with open(ent_id_2_path, 'r') as f:
+        for line in f.readlines():
+            ent_ids_2_aligned.append(line.split('\t')[1].strip())
+
+    ent_ids_12_dict = dict(zip(ent_ids_1, ent_ids_2_aligned))
+
+    def find_word_position(word, word_list):
+        if word_list == -1: return np.inf
+
+        word_list = word_list.split(',')
+        word_list[0] = word_list[0][1:]
+        word_list[-1] = word_list[-1][:-1]
+
+        pattern1 = r"'([^']*)'"
+        for i, word_ in enumerate(word_list):
+            match = re.search(pattern1, word_)
+            if match:
+                word_ = match.group(1)
+            word_list[i] = word_
+
+        pattern2 = r'"([^"]*)"'
+        for i, word_ in enumerate(word_list):
+            match = re.search(pattern2, word_)
+            if match:
+                word_ = match.group(1)
+            word_list[i] = word_
+
+        word = word[1:-1] if word[0] == "'" or word[0] == "\"" else word
+
+        try:
+            index = word_list.index(word)+1
+            return index
+        except:
+            return np.inf
+
+
+    ranks = []
+    for entity in final_answers.keys():
+            aligned_entity = ent_ids_12_dict[entity]
+
+            rank = find_word_position(aligned_entity, final_answers[entity])
+
+            ranks.append(rank)
+
+        # print(entity, ' ', final_answers[aligned_entity])
+        # print(rank)
+
+    reciprocal_ranks = [1.0 / rank for rank in ranks]
+    mrr = sum(reciprocal_ranks) / len(ranks)
+    return mrr
+
+
+    # mrrs = []
+    # for ranks in final_ranks:
+    #
+    #     reciprocal_ranks = [1.0 / rank for rank in ranks]
+    #
+    #     mrr = sum(reciprocal_ranks) / len(ranks)
+    #     mrrs.append(mrr)
+    # return np.mean(mrrs)

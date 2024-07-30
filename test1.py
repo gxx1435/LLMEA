@@ -579,22 +579,27 @@ import argparse
 # f = "new_ent_ids_1_random_sample_{}".format(random_sample)
 # print(f)
 
-# from ReAct_API_call_Nan import hit_1_10_rate, motif_ReAct_example_prompt,mean_reciprocal_rank
-# final_answers = {}
-# for i in [1, 2, 3, 4]:
-#     with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/icews_yago_gpt_4_turbo-5/final_answer_code_motif_{}.json'.format(i), 'r') as f:
-#         final_answer = json.load(f)
-#         final_answers.update(final_answer)
-#
-# with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/icews_yago_gpt_4_turbo-5/final_answer_code_motif_all.json', 'w') as f:
-#     json.dump(final_answers, f, indent=4)
+# from run.utils import hit_1_10_rate
+final_answers = {}
+for i in [1, 2, 3, 4]:
+    with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t3000_100_50/most_list_code_motif_base_{}.json'.format(i), 'r') as f:
+        final_answer = json.load(f)
+        final_answers.update(final_answer)
+
+with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t3000_100_50/most_list_code_motif_base_all.json', 'w') as f:
+    json.dump(final_answers, f, indent=4)
+
 
 # dataset = 'icews_yago'
 # ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_strip'.format(dataset)
 # ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned_strip'.format(dataset)
-
-# hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/icews_yago_gpt_4_turbo-5/final_answer_code_motif_all.json', 'hit1')
+#
+# hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t3000_100_50/most_list_code_motif_base_all.json', 'hit10')
 # print(hit_rate)
+
+from run.utils import mean_reciprocal_rank
+mrr = mean_reciprocal_rank(final_answers)
+print(mrr)
 
 # id_ent_dict = {}
 # idxs = []
@@ -659,94 +664,104 @@ import argparse
 #
 # print(matches.group(1))
 
-import networkx as nx
-from itertools import combinations
-from collections import Counter
-import numpy as np
-import matplotlib.pyplot as plt
+# import networkx as nx
+# from itertools import combinations
+# from collections import Counter
+# import numpy as np
+# import matplotlib.pyplot as plt
+#
+# # 创建图结构
+# G = nx.Graph()
+# edges = [(1, 2), (2, 3), (3, 1), (3, 4), (4, 5), (5, 6), (6, 4), (6, 7), (7, 8), (8, 9), (9, 7)]
+# G.add_edges_from(edges)
+#
+# # 枚举三角形
+# def find_triangles(G):
+#     triangles = []
+#     for node in G.nodes():
+#         neighbors = list(G.neighbors(node))
+#         for u, v in combinations(neighbors, 2):
+#             if G.has_edge(u, v):
+#                 triangles.append((node, u, v))
+#     return triangles
+#
+# # 枚举星形（中心节点连接多个外围节点）
+# def find_stars(G):
+#     stars = []
+#     for node in G.nodes():
+#         neighbors = list(G.neighbors(node))
+#         if len(neighbors) >= 3:
+#             stars.append((node, tuple(neighbors)))
+#     return stars
+#
+# # 枚举四边形
+# def find_quadrilaterals(G):
+#     quadrilaterals = []
+#     for node in G.nodes():
+#         neighbors = list(G.neighbors(node))
+#         for u, v in combinations(neighbors, 2):
+#             if G.has_edge(u, v):
+#                 for w in neighbors:
+#                     if w != u and w != v and G.has_edge(u, w) and G.has_edge(v, w):
+#                         quadrilaterals.append((node, u, v, w))
+#     return quadrilaterals
+#
+# # 计算图中各个motif的数量
+# triangles = find_triangles(G)
+# stars = find_stars(G)
+# quadrilaterals = find_quadrilaterals(G)
+#
+# # 计算各个motif的频率
+# motif_frequencies = {
+#     "triangle": len(triangles),
+#     "star": len(stars),
+#     "quadrilateral": len(quadrilaterals)
+# }
+#
+# # 找到频率最高的motif
+# most_frequent_motif = max(motif_frequencies, key=motif_frequencies.get)
+#
+# # 输出最有代表性的motif
+# print(f"The most representative motif is: {most_frequent_motif} with count: {motif_frequencies[most_frequent_motif]}")
+#
+# most_frequent_motif = "star"
+# # 提取包含最有代表性motif的实例
+# if most_frequent_motif == "triangle":
+#     motif_instances = triangles
+# elif most_frequent_motif == "star":
+#     motif_instances = stars
+# elif most_frequent_motif == "quadrilateral":
+#     motif_instances = quadrilaterals
+#
+# # 提取最有代表性的motif实例
+# print(motif_instances)
+# most_representative_motif_instance = motif_instances[0]
+#
+# print(f"The most representative motif instance is: {most_representative_motif_instance}")
+#
+# # 提取子图
+# motif_nodes = set(most_representative_motif_instance)
+#
+# subgraph = G.subgraph(motif_nodes).copy()
+#
+#
+# # 输出子图中的节点和边
+# print(f"Nodes in the most representative motif subgraph: {list(subgraph.nodes())}")
+# print(f"Edges in the most representative motif subgraph: {list(subgraph.edges())}")
+#
+# # 可视化子图
+# pos = nx.spring_layout(subgraph)
+# nx.draw(subgraph, pos, with_labels=True, node_color='skyblue', edge_color='gray', node_size=1500, font_size=20)
+# plt.title("Most Representative Motif Subgraph")
+# plt.show()
 
-# 创建图结构
-G = nx.Graph()
-edges = [(1, 2), (2, 3), (3, 1), (3, 4), (4, 5), (5, 6), (6, 4), (6, 7), (7, 8), (8, 9), (9, 7)]
-G.add_edges_from(edges)
-
-# 枚举三角形
-def find_triangles(G):
-    triangles = []
-    for node in G.nodes():
-        neighbors = list(G.neighbors(node))
-        for u, v in combinations(neighbors, 2):
-            if G.has_edge(u, v):
-                triangles.append((node, u, v))
-    return triangles
-
-# 枚举星形（中心节点连接多个外围节点）
-def find_stars(G):
-    stars = []
-    for node in G.nodes():
-        neighbors = list(G.neighbors(node))
-        if len(neighbors) >= 3:
-            stars.append((node, tuple(neighbors)))
-    return stars
-
-# 枚举四边形
-def find_quadrilaterals(G):
-    quadrilaterals = []
-    for node in G.nodes():
-        neighbors = list(G.neighbors(node))
-        for u, v in combinations(neighbors, 2):
-            if G.has_edge(u, v):
-                for w in neighbors:
-                    if w != u and w != v and G.has_edge(u, w) and G.has_edge(v, w):
-                        quadrilaterals.append((node, u, v, w))
-    return quadrilaterals
-
-# 计算图中各个motif的数量
-triangles = find_triangles(G)
-stars = find_stars(G)
-quadrilaterals = find_quadrilaterals(G)
-
-# 计算各个motif的频率
-motif_frequencies = {
-    "triangle": len(triangles),
-    "star": len(stars),
-    "quadrilateral": len(quadrilaterals)
-}
-
-# 找到频率最高的motif
-most_frequent_motif = max(motif_frequencies, key=motif_frequencies.get)
-
-# 输出最有代表性的motif
-print(f"The most representative motif is: {most_frequent_motif} with count: {motif_frequencies[most_frequent_motif]}")
-
-most_frequent_motif = "star"
-# 提取包含最有代表性motif的实例
-if most_frequent_motif == "triangle":
-    motif_instances = triangles
-elif most_frequent_motif == "star":
-    motif_instances = stars
-elif most_frequent_motif == "quadrilateral":
-    motif_instances = quadrilaterals
-
-# 提取最有代表性的motif实例
-print(motif_instances)
-most_representative_motif_instance = motif_instances[0]
-
-print(f"The most representative motif instance is: {most_representative_motif_instance}")
-
-# 提取子图
-motif_nodes = set(most_representative_motif_instance)
-
-subgraph = G.subgraph(motif_nodes).copy()
-
-
-# 输出子图中的节点和边
-print(f"Nodes in the most representative motif subgraph: {list(subgraph.nodes())}")
-print(f"Edges in the most representative motif subgraph: {list(subgraph.edges())}")
-
-# 可视化子图
-pos = nx.spring_layout(subgraph)
-nx.draw(subgraph, pos, with_labels=True, node_color='skyblue', edge_color='gray', node_size=1500, font_size=20)
-plt.title("Most Representative Motif Subgraph")
-plt.show()
+# import re
+#
+# def split_camel_case(s):
+#     return re.sub('([a-z])([A-Z])', r'\1 \2', s)
+#
+# # 示例用法
+# camel_case_string = "hasOccupation"
+# split_string = split_camel_case(camel_case_string)
+# print(split_string)
 

@@ -7,79 +7,24 @@ import numpy as np
 import argparse
 from run.utils import get_ent_id_dict, get_id_entity_dict
 # from API_bank_multi import collect_response
-# from graph_motif_ReAct_v4_100_50candidates_tmp2 import motif_ReAct_example_prompt
+from graph_motif_ReAct import (motif_ReAct_example_prompt_cn100_cn50, motif_ReAct_example_prompt_cn100_cn40,
+                               motif_ReAct_example_prompt_cn100_cn30, motif_ReAct_example_prompt_cn100_cn20,
+                               motif_ReAct_example_prompt_cn100_cn10)
+
 from graph_motif_prompt import code_motif_prompts_generate
 
 
-def dynamic_import(module_name):
-    module = __import__(module_name)
-    return module
+# def dynamic_import(module_name):
+#     module = __import__(module_name)
+#     return module
 
-def hit_1_10_rate(final_anwser_file, type='hit1'):
-    """
-    :param final_anwser_file:
-    :param type:
-    :return:
-    """
-    dataset = 'icews_yago'
-    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
-    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
-
-    ent_ids_1 = []
-    with open(ent_id_1_path, 'r') as f:
-        for line in f.readlines():
-            ent_ids_1.append(line.split('\t')[1].strip())
-
-    ent_ids_2_aligned = []
-    with open(ent_id_2_path, 'r') as f:
-        for line in f.readlines():
-            ent_ids_2_aligned.append(line.split('\t')[1].strip())
-
-    ent_ids_12_dict = dict(zip(ent_ids_1, ent_ids_2_aligned))
-    print(ent_ids_12_dict)
-
-    hit1 = 0
-    hit10 = 0
-    with open(final_anwser_file, 'r') as f:
-        final_answer = json.load(f)
-        for key in final_answer.keys():
-
-
-            if type == 'hit1':
-                if final_answer[key] == ent_ids_12_dict[key]:
-                    hit1 += 1
-            elif type == 'hit10':
-                if ent_ids_12_dict[key] in final_answer[key]:
-                    hit10 += 1
-
-    return float(hit1/len(final_answer)) if type == 'hit1' else float(hit10/len(final_answer))
-
-
-def mean_reciprocal_rank(final_ranks):
-    """
-    计算Mean Reciprocal Rank (MRR)
-
-    参数:
-    final_ranks (list): 每个查询的第一个相关结果的排名的列表
-
-    返回:
-    float: 平均MRR值
-    """
-    mrrs = []
-    for ranks in final_ranks:
-
-        reciprocal_ranks = [1.0 / rank for rank in ranks]
-
-        mrr = sum(reciprocal_ranks) / len(ranks)
-        mrrs.append(mrr)
-    return np.mean(mrrs)
 
 def read_idx_entity_file():
     """
     :param dataset_file: idx entity corresponding file
     :return:
     """
-    dataset_file = ent_id_1_path
+    dataset_file = ent_ids_1_path
     idx_entity_dict = {}
     with open(dataset_file) as f:
         for line in f.readlines():
@@ -157,7 +102,7 @@ def generate_message_lists(threshold):
             idx_prompt_dict = json.load(f)
 
         entity_list = []
-        id_entity_dict = get_id_entity_dict(ent_id_1_path)
+        id_entity_dict = get_id_entity_dict(ent_ids_1_path)
         for idx in idx_prompt_dict.keys():
             entity_type = 'target'
             entity = Entity(id_entity_dict[idx], idx, entity_type)
@@ -353,7 +298,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
 
         new_entity_list = []
-        id_entity_dict = get_id_entity_dict(ent_id_1_path)
+        id_entity_dict = get_id_entity_dict(ent_ids_1_path)
         for idx in new_idx_prompt_dict.keys():
             entity_type = 'target'
             entity = Entity(id_entity_dict[idx], idx, entity_type)
@@ -408,21 +353,26 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
                 ent_id_dict = {}
                 if entity_type == 'target':
-                    ent_id_dict = get_ent_id_dict(ent_id_1_path)
+                    ent_id_dict = get_ent_id_dict(ent_ids_1_path)
                 elif entity_type == 'candidate':
-                    ent_id_dict = get_ent_id_dict(ent_id_2_path)
+                    ent_id_dict = get_ent_id_dict(ent_ids_2_path)
+
+                if 'entity:' in request_entity:
+                    request_entity = request_entity.split(":")[1].strip()
 
                 print(request_entity, entity_list[i].entity_name, entity_type)
-                # try:
-                if entity_type == 'target':
-                    request_entity_id = ent_id_dict[entity_list[i].entity_name]
-                else:
-                    request_entity_id = ent_id_dict[request_entity]
+                try:
+                    if entity_type == 'target':
+                        request_entity_id = ent_id_dict[entity_list[i].entity_name]
+                    else:
+                        request_entity_id = ent_id_dict[request_entity]
 
-                request_entity = Entity(request_entity, request_entity_id, entity_type)
-                # except:
-                #     # introduce noise
-                #     request_entity = Entity('Armenia', ent_id_dict['Armenia'], entity_type)
+                    request_entity = Entity(request_entity, request_entity_id, entity_type)
+                except:
+                    # introduce noise
+                    request_entity = Entity(entity_list[i].entity_name,
+                                            entity_list[i].entity_id,
+                                            'target')
 
                 if info_type == '1_neighbor':
 
@@ -436,16 +386,24 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
                 elif info_type == 'code_motif_lite':
 
-                    text_motif_info = request_entity.get_dynamic_motifs_information()
+                    text_motif_info = request_entity.get_only_triangle_information()
                     print(text_motif_info)
                     code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
                     code_motif_prompts.update({entity_id: code_motif_prompt})
 
                 elif info_type == 'text_motif_base':
-                    """To do"""
 
-                elif info_type == 'code_motif_lite':
                     """To do"""
+                    text_motif_info = request_entity.get_dynamic_motifs_information()
+                    observations.update({entity_id: 'Observation {}: \n'.format(step) + text_motif_info})
+
+                elif info_type == 'code_motif_base':
+
+                    """To do"""
+                    text_motif_info = request_entity.get_dynamic_motifs_information()
+                    print(text_motif_info)
+                    code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
+                    code_motif_prompts.update({entity_id: code_motif_prompt})
 
 
         if 'code_motif' in info_type:
@@ -472,7 +430,11 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
             with open('output/{}/LLM_response_{}/code_{}.json'.format(save_dir, info_type, step), 'w') as f:
                 json.dump(code_generated, f, indent=4)
+
             observations = dict(zip(code_motif_prompts.keys(), code_generated))
+
+            with open('output/{}/LLM_response_{}/observations_{}.json'.format(save_dir, info_type, step), 'w') as f:
+                json.dump(observations, f, indent=4)
 
 
         new_idx_prompt_dict = {}
@@ -522,6 +484,11 @@ parser.add_argument('-cn1', '--candidate_num_1', type=int, help='candidate numbe
 
 parser.add_argument('-cn2', '--candidate_num_2', type=int, help='candidate number of target entity in the answer')
 
+parser.add_argument('-ent1', '--ent_ids_1', type=str, help='ent ids 1 file')
+
+parser.add_argument('-ent2', '--ent_ids_2', type=str, help='ent ids 2 file')
+
+
 # # 添加可选参数（带默认值）
 # parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
 
@@ -534,14 +501,37 @@ LLM_type = args.llm_type
 threshold = args.threshold
 module_name = args.react_file
 
-ReAct_module = dynamic_import(module_name)
-motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
+# ReAct_module = dynamic_import(module_name)
+# motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
+
+if args.candidate_num_1 == 100 and args.candidate_num_2 == 50:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn50
+
+elif args.candidate_num_1 == 100 and args.candidate_num_2 == 40:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn40
+
+elif args.candidate_num_1 == 100 and args.candidate_num_2 == 30:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn30
+
+elif args.candidate_num_1 == 100 and args.candidate_num_2 == 20:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn20
+
+elif args.candidate_num_1 == 100 and args.candidate_num_2 == 10:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn10
+
 sematic_embedding_candidates_path = args.sematic_embedding_candidates_path
 candidate_num_1 = str(args.candidate_num_1)
 candifate_num_2 = str(args.candidate_num_2)
+ent_ids_1 = args.ent_ids_1
+ent_ids_2 = args.ent_ids_2
 
-ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_strip'.format(dataset)
-ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned_strip'.format(dataset)
+ent_ids_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent_ids_1)
+ent_ids_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent_ids_2)
 
 save_dir = dataset+"_"+LLM_type+"_"+'t'+str(threshold)+'_'+candidate_num_1+"_"+candifate_num_2
 
