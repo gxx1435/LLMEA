@@ -11,6 +11,7 @@ import torch
 import tqdm
 import time
 import subprocess
+from utils import compute_csls
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
@@ -89,68 +90,6 @@ def refine_all(ent_left, candidates, entity_text_right, save_dir):
     with open(save_dir, 'w', encoding='utf8') as f:
         json.dump(llm_response_dict, f, indent=4)
 
-def compute_csls(X_src, X_tgt, k=10):
-    """
-    Compute Cross-domain Similarity Local Scaling (CSLS).
-
-    Parameters:
-    X_src : np.array
-        Source domain embeddings (n_samples_src, n_features)
-    X_tgt : np.array
-        Target domain embeddings (n_samples_tgt, n_features)
-    k : int
-        Number of nearest neighbors for local scaling
-
-    Returns:
-    csls_matrix : np.array
-        CSLS similarity scores matrix (n_samples_src, n_samples_tgt)
-    """
-    # Compute cosine similarity matrix
-    cosine_sim = np.dot(X_src, X_tgt.T)
-
-    # Normalize vectors to have unit norm
-    X_src_norm = np.linalg.norm(X_src, axis=1, keepdims=True)
-    X_tgt_norm = np.linalg.norm(X_tgt, axis=1, keepdims=True)
-    cosine_sim /= (X_src_norm @ X_tgt_norm.T)
-
-    # Compute nearest neighbor similarity for source and target domains
-    src_nn_sim = np.zeros(X_src.shape[0])
-    tgt_nn_sim = np.zeros(X_tgt.shape[0])
-
-    for i in range(X_src.shape[0]):
-        src_nn_sim[i] = np.mean(np.sort(cosine_sim[i, :])[-k:])
-
-    for j in range(X_tgt.shape[0]):
-        tgt_nn_sim[j] = np.mean(np.sort(cosine_sim[:, j])[-k:])
-
-    # Compute CSLS similarity scores
-    csls_matrix = np.zeros(cosine_sim.shape)
-    for i in range(X_src.shape[0]):
-        for j in range(X_tgt.shape[0]):
-            csls_matrix[i, j] = 2 * cosine_sim[i, j] - src_nn_sim[i] - tgt_nn_sim[j]
-
-    return csls_matrix
-
-def edit_distance(s1, s2, m, n):
-    """
-    :param s1:
-    :param s2:
-    :param m:
-    :param n:
-    :return:
-    """
-    if m == 0:
-        return n
-    if n == 0:
-        return m
-
-    if s1[m-1] == s2[n-1]:
-        return edit_distance(s1, s2, m-1, n-1)
-
-    return 1 + min(edit_distance(s1, s2, m, n-1),
-                  edit_distance(s1, s2, m-1, n),
-                  edit_distance(s1, s2, m-1, n-1))
-
 
 def coverage_eval(ent_left, candidates_idx_list, ent_right, entity_text_right):
     """
@@ -173,16 +112,18 @@ def coverage_eval(ent_left, candidates_idx_list, ent_right, entity_text_right):
 
     return float(cnt / len(ent_left))
 
-def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100):                
-    sim = 1 - np.array(cosine_similarity(Lvec, Rvec))
+def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100):
+    sim_cosine = 1 - np.array(cosine_similarity(Lvec, Rvec))
 
     sim_edit_dis = np.zeros((len(entity_text_left), len(entity_text_right)))
+
     for i in range(len(entity_text_left)):
         for j in range(len(entity_text_right)):
-            # sim_edit_dis[i][j] = edit_distance(entity_text_left[i],entity_text_right[j],len(entity_text_left[i]),len(entity_text_right[j]))
             sim_edit_dis[i][j] = editdistance.eval(entity_text_left[i], entity_text_right[j])
 
-    sim_csls = 1 - compute_csls(Lvec, Rvec)
+    sim_csls = 1 - compute_csls(np.array(Lvec), np.array(Rvec))
+
+    sim = sim_cosine + sim_edit_dis + sim_csls
 
 
     candidates = [0] * len(Lvec)
@@ -191,71 +132,15 @@ def get_candidates(Lvec, Rvec, entity_text_left, entity_text_right, n_cand=100):
     ranks = [0] * len(Lvec)
 
     for i in range(len(Lvec)):
-        rank1 = sim[i, :].argsort()
-        rank2 = sim_edit_dis[i, :].argsort()
-        rank3 = sim_csls[i, :].argsort()
+        rank = sim[i, :].argsort()
+        ranks[i] = rank
+        candidates[i] = rank[0:n_cand]
 
-        ranks[i] = rank1
-        candidates[i] = list(set(rank1[0:n_cand]).union(set(rank2[0:n_cand])).union(set(rank3[0:n_cand])))
         ent_left[i] = entity_text_left[i]
         ent_right[i] = entity_text_right[i]
     
     return ranks, candidates, ent_left, ent_right
 
-
-def get_target_embed(filename, tokenizer, model):
-    with open(filename, "r") as input_f:
-        entity_text_all = []
-        entity_embed_all = []
-        counter = 0
-        counter_list = []
-        for line in input_f:
-            tmp = line.strip().replace("...", "")
-            real_label = tmp.replace("\n", '')
-            
-            # Adding wrod_embed
-            entity_text = real_label.split(":")[0].strip()
-            entity_text = entity_text.split('(')[0].strip()
-            entity_text = entity_text.split('（')[0].strip()
-            
-            # remove punctuation
-            punctuation_eng = string.punctuation
-            punctuation_zh = punctuation
-            for i in punctuation_eng:
-                entity_text = entity_text.replace(i, '')
-                
-            for j in punctuation_zh:
-                entity_text = entity_text.replace(j, '')
-                
-                
-            sep_idx = real_label.index(":")
-            real_label = entity_text + real_label[sep_idx:]
-            input_txt_list = real_label.split(":")
-            input_txt_all = entity_text + ": " + "[MASK] is identical with " + entity_text +'. '
-            for i in input_txt_list[1:]:
-                input_txt_all = input_txt_all + i
-                
-            entity_text_all.append(entity_text)
-            
-            input_txt_ent = "[MASK] is identical with " + entity_text +'. '
-            tokens_ent = tokenizer(
-                input_txt_ent,               
-                return_token_type_ids=False,   
-                return_attention_mask=True,     
-                return_tensors='pt')        
-            
-            tokenized_ent_text = tokenizer.convert_ids_to_tokens(tokens_ent["input_ids"][0])
-            encoded_layers_ent = model(input_ids=tokens_ent["input_ids"], attention_mask=tokens_ent["attention_mask"])['last_hidden_state']
-            last_hidden_state_ent = encoded_layers_ent[0]
-            mask_idx = tokenized_ent_text.index("[MASK]")
-            entity_embed = last_hidden_state_ent[mask_idx]
-            entity_embed_all.append(entity_embed.detach().numpy())
-            
-            if counter > thresh_num:
-                break
-            counter += 1
-            
-    return counter_list, entity_text_all, entity_embed_all
 
 def get_embed(summed_last_4_layers, tokenized_text):
     sep_idx = tokenized_text.index(".")
@@ -288,18 +173,20 @@ def get_target_embed(filename, tokenizer, model):
             
             ### Adding wrod_embed
             entity_text = real_label.split(":")[0].strip()
-            entity_text = entity_text.split('(')[0].strip()
-            entity_text = entity_text.split('（')[0].strip()
+            # entity_text = entity_text.split('(')[0].strip()
+            # entity_text = entity_text.split('（')[0].strip()
             
             # remove punctuation
-            punctuation_eng = string.punctuation
-            punctuation_zh = punctuation
-            for i in punctuation_eng:
-                entity_text = entity_text.replace(i, '')
-                
-            for j in punctuation_zh:
-                entity_text = entity_text.replace(j, '')
-                
+            # punctuation_eng = string.punctuation
+            # punctuation_zh = punctuation
+            # for i in punctuation_eng:
+            #     entity_text = entity_text.replace(i, '')
+            #
+            # for j in punctuation_zh:
+            #     entity_text = entity_text.replace(j, '')
+
+            entity_text = entity_text.replace('_', ' ')
+            # print(entity_text)
                 
             sep_idx = real_label.index(":")
             real_label = entity_text + real_label[sep_idx:]
@@ -356,31 +243,36 @@ def get_target_embed(filename, tokenizer, model):
 if __name__ == '__main__':
     input_prompt_dir_1 = sys.argv[1]   
     input_prompt_dir_2 = sys.argv[2] 
-    llm_resp_save_dir = sys.argv[3] 
-    thresh_num = 3000
+    llm_resp_save_dir = sys.argv[3]
+    mid_results_dir = sys.argv[4]
+
+
+    # thresh_num = 1116
+    thresh_num = 30000
+
     bert_model = 'bert-base-uncased'  #"bert-base-multilingual-cased"
     try:
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "ranks_").replace(".json", ".pkl"), "rb") as fp:
+        with open(llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "ranks_").replace(".json", ".pkl"), "rb") as fp:
             ranks = pickle.load(fp)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl"), "rb") as fp:
+        with open(llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl"), "rb") as fp:
             candidates_idx_list = pickle.load(fp)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "aligned_entity_"), 'r', encoding='utf8') as f:
+        with open(llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "aligned_entity_"), 'r', encoding='utf8') as f:
             ent_right = json.load(f)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "target_entity_"), 'r', encoding='utf8') as f:
+        with open(llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "target_entity_"), 'r', encoding='utf8') as f:
             ent_left = json.load(f)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "entity_text_left_"), 'r', encoding='utf8') as f:
+        with open(llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_text_left_"), 'r', encoding='utf8') as f:
             entity_text_left = json.load(f)
 
-        with open(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "entity_text_right_"), 'r', encoding='utf8') as f:
+        with open(llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_text_right_"), 'r', encoding='utf8') as f:
             entity_text_right = json.load(f)
 
-        entity_embed_left = np.loadtxt(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "entity_embed_left_"), delimiter=',')
+        entity_embed_left = np.loadtxt(llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_embed_left_"), delimiter=',')
 
-        entity_embed_right = np.loadtxt(llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "entity_embed_right_"), delimiter=',')
+        entity_embed_right = np.loadtxt(llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_embed_right_"), delimiter=',')
 
     except:
 
@@ -399,8 +291,8 @@ if __name__ == '__main__':
                                                                            tokenizer,
                                                                            model)
 
-        entity_embed_left_save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "entity_embed_left_")
-        entity_embed_right_save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "entity_embed_right_")
+        entity_embed_left_save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_embed_left_")
+        entity_embed_right_save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_embed_right_")
 
         np.savetxt(entity_embed_left_save_dir, np.array(entity_embed_left), delimiter=',', fmt='%f')
         np.savetxt(entity_embed_right_save_dir, np.array(entity_embed_right), delimiter=',', fmt='%f')
@@ -409,36 +301,28 @@ if __name__ == '__main__':
         tmp_list = list(set(c_list_1 + c_list_2))
         c_list_all = sorted(tmp_list, reverse=True)
 
-        ### No need to know this part, Start:
-        # if c_list_all:
-        #     for j in c_list_all:
-        #         del entity_text_left[j]
-        #         del entity_text_right[j]
-        #         del entity_embed_left[j]
-        #         del entity_embed_right[j]
-        ### End
 
         ranks, candidates_idx_list, ent_left, ent_right = get_candidates(entity_embed_left, entity_embed_right, entity_text_left, entity_text_right)
         
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "aligned_entity_")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "aligned_entity_")
         with open(save_dir, 'w', encoding='utf8') as f:
             json.dump(ent_right, f)
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "target_entity_")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "target_entity_")
         with open(save_dir, 'w', encoding='utf8') as f:
             json.dump(ent_left, f)
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "ranks_").replace(".json", ".pkl")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "ranks_").replace(".json", ".pkl")
         pickle.dump(ranks, open(save_dir, "wb"))
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl")
-        pickle.dump(candidates_idx_list,open(save_dir, "wb"))
+        save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl")
+        pickle.dump(candidates_idx_list, open(save_dir, "wb"))
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "entity_text_left_")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_text_left_")
         with open(save_dir, 'w', encoding='utf8') as f:
             json.dump(entity_text_left, f)
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", "/mid_results_3000_zeroembed_cos_ed_csls_union/").replace("gpt4_turbo_", "entity_text_right_")
+        save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_text_right_")
         with open(save_dir, 'w', encoding='utf8') as f:
             json.dump(entity_text_right, f)
 

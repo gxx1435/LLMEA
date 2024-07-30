@@ -1,3 +1,0 @@
-[
-    "<CODE>\nimport foundingDate\n\ndef Democratic_Unity_Roundtable_foundingDate(Democratic_Unity_Roundtable):\n    Democratic_Unity_Roundtable = foundingDate(Democratic_Unity_Roundtable)\n    return Democratic_Unity_Roundtable\n\nif __name__ == '__main__':\n    Democratic_Unity_Roundtable = Democratic_Unity_Roundtable_foundingDate('Democratic_Unity_Roundtable')\n\n</CODE>"
-]

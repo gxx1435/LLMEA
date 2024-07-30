@@ -101,25 +101,4 @@ if __name__ == '__main__':
 Given Graph, please generate its code description language.
 Given Entity, The triangle motif information is
 {}
-""".format("""
-9483 , Organization for Economic Cooperation and Development , Motif 1:
-Austria Express intent to engage in diplomatic cooperation (such as policy support),Express intent to meet or negotiate,Engage in negotiation,Engage in diplomatic cooperation,Meet at a 'third' location Slovenia
-Austria connected with Organization for Economic Cooperation and Development
-Slovenia Express intent to meet or negotiate Organization for Economic Cooperation and Development
-9483 , Organization for Economic Cooperation and Development , Motif 2:
-Arab League connected with Vietnam
-Arab League Rally opposition against Organization for Economic Cooperation and Development
-Vietnam connected with Organization for Economic Cooperation and Development
-9483 , Organization for Economic Cooperation and Development , Motif 3:
-Lee Myung Bak Make an appeal or request,Express intent to meet or negotiate,Make a visit Canada
-Lee Myung Bak Make an appeal or request Organization for Economic Cooperation and Development
-Canada connected with Organization for Economic Cooperation and Development
-9483 , Organization for Economic Cooperation and Development , Motif 4:
-Ethiopia Engage in diplomatic cooperation,Consult,Sign formal agreement,Make a visit,Praise or endorse Canada
-Ethiopia connected with Organization for Economic Cooperation and Development
-Canada connected with Organization for Economic Cooperation and Development
-9483 , Organization for Economic Cooperation and Development , Motif 5:
-Ukraine Declare truce, ceasefire,Engage in negotiation,Praise or endorse,Engage in diplomatic cooperation,Consult Lithuania
-Ukraine Engage in diplomatic cooperation Organization for Economic Cooperation and Development
-Lithuania Engage in negotiation,Engage in diplomatic cooperation,Host a visit Organization for Economic Cooperation and Development
-""")
+"""

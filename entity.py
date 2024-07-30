@@ -7,7 +7,7 @@ from graph_motif_counts import get_subgraph_within_k_per_node, read_graph
 #                              rel_1_dict, rel_2_dict, G1, G2,
 #                              _1_neighbor_subgraph1_path, _2_neighbor_subgraph1_path,
 #                              _1_neighbor_subgraph2_path, _2_neighbor_subgraph2_path)
-from graph_motif_LLM import (find_triangle_or_star_motifs, find_star_motifs,
+from graph_motif import (find_triangle_or_star_motifs, find_star_motifs,
                              find_tree_motifs, find_four_cycles, find_chain_motifs,
                              find_star_triangle_motifs)
 
@@ -17,7 +17,7 @@ def get_paths():
     dataset = 'icews_yago'
     sematic_embedding_candidates_path = '{}/icews_yago/candiadtes_semantic_embed_100_3765_all add_corrected.txt'.format(save_dir)
 
-    from ReAct_API_call_Nan import dataset, sematic_embedding_candidates_path
+    from ReAct_API_call import dataset, sematic_embedding_candidates_path
 
     ent_id_1_path = '{}/{}/new_ent_ids_1'.format(save_dir, dataset)
     ent_id_2_path = '{}/{}/new_ent_ids_2_aligned'.format(save_dir, dataset)
