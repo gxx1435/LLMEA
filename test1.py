@@ -580,26 +580,33 @@ import argparse
 # print(f)
 
 # from run.utils import hit_1_10_rate
-final_answers = {}
-for i in [1, 2, 3, 4]:
-    with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t3000_100_50/most_list_code_motif_base_{}.json'.format(i), 'r') as f:
-        final_answer = json.load(f)
-        final_answers.update(final_answer)
-
-with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t3000_100_50/most_list_code_motif_base_all.json', 'w') as f:
-    json.dump(final_answers, f, indent=4)
-
-
-# dataset = 'icews_yago'
-# ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_strip'.format(dataset)
-# ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned_strip'.format(dataset)
+# final_answers = {}
+# for i in [1, 2, 3, 4]:
+#     with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_100_50/most_list_code_motif_base_{}.json'.format(i), 'r') as f:
+#         final_answer = json.load(f)
+#         final_answers.update(final_answer)
+# # for key in final_answers:
+# #     print(key, final_answers[key])
+# # exit()
 #
-# hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t3000_100_50/most_list_code_motif_base_all.json', 'hit10')
+# with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_100_50/most_list_code_motif_base_all.json', 'w') as f:
+#     json.dump(final_answers, f, indent=4)
+#
+#
+# dataset = 'icews_yago'
+# ent1_f = 'new_ent_ids_1_rs_0.3_new'
+# ent2_f = 'new_ent_ids_2_aligned_rs_0.3_new'
+#
+# hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_100_50/most_list_code_motif_base_all.json',
+#                          dataset=dataset,
+#                          ent1_f=ent1_f,
+#                          ent2_f=ent2_f,
+#                          type='hit10')
 # print(hit_rate)
 
-from run.utils import mean_reciprocal_rank
-mrr = mean_reciprocal_rank(final_answers)
-print(mrr)
+# from run.utils import mean_reciprocal_rank
+# mrr = mean_reciprocal_rank(final_answers)
+# print(mrr)
 
 # id_ent_dict = {}
 # idxs = []
@@ -764,4 +771,15 @@ print(mrr)
 # camel_case_string = "hasOccupation"
 # split_string = split_camel_case(camel_case_string)
 # print(split_string)
+
+# import os
+#
+# # 获取当前工作目录
+# current_path = os.getcwd()
+#
+# # 打印当前工作目录
+# print(f"当前路径是：{current_path}")
+
+list = ['Ne Win', 'Benin', 'Hla Min', 'Femen', 'Yen Ming', 'Nokia', 'Chea Sim', 'Soe Thein', 'Jean Ping', 'Hun Sen', 'Ma Kai', 'Aung Min', 'Serbia', 'Hla Tun', 'Bev Oda', 'Meretz', 'Spain', 'Ta Nea', 'Su Chi', 'Tea Banh']
+print(len(list))
 

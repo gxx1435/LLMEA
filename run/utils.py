@@ -280,7 +280,11 @@ def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, o
 
         if ent_right[i] in candidates:
            cnt += 1
+           candidates.remove(ent_right[i])
+           candidates.append(ent_right[i])
+
         elif ent_right[i] not in candidates:
+            candidates.remove(candidates[-1])
             candidates.append(ent_right[i])
 
         candidates_list.append(candidates)
@@ -293,15 +297,15 @@ def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, o
 
     return float(cnt / len(ent_left))
 
-def hit_1_10_rate(final_anwser_file, type='hit1'):
+def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
     """
     :param final_anwser_file:
     :param type:
     :return:
     """
-    dataset = 'icews_yago'
-    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
-    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
+
+    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent1_f)
+    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent2_f)
 
     ent_ids_1 = []
     with open(ent_id_1_path, 'r') as f:
@@ -314,23 +318,50 @@ def hit_1_10_rate(final_anwser_file, type='hit1'):
             ent_ids_2_aligned.append(line.split('\t')[1].strip())
 
     ent_ids_12_dict = dict(zip(ent_ids_1, ent_ids_2_aligned))
-    print(ent_ids_12_dict)
+
 
     hit1 = 0
     hit10 = 0
     with open(final_anwser_file, 'r') as f:
         final_answer = json.load(f)
         for key in final_answer.keys():
+            # try:
+                if type == 'hit1':
 
-            if type == 'hit1':
-                if final_answer[key] == ent_ids_12_dict[key]:
-                    hit1 += 1
-            elif type == 'hit10':
-                if final_answer[key] == -1:
-                    continue
-                if ent_ids_12_dict[key] in final_answer[key]:
-                    print(key, final_answer[key])
-                    hit10 += 1
+                    if final_answer[key] == ent_ids_12_dict[key]:
+                        hit1 += 1
+
+                elif type == 'hit10':
+                    if final_answer[key] == -1:
+                        continue
+                    word = ent_ids_12_dict[key]
+                    wordlist = final_answer[key]
+
+                    wordlist = wordlist.split(',')
+                    wordlist[0] = wordlist[0][1:]
+                    wordlist[-1] = wordlist[-1][:-1]
+                    pattern1 = r"'([^']*)'"
+                    for i, word_ in enumerate(wordlist):
+                        match = re.search(pattern1, word_)
+                        if match:
+                            word_ = match.group(1)
+                        wordlist[i] = word_
+
+                    pattern2 = r'"([^"]*)"'
+                    for i, word_ in enumerate(wordlist):
+                        match = re.search(pattern2, word_)
+                        if match:
+                            word_ = match.group(1)
+                        wordlist[i] = word_
+
+                    word = word[1:-1] if word[0] == "'" or word[0] == "\"" else word
+                    wordlist = wordlist[:10]
+
+                    if word in wordlist:
+                        print(key, len(wordlist))
+                        hit10 += 1
+            # except:
+            #     pass
 
     return float(hit1/len(final_answer)) if type == 'hit1' else float(hit10/len(final_answer))
 

@@ -1,3 +1,5 @@
+import os
+
 import networkx as nx
 from collections import Counter, defaultdict
 from run.utils import split_camel_case, standarlize_entity
@@ -11,11 +13,11 @@ from graph_motif import (find_triangle_or_star_motifs, find_star_motifs,
                              find_tree_motifs, find_four_cycles, find_chain_motifs,
                              find_star_triangle_motifs)
 
-
-save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data'
+current_dir = os.getcwd()
+save_dir = current_dir + '/data'
 def get_paths():
     dataset = 'icews_yago'
-    sematic_embedding_candidates_path = '{}/icews_yago/candiadtes_semantic_embed_100_3765_all add_corrected.txt'.format(save_dir)
+    sematic_embedding_candidates_path = '{}/icews_yago/candiadtes_semantic_embed_20_3765_all add_corrected.txt'.format(save_dir)
 
     from ReAct_API_call import dataset, sematic_embedding_candidates_path
 
@@ -175,9 +177,9 @@ class Entity:
         :return:
         """
         if self.entity_type == 'target':
-            newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_1'.format(dataset)
+            newgraph_path = current_dir + '/data/{}/newgraph_1'.format(dataset)
         elif self.entity_type == 'candidate':
-            newgraph_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/newgraph_2'.format(dataset)
+            newgraph_path = current_dir + '/data/{}/newgraph_2'.format(dataset)
 
         graph_edges_kg = read_graph(newgraph_path)
         kg = nx.Graph()
@@ -686,11 +688,11 @@ class Entity:
 
 def main():
 
-    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1'.format(dataset)
-    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_2_aligned'.format(dataset)
+    ent_id_1_path = current_dir + '/data/{}/new_ent_ids_1'.format(dataset)
+    ent_id_2_path = current_dir + '/data/{}/new_ent_ids_2_aligned'.format(dataset)
 
     entity_type = 'candidate'
-    entity_type = 'target'
+    # entity_type = 'target'
 
     ent_id_dict = {}
     if entity_type == ('target'):
@@ -699,13 +701,13 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Ne Win"""
+    entity = """Morocco"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
 
-    _, _, prompts = entity.get_baseline_prompts()
-    # prompts = entity.get_only_triangle_information()
+    # _, _, prompts = entity.get_baseline_prompts()
+    prompts = entity.get_only_triangle_information()
 
     print(prompts)
 

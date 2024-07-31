@@ -7,9 +7,8 @@ import numpy as np
 import argparse
 from run.utils import get_ent_id_dict, get_id_entity_dict
 # from API_bank_multi import collect_response
-from graph_motif_ReAct import (motif_ReAct_example_prompt_cn100_cn50, motif_ReAct_example_prompt_cn100_cn40,
-                               motif_ReAct_example_prompt_cn100_cn30, motif_ReAct_example_prompt_cn100_cn20,
-                               motif_ReAct_example_prompt_cn100_cn10)
+from graph_motif_ReAct_selecting import *
+from graph_motif_ReAct_reranking import *
 
 from graph_motif_code_generated import code_motif_prompts_generate
 
@@ -478,8 +477,8 @@ parser.add_argument('-t', '--threshold', type=int, default=300, help='阈值')
 
 parser.add_argument('-r', '--react_file', type=str, default='graph_motif_ReAct_v4_100_50candidates_tmp2', help='ReAct File')
 
-parser.add_argument('-s', '--sematic_embedding_candidates_path', default='/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_yago/candiadtes_semantic_embed_100_3765_all add_corrected.txt',
-                                                                               type=str, help='semantic cadidate path')
+parser.add_argument('-s', '--sematic_embedding_candidates_path', type=str, help='semantic cadidate path')
+
 parser.add_argument('-cn1', '--candidate_num_1', type=int, help='candidate number of target entity in start')
 
 parser.add_argument('-cn2', '--candidate_num_2', type=int, help='candidate number of target entity in the answer')
@@ -524,21 +523,38 @@ elif args.candidate_num_1 == 100 and args.candidate_num_2 == 10:
 
     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn10
 
+elif args.candidate_num_1 == 20 and args.candidate_num_2 == 20:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn20_cn20
+
+elif args.candidate_num_1 == 50 and args.candidate_num_2 == 50:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50
+
+elif args.candidate_num_1 == 100 and args.candidate_num_2 == 100:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn100
+
+elif args.candidate_num_1 == 200 and args.candidate_num_2 == 200:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn200_cn200
+
 sematic_embedding_candidates_path = args.sematic_embedding_candidates_path
 candidate_num_1 = str(args.candidate_num_1)
 candifate_num_2 = str(args.candidate_num_2)
 ent_ids_1 = args.ent_ids_1
 ent_ids_2 = args.ent_ids_2
+current_path = os.getcwd()
 
-ent_ids_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent_ids_1)
-ent_ids_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent_ids_2)
+ent_ids_1_path = current_path + '/data/{}/{}'.format(dataset, ent_ids_1)
+ent_ids_2_path = current_path + '/data/{}/{}'.format(dataset, ent_ids_2)
 
 save_dir = dataset+"_"+LLM_type+"_"+'t'+str(threshold)+'_'+candidate_num_1+"_"+candifate_num_2
 
 if __name__ == '__main__':
 
-    if not os.path.exists('output/{}'.format(save_dir)):
-        os.mkdir('output/{}'.format(save_dir))
+    if not os.path.exists(current_path+ '/output/{}'.format(save_dir)):
+        os.mkdir(current_path+'/output/{}'.format(save_dir))
 
     if info_type == 'baseline':
         idx_prompt_dict = baseline()
