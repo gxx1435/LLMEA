@@ -405,7 +405,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                 elif info_type == 'code_motif_base':
 
                     """To do"""
-                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=0，info_type=info_type)
+                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=0, info_type=info_type)
                     print(text_motif_info)
                     code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
                     code_motif_prompts.update({entity_id: code_motif_prompt})
