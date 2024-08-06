@@ -17,7 +17,7 @@ current_dir = os.getcwd()
 save_dir = current_dir + '/data'
 def get_paths():
     dataset = 'icews_yago'
-    sematic_embedding_candidates_path = '{}/icews_yago/candiadtes_semantic_embed_20_3765_all add_corrected.txt'.format(save_dir)
+    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_10_3765_all add_corrected.txt'.format(save_dir, dataset)
 
     from ReAct_API_call import dataset, sematic_embedding_candidates_path
 
@@ -422,7 +422,7 @@ class Entity:
         #
         # return [subgraph]
 
-    def get_motifs_promts(self, node, motifs):
+    def get_motifs_promts(self, node, motifs, if_triple=0, info_type='1_neighbor'):
         """
 
         :param motifs:
@@ -435,19 +435,58 @@ class Entity:
             # if node in subgraph.nodes:
                 # try:
                 if self.entity_type == 'target':
-                    motifs_prompts += ' , '.join([node, standarlize_entity(id_ent_dict1[node]), f"Motif {idx + 1}:\n"])
+
+                    if info_type == '1_neighbor':
+
+                        motifs_prompts += 'Neighbor of {}: '.format(standarlize_entity(id_ent_dict1[node]))
+                    else:
+                        if if_triple:
+                            motifs_prompts += ' , '.join([standarlize_entity(id_ent_dict1[node]), f"Motif {idx + 1}"])
+                        else:
+                            motifs_prompts += ' , '.join([standarlize_entity(id_ent_dict1[node]), f"Motif {idx + 1}:\n"])
+
                 elif self.entity_type == 'candidate':
-                    motifs_prompts += ' , '.join([node, standarlize_entity(id_ent_dict2[node]), f"Motif {idx + 1}:\n"])
+
+                    if info_type == '1_neighbor':
+
+                        motifs_prompts += 'Neighbor of {}: '.format(standarlize_entity(id_ent_dict2[node]))
+                    else:
+                        if if_triple:
+                            motifs_prompts += ' , '.join([standarlize_entity(id_ent_dict2[node]), f"Motif {idx + 1}:"])
+                        else:
+                            motifs_prompts += ' , '.join([standarlize_entity(id_ent_dict2[node]), f"Motif {idx + 1}:\n"])
+
                 # nodes = ','.join([id_ent_dict[idx] for idx in subgraph.nodes()])
                 # edges = ','.join(['(' + id_ent_dict[i] + ',' + id_ent_dict[j] + ')' for i, j in subgraph.edges()])
+                triples = []
                 for i, j in subgraph.edges():
 
                     if self.entity_type == 'target':
+
                         relationship = self.get_relation(G1, i, j)
-                        motifs_prompts += standarlize_entity(id_ent_dict1[i]) + relationship + standarlize_entity(id_ent_dict1[j]) + '\n'
+                        if if_triple:
+                            triples.append(
+                                "(" + standarlize_entity(
+                                    id_ent_dict1[i]) + "," + relationship + "," + standarlize_entity(
+                                    id_ent_dict1[j]) + ")"
+                            )
+                        else:
+                            motifs_prompts += standarlize_entity(id_ent_dict1[i]) + relationship + standarlize_entity(id_ent_dict1[j]) + '\n'
+
                     elif self.entity_type == 'candidate':
+
                         relationship = self.get_relation(G2, i, j)
-                        motifs_prompts += standarlize_entity(id_ent_dict2[i]) + relationship + standarlize_entity(id_ent_dict2[j]) + '\n'
+                        if if_triple:
+                            triples.append(
+                                "("+standarlize_entity(
+                                    id_ent_dict2[i]) + "," + relationship + "," + standarlize_entity(
+                                    id_ent_dict2[j])+")"
+                            )
+                        else:
+                            motifs_prompts += standarlize_entity(id_ent_dict2[i]) + relationship + standarlize_entity(id_ent_dict2[j]) + '\n'
+
+                if if_triple:
+                    motifs_prompts += '['+','.join(triples)+']'
 
                 # motifs_prompts += nodes + '\n\n'
                 # motifs_prompts += edges + '\n\n'
@@ -573,6 +612,8 @@ class Entity:
                 1. Please encapsulate the answer within <output> </output>.
                 2. Please note the forms with and without underscores for entities.
                 3. Please focus on entities with a small edit distance from the original entity.
+                4. Please rerank the candidate list and put the answer in the first place of candidate list.
+                5. the output format is: the rerank candidate lists is <most>[]</most> and the answer is <output></output>.
 
                 === Target Entities Info starts: ===
                 Entity Name: {}
@@ -587,7 +628,7 @@ class Entity:
                 Target Entity: {}
 
                 ---output format: ----
-                <output> xxxx </output>
+                The rerank candidate list is <most></most> and the answer is <output> xxxx </output>
 
                 """.format(self.entity_name,
                            self.get_candidates(self.entity_name),
@@ -595,14 +636,14 @@ class Entity:
 
         return self.entity_name, self.get_candidates(self.entity_name), prompts
 
-    def get_only_triangle_information(self):
+    def get_only_triangle_information(self, if_triple=0, info_type=''):
         """
         :return:
         """
 
         triangle_motifs = self.get_triangle_motif(self.entity_id)
 
-        triangle_motifs_prompts = self.get_motifs_promts(self.entity_id, triangle_motifs)
+        triangle_motifs_prompts = self.get_motifs_promts(self.entity_id, triangle_motifs, if_triple=if_triple, info_type=info_type)
 
         return triangle_motifs_prompts
 
@@ -617,13 +658,13 @@ class Entity:
 
         return star_motifs_prompts
 
-    def get_only_1_neighbor_information(self):
+    def get_only_1_neighbor_information(self, if_triple=0, info_type=''):
         """
         :return:
         """
         star_motifs = self.get_star_motif(self.entity_id)
 
-        star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
+        star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs, if_triple, info_type)
 
         return star_motifs_prompts
 
@@ -667,13 +708,15 @@ class Entity:
 
         return star_traiagles_prompts
 
-    def get_dynamic_motifs_information(self):
+    def get_dynamic_motifs_information(self, if_triple=0, info_type=''):
         """
         :return:
         """
+
         motifs = self.get_most_representative_motifs(self.entity_id)
 
-        prompts = self.get_motifs_promts(self.entity_id, motifs)
+        prompts = self.get_motifs_promts(self.entity_id, motifs, if_triple=if_triple, info_type=info_type)
+
 
         return prompts
 
@@ -701,7 +744,7 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Morocco"""
+    entity = """Louisa Hanoune"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)

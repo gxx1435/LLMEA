@@ -61,7 +61,10 @@ def baseline():
 
         idx_prompt_dict.update({idx: prompt})
 
-    with open('output/{}/idx_prompt_dict_baseline.json'.format(save_dir), 'w') as f:
+    if not os.path.exists('output/{}/baseline'.format(save_dir)):
+        os.mkdir('output/{}/baseline'.format(save_dir))
+
+    with open('output/{}/baseline/idx_prompt_dict_baseline.json'.format(save_dir), 'w') as f:
         json.dump(idx_prompt_dict, f, indent=4)
 
     return idx_prompt_dict
@@ -81,11 +84,11 @@ def get_baseline_responses(idx_prompt_dict):
         output = s[start_idx+8: end_idx]
         return output
 
-    responses = [get_output(response) for response in responses]
+    responses = [response for response in responses]
 
     responses_dict = dict(zip(idx_prompt_dict.keys(), responses))
 
-    with open('output/{}/idx_prompt_dict_baseline_responses.json'.format(save_dir), 'w') as f:
+    with open('output/{}/baseline/idx_prompt_dict_baseline_responses.json'.format(save_dir), 'w') as f:
         json.dump(responses_dict, f, indent=4)
 
     return
@@ -375,17 +378,19 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
                 if info_type == '1_neighbor':
 
-                    _1_neighbor_info = request_entity.get_only_1_neighbor_information()
+                    _1_neighbor_info = request_entity.get_only_1_neighbor_information(if_triple=1, info_type=info_type)
+                    print(_1_neighbor_info)
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + _1_neighbor_info})
 
                 elif info_type == 'text_motif_lite':
 
-                    text_motif_info = request_entity.get_only_triangle_information()
+                    text_motif_info = request_entity.get_only_triangle_information(if_triple=1, info_type=info_type)
+                    print(text_motif_info)
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + text_motif_info})
 
                 elif info_type == 'code_motif_lite':
 
-                    text_motif_info = request_entity.get_only_triangle_information()
+                    text_motif_info = request_entity.get_only_triangle_information(if_triple=0, info_type=info_type)
                     print(text_motif_info)
                     code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
                     code_motif_prompts.update({entity_id: code_motif_prompt})
@@ -393,13 +398,14 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                 elif info_type == 'text_motif_base':
 
                     """To do"""
-                    text_motif_info = request_entity.get_dynamic_motifs_information()
+                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=1, info_type=info_type)
+                    print(text_motif_info)
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + text_motif_info})
 
                 elif info_type == 'code_motif_base':
 
                     """To do"""
-                    text_motif_info = request_entity.get_dynamic_motifs_information()
+                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=0，info_type=info_type)
                     print(text_motif_info)
                     code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
                     code_motif_prompts.update({entity_id: code_motif_prompt})
@@ -523,6 +529,10 @@ elif args.candidate_num_1 == 100 and args.candidate_num_2 == 10:
 
     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn10
 
+elif args.candidate_num_1 == 10 and args.candidate_num_2 == 10:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn10_cn10
+
 elif args.candidate_num_1 == 20 and args.candidate_num_2 == 20:
 
     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn20_cn20
@@ -530,6 +540,10 @@ elif args.candidate_num_1 == 20 and args.candidate_num_2 == 20:
 elif args.candidate_num_1 == 50 and args.candidate_num_2 == 50:
 
     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50
+
+elif args.candidate_num_1 == 70 and args.candidate_num_2 == 70:
+
+    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn70_cn70
 
 elif args.candidate_num_1 == 100 and args.candidate_num_2 == 100:
 
@@ -540,6 +554,11 @@ elif args.candidate_num_1 == 200 and args.candidate_num_2 == 200:
     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn200_cn200
 
 sematic_embedding_candidates_path = args.sematic_embedding_candidates_path
+if 'orginal_ranking' in sematic_embedding_candidates_path:
+    first_step_setting = 'original'
+elif 'put_correct_ans_last' in sematic_embedding_candidates_path:
+    first_step_setting = 'corrected'
+
 candidate_num_1 = str(args.candidate_num_1)
 candifate_num_2 = str(args.candidate_num_2)
 ent_ids_1 = args.ent_ids_1
@@ -549,7 +568,7 @@ current_path = os.getcwd()
 ent_ids_1_path = current_path + '/data/{}/{}'.format(dataset, ent_ids_1)
 ent_ids_2_path = current_path + '/data/{}/{}'.format(dataset, ent_ids_2)
 
-save_dir = dataset+"_"+LLM_type+"_"+'t'+str(threshold)+'_'+candidate_num_1+"_"+candifate_num_2
+save_dir = dataset+"_"+LLM_type+"_"+'t'+str(threshold)+'_'+candidate_num_1+"_"+candifate_num_2+'_' + first_step_setting
 
 if __name__ == '__main__':
 

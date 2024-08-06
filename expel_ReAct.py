@@ -1,73 +1,8 @@
-import argparse
-import json
-import os
-import random
-from entity import Entity
-from run.utils import get_ent_id_dict
-# from API_bank import get_gpt_4_turbo
+"""
+2. Generate only 'Thought' and 'Act' steps, and wait for the User to generate 'Observation'.
+"""
 
-def split_train_test_dataset():
-    """
-    :return:
-    """
-    dataset_file = ent_id_1_path
-    entity_list = []
-    with open(dataset_file) as f:
-        for line in f.readlines()[:threshold]:
-            entity = line.split('\t')[1].strip()
-            entity_list.append(entity)
-
-    random.seed(7)
-
-    sample_train_entity = random.sample(entity_list, 500)
-    sample_test_entity = list(set(entity_list) - set(sample_train_entity))
-
-    return sample_train_entity, sample_test_entity
-
-def get_gpt_4_turbo(messages_input, max_tokens=2000):
-
-    return "xxxxxx"
-
-def get_entity_map():
-    entity1_list = []
-    with open(ent_id_1_path) as f:
-        for i, line in enumerate(f.readlines()):
-            if i == threshold: break
-            entity1_list.append(line.split('\t')[1].strip())
-
-    entity2_list = []
-    with open(ent_id_2_path) as f:
-        for i, line in enumerate(f.readlines()):
-            if i == threshold: break
-            entity2_list.append(line.split('\t')[1].strip())
-
-    entity1_map_entity2 = dict(zip(entity1_list, entity2_list))
-    new_entity_map = {}
-
-    sample_train_entity, _ = split_train_test_dataset()
-    for entity in sample_train_entity:
-        new_entity_map.update({entity: entity1_map_entity2[entity]})
-
-    # print(new_entity_map)
-    # print(len(new_entity_map))
-
-    return new_entity_map
-
-def expel():
-
-    """
-    :return:
-    """
-    def find_rules(s):
-        start_idx = s.find('<rule>')
-        end_idx = s.find("</rule>")
-        if start_idx != -1:
-            return s[start_idx + 6: end_idx]
-        return -1
-
-    rules = []
-    prompts = """
-    
+prompts = """
     You are a programmer. You can request useful entities from a candidate list but must avoid requesting irrelevant entities. Failure to adhere to this will result in termination. Your task is to solve a question-answering problem using interleaving Thought, Action, and Observation steps.
     
     Thought: Reason about the current situation.
@@ -75,7 +10,9 @@ def expel():
     Request[entity] - Requests the entity context information from Knowledge Graphs. The context information may be given in code descriptions. You can only request one entity per turn and it must be from the candidate list.
     Terminate[answer] - Returns the answer and finishes the task.
     Example
-    [USER (Boss)]: Give me the most aligned entity of the target entity from the candidates entity list. If there is the same entity, please select it directly. The target entity is: 'Salauddin'
+    [USER (Boss)]: Give me the most aligned entity of the target entity from the candidates entity list. If there is the same entity, please select it directly. 
+    The target entity is: 
+    'Salauddin'
     
     The Candidate entities list is:
     ['Salahuddin of Selangor', 'Slovenia', 'Riad Salamé', 'Hla Tun', 'Qadri Jamil', 'Sweden', 'Palau', 'Spain', 'Sheikh Hasina', 'Hla Min', 'Malaysia', 'Mohamed Nasheed', 'Ahmed Chalabi', 'Nabil Shaath', 'Sirindhorn', 'Japan', 'Abdo Hussameddin', 'Macky Sall', 'Salam Fayyad', 'Malawi', 'Mourad Dhina', 'Jawed Ludin', 'Macau', 'Abdulla Kurd']
@@ -164,63 +101,27 @@ def expel():
     New Task
     You are performing an entity alignment task.
 
-    [USER (Boss)]: Please sort the candidate list according to similarity to the target entity and select the most aligned entity. You have at most 4 turns to finish the task. If there is the same entity in the candidate list as the target entity, please select it directly. The answer format is: The most similar 50 entities are: <most>[]</most> and Terminate[answer]. The target entity is:
-    The target entity is {}.
+    [USER (Boss)]: Please sort the candidate list according to similarity to the target entity and select the most aligned entity. You have at most 4 turns to finish the task. If there is the same entity in the candidate list as the target entity, please select it directly. The answer format is: Terminate[answer]. The target entity is:
+    The target entity is:
+    {}
     
-    The candidate entities list is:{}
+    The aligned entity is:
+    {}
     
-    The aligned entity is {}.
+    The candidate entities list is: 
+    {}
     
     Notes:
     1. Please generate the step-by-step thought process leading to the final answer.
     3. You must use Code Motif in the reasoning path. Refer to the example provided.
     4. Please generate some rules on how to write Code Motifs in <rule></rule> tags in the final turn.
-    """
-    entity_map = get_entity_map()
-    ent_id_dict = get_ent_id_dict(ent_id_1_path)
+    
+    """.format('Party of the Revolution',
+                'Chama Cha Mapinduzi',
+               ['Party of Regions', 'Rally of the Republicans', 'State of Law Coalition', 'Party of Democratic Action',
+                'Christine Boutin', 'Carlos De León', 'Park Taejoon', 'Beatrix of the Netherlands',
+                'Sprint Corporation', 'Daily Nation', 'Daily Nation', 'Oracle Corporation', 'Friends of the Earth',
+                'All Basotho Convention', 'Alliance for the Republic', 'Bank of Spain', 'Raymond Benjamin',
+                'Margaret Wilson', 'Marcos Valério', 'Bank of Mexico', 'Chama Cha Mapinduzi'],
 
-    for target_entity in entity_map.keys():
-        aligned_entity = entity_map[target_entity]
-
-        entity_id = ent_id_dict[target_entity]
-        entity = Entity(target_entity, entity_id, 'target')
-        _, cand_list, _ = entity.get_baseline_prompts()
-
-        prompts = prompts.format(target_entity, cand_list, aligned_entity)
-        print(prompts)
-
-        msg = prompts
-        messages_input = [
-            {
-                "role": "user",
-                "content": msg,
-            }
-        ]
-        LLM_response = get_gpt_4_turbo(messages_input, max_tokens=2000)
-
-        rule = find_rules(LLM_response)
-        rules.append(rule)
-
-    with open(save_dir + '/output/rules.txt', 'w') as f:
-        json.dump(rules, f, indent=4)
-
-
-
-parser = argparse.ArgumentParser(description="It's a test")
-
-parser.add_argument('-d', '--dataset', type=str, help='dataset name')
-parser.add_argument('-t', '--threshold', type=int, default=3000, help='dataset name')
-
-args = parser.parse_args()
-
-dataset = args.dataset
-threshold = args.threshold
-
-save_dir = os.getcwd()
-ent_id_1_path = save_dir +'/data/{}/new_ent_ids_1_rs_0.3_new'.format(dataset)
-ent_id_2_path = save_dir +'/data/{}/new_ent_ids_2_aligned_rs_0.3_new'.format(dataset)
-
-if __name__ == '__main__':
-
-
-    expel()
+               )

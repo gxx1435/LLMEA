@@ -280,15 +280,15 @@ def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, o
 
         if ent_right[i] in candidates:
            cnt += 1
-           candidates.remove(ent_right[i])
-           candidates.append(ent_right[i])
-
-        elif ent_right[i] not in candidates:
-            candidates.remove(candidates[-1])
-            candidates.append(ent_right[i])
+        #    candidates.remove(ent_right[i])
+        #    candidates.append(ent_right[i])
+        #
+        # elif ent_right[i] not in candidates:
+        #     candidates.remove(candidates[-1])
+        #     candidates.append(ent_right[i])
 
         candidates_list.append(candidates)
-        print(ent_right[i], candidates, '\n')
+        print(ent_right[i], len(candidates), '\n')
 
     with open(out_file, 'w') as f:
         for i in range(len(ent_left)):
@@ -296,6 +296,39 @@ def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, o
 
 
     return float(cnt / len(ent_left))
+
+def baseline_hit_rate(final_answer_file, dataset, ent1_f,ent2_f, type='hit1'):
+    ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent1_f)
+    ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent2_f)
+
+    idx_ent1_dict = {}
+    with open(ent_id_1_path) as f:
+        for line in f.readlines():
+            idx = line.split('\t')[0]
+            ent = line.split('\t')[1].strip()
+            idx_ent1_dict.update({idx: ent})
+
+    ent_ids_1 = []
+    with open(ent_id_1_path, 'r') as f:
+        for line in f.readlines():
+            ent_ids_1.append(line.split('\t')[1].strip())
+
+    ent_ids_2_aligned = []
+    with open(ent_id_2_path, 'r') as f:
+        for line in f.readlines():
+            ent_ids_2_aligned.append(line.split('\t')[1].strip())
+
+    ent_ids_12_dict = dict(zip(ent_ids_1, ent_ids_2_aligned))
+
+    with open(final_answer_file) as f:
+        final_answer = json.load(f)
+
+    cnt = 0
+    for key in final_answer.keys():
+        if final_answer[key].strip() == ent_ids_12_dict[idx_ent1_dict[key]].strip():
+            cnt += 1
+
+    return float(cnt/len(final_answer))
 
 def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
     """

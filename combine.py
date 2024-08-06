@@ -45,7 +45,7 @@ def get_performance_of_semantic_embedding_similarity(
     # entity_right = get_entity_names(entity_ids_2_path, thres_hold)
 
 
-    n_cand = 200
+    n_cand = 10
     method = 'all add'
     candidates_idx_list, ent_left, ent_right = get_candidates(matrix1,
                                                               matrix2,
@@ -68,7 +68,7 @@ def get_performance_of_semantic_embedding_similarity(
     #                 f.write(cand_list[0] + '\n')
 
 
-    out_file = candidates_save_path.split('.')[0] + '_put_correct_ans_last.txt'
+    out_file = candidates_save_path.split('.')[0] + '_orginal_ranking.txt'
     print(out_file)
     print("语义向量的覆盖率为：\n", coverage_eval(candidates_idx_list,
                                                  ent_left,
