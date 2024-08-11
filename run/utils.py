@@ -298,6 +298,26 @@ def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, o
     return float(cnt / len(ent_left))
 
 def baseline_hit_rate(final_answer_file, dataset, ent1_f,ent2_f, type='hit1'):
+    def get_output(s):
+        start_idx = s.find('<output>')
+        end_idx = s.find('</output>')
+        output = s[start_idx + 8: end_idx]
+        return output
+
+    def find_most_list(s):
+        # start_idx = s.find('<most>')
+        # end_idx = s.find('</msot>')
+        # return s[start_idx+6: end_idx]
+
+        # 正则表达式模式，匹配 <most> 和 </most> 标签之间的内容
+        pattern = r'<most>(.*?)</most>'
+        # 使用 re.findall() 提取所有匹配的内容
+        matches = re.search(pattern, s)
+        if matches:
+            return matches.group(1)
+
+        return -1
+
     ent_id_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent1_f)
     ent_id_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/{}'.format(dataset, ent2_f)
 
@@ -325,8 +345,21 @@ def baseline_hit_rate(final_answer_file, dataset, ent1_f,ent2_f, type='hit1'):
 
     cnt = 0
     for key in final_answer.keys():
-        if final_answer[key].strip() == ent_ids_12_dict[idx_ent1_dict[key]].strip():
+        if ent_ids_12_dict[key] == final_answer[key]:
             cnt += 1
+
+    # cnt = 0
+    # for key in final_answer.keys():
+    #     ans = get_output(final_answer[key])
+    #
+    #     wordlist = find_most_list(final_answer[key])
+    #     wordlist = wordlist.split(',')
+    #     wordlist[0] = wordlist[0][1:]
+    #     wordlist[-1] = wordlist[-1][:-1]
+    #     target_entity = idx_ent1_dict[key]
+    #
+    #     if ent_ids_12_dict[target_entity] == ans:
+    #         cnt += 1
 
     return float(cnt/len(final_answer))
 
@@ -355,12 +388,23 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
 
     hit1 = 0
     hit10 = 0
+    no_answer = 0
     with open(final_anwser_file, 'r') as f:
         final_answer = json.load(f)
         for key in final_answer.keys():
             # try:
                 if type == 'hit1':
 
+                    pattern = r'"([^"]*)"'
+                    if final_answer[key] == -1:
+                        no_answer += 1
+                        continue
+                    match = re.search(pattern, final_answer[key])
+                    if match:
+                        final_answer[key] = match.group(1)
+
+                    if final_answer[key] != ent_ids_12_dict[key]:
+                        print(key, '\t', final_answer[key], '\t', ent_ids_12_dict[key])
                     if final_answer[key] == ent_ids_12_dict[key]:
                         hit1 += 1
 
@@ -395,6 +439,7 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
                         hit10 += 1
             # except:
             #     pass
+    print("no answer rate:{}".format(float(no_answer/len(final_answer))))
 
     return float(hit1/len(final_answer)) if type == 'hit1' else float(hit10/len(final_answer))
 

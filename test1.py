@@ -578,18 +578,20 @@
 # # random_sample = 0.3
 # # f = "new_ent_ids_1_random_sample_{}".format(random_sample)
 # # print(f)
+
 import json
 from run.utils import hit_1_10_rate, baseline_hit_rate
 final_answers = {}
-for i in [1, 2, 3, 4]:
-    with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_50_50_original/most_list_text_motif_base_{}.json'.format(i), 'r') as f:
+for i in [2,3,4]:
+    with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_corrected_5motif_v2/final_answer_text_motif_lite_{}.json'.format(i), 'r') as f:
         final_answer = json.load(f)
         final_answers.update(final_answer)
+print(len(final_answers))
 # for key in final_answers:
 #     print(key, final_answers[key])
 # exit()
 
-with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_50_50_original/most_list_text_motif_base_all.json', 'w') as f:
+with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_corrected_5motif_v2/final_answer_text_motif_lite_recall_all.json', 'w') as f:
     json.dump(final_answers, f, indent=4)
 
 
@@ -597,19 +599,36 @@ dataset = 'icews_yago'
 ent1_f = 'new_ent_ids_1_rs_0.3_new'
 ent2_f = 'new_ent_ids_2_aligned_rs_0.3_new'
 
-# baseline_response = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_50_50_corrected/idx_prompt_dict_baseline_responses.json'
+# baseline_response = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_50_50_corrected/baseline/idx_prompt_dict_baseline_final_ans.json'
 # hit_rate = baseline_hit_rate(baseline_response,dataset, ent1_f, ent2_f, 'hit1')
 
-hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_50_50_original/most_list_text_motif_base_all.json',
+hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_corrected_5motif_v2/final_answer_text_motif_lite_recall_all.json',
                          dataset=dataset,
                          ent1_f=ent1_f,
                          ent2_f=ent2_f,
-                         type='hit10')
+                         type='hit1')
 print(hit_rate)
 
 # from run.utils import mean_reciprocal_rank
 # mrr = mean_reciprocal_rank(final_answers)
 # print(mrr)
+
+
+# import re
+# def find_most_list_llama(text):
+#     match = re.search(r"Most\[(.*?)\]", text)
+#
+#     if match:
+#         extracted_list = match.group(1).encode().decode('unicode_escape')
+#         extracted_list = eval('['+extracted_list+']')
+#
+#         return extracted_list
+#     else:
+#         return -1
+#
+# text = "I can find a direct match for the target entity \"Keshari Nath Tripathi\" in the candidate list.\n\nAct 1: The most similar 10 entities are: Most['Keshari Nath Tripathi', 'Hridayesh Tripathi', 'Bhrigu Nath Singh', 'Kamal Nath', 'Kehar Singh', 'Dina Nath Sharma', 'Kastriot Islami', 'Nguy\u1ec5n Minh Tri\u1ebft', 'Kukrit Pramoj', 'Kausea Natano'] and Terminate['Keshari Nath Tripathi'].",
+# print(find_most_list_llama(str(text)))
+
 
 # id_ent_dict = {}
 # idxs = []

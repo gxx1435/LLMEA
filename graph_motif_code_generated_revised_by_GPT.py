@@ -31,6 +31,12 @@ Ne Win Threaten,Express intent to meet or negotiate Military (Myanmar)
 Ne Win connected with Kyaw Win
 Ne Win Threaten,Express intent to meet or negotiate Military (Myanmar)
 Kyaw Win Express intent to meet or negotiate,fight with artillery and tanks Military (Myanmar)
+
+"""
+"""[(Vladimir Putin, makes a visit, expresses intent to meet or negotiate, and consults with, Yury Nikolayevich Baluyevsky), (Yury Nikolayevich Baluyevsky, holds a visit, with Citizen (Russia)),(Citizen (Russia), is connected with, Vladimir Putin)]
+
+"""
+"""[(Vladimir Putin, makes a visit,Yury Nikolayevich Baluyevsky),( Vladimir Putin, expresses intent to meet or negotiate,Yury Nikolayevich Baluyevsky),(Vladimir Putin, and consults with , Yury Nikolayevich Baluyevsky), (Yury Nikolayevich Baluyevsky, holds a visit, with Citizen (Russia)),(Citizen (Russia), is connected with, Vladimir Putin)]
 """
 
 code_motif_prompts_generate = """
@@ -45,7 +51,6 @@ As a good Computer Science student good at coding, your task is to describe the 
   6. Complex Relationships: For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
   7. Return Values: Return all the nodes involved in the motif as part of the function’s result. Ensure that the function returns the state or outcome after applying the relationships.
   8. Please note the += relationship which represents multiple relationship between two nodes. It means two nodes have more than 1 type of relationship.
-  9. A definition function represents a motif.
   
 Please refer to the example below and handle a new task! 
 
@@ -107,4 +112,13 @@ Given triangle Motif information, generate its Code description.
 
 **Triangle Motif information:**
 {}
-"""
+
+""".format(
+    """
+    - Target entity:Salauddin;Motif 1: [(Citizen (India), connected with ,Salauddin),(Citizen (India), Use unconventional violence,Express intent to meet or negotiate,Criticize or denounce,Make pessimistic comment,Cooperate economically ,Bangladesh),(Salauddin, Deny responsibility ,Bangladesh)]
+    - Target entity:Salauddin;Motif 2: [(Salauddin, connected with ,Police (India)),(Salauddin, Deny responsibility ,Bangladesh),(Police (India), Express intent to meet or negotiate,Make statement,Use conventional military force,Criticize or denounce,Consult ,Bangladesh)]
+    - Target entity:Salauddin;Motif 3: [(Salauddin, connected with ,Member of the Judiciary (Bangladesh)),(Salauddin, Consult ,Ali Ahsan Mohammad Mujahid),(Member of the Judiciary (Bangladesh), Reject ,Ali Ahsan Mohammad Mujahid)]
+    - Target entity:Salauddin;Motif 4: [(Salauddin, connected with ,Abdul Hamid),(Salauddin, Deny responsibility ,Bangladesh),(Abdul Hamid, Make an appeal or request,Make statement,Grant diplomatic recognition,Make a visit,Make optimistic comment ,Bangladesh)]
+    - Target entity:Salauddin;Motif 5: [(Salauddin, Consult ,Head of Government (Qatar)),(Salauddin, Deny responsibility ,Bangladesh),(Head of Government (Qatar), Make a visit ,Bangladesh)]
+    """
+)

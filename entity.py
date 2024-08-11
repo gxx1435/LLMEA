@@ -17,7 +17,7 @@ current_dir = os.getcwd()
 save_dir = current_dir + '/data'
 def get_paths():
     dataset = 'icews_yago'
-    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_10_3765_all add_corrected.txt'.format(save_dir, dataset)
+    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_50_5041_all add_put_correct_ans_last.txt'.format(save_dir, dataset)
 
     from ReAct_API_call import dataset, sematic_embedding_candidates_path
 
@@ -217,7 +217,7 @@ class Entity:
 
         return G
 
-    def get_triangle_motif(self, node):
+    def get_triangle_motif(self, node, top_n=5):
         """
 
         :param node:
@@ -226,7 +226,7 @@ class Entity:
 
         G = self.get_subgraph_of_node(node, 2)
 
-        motifs = find_triangle_or_star_motifs(G, node)
+        motifs = find_triangle_or_star_motifs(G, node, top_n=top_n)
 
         return motifs
 
@@ -287,7 +287,7 @@ class Entity:
 
         return motifs
 
-    def get_most_representative_motifs(self, node):
+    def get_most_representative_motifs(self, node, top_n=5):
         """
         :return:
         """
@@ -389,15 +389,15 @@ class Entity:
             f"The most representative motif is: {most_frequent_motif} with count: {motif_frequencies[most_frequent_motif]}")
 
         if most_frequent_motif == "triangle":
-            motifs = find_triangle_or_star_motifs(G, node)
+            motifs = find_triangle_or_star_motifs(G, node, top_n)
         elif most_frequent_motif == "star":
-            motifs = find_triangle_or_star_motifs(G, node)
+            motifs = find_triangle_or_star_motifs(G, node, top_n)
         elif most_frequent_motif == "quadrilateral":
-            motifs = find_four_cycles(G, node)
+            motifs = find_four_cycles(G, node, top_n)
         elif most_frequent_motif == 'chain':
-            motifs = find_chain_motifs(G, node)
+            motifs = find_chain_motifs(G, node, top_n)
         elif most_frequent_motif == 'star_triangle':
-            motifs = find_star_triangle_motifs(G, node)
+            motifs = find_star_triangle_motifs(G, node, top_n)
 
         return motifs
 
@@ -441,7 +441,7 @@ class Entity:
                         motifs_prompts += 'Neighbor of {}: '.format(standarlize_entity(id_ent_dict1[node]))
                     else:
                         if if_triple:
-                            motifs_prompts += ' , '.join([standarlize_entity(id_ent_dict1[node]), f"Motif {idx + 1}"])
+                            motifs_prompts += '- Target entity:'+ standarlize_entity(id_ent_dict1[node]) + ';' + f"Motif {idx + 1}: "
                         else:
                             motifs_prompts += ' , '.join([standarlize_entity(id_ent_dict1[node]), f"Motif {idx + 1}:\n"])
 
@@ -452,7 +452,7 @@ class Entity:
                         motifs_prompts += 'Neighbor of {}: '.format(standarlize_entity(id_ent_dict2[node]))
                     else:
                         if if_triple:
-                            motifs_prompts += ' , '.join([standarlize_entity(id_ent_dict2[node]), f"Motif {idx + 1}:"])
+                            motifs_prompts += '- Target entity: ' + standarlize_entity(id_ent_dict2[node]) + '; '+ f"Motif {idx + 1}: "
                         else:
                             motifs_prompts += ' , '.join([standarlize_entity(id_ent_dict2[node]), f"Motif {idx + 1}:\n"])
 
@@ -464,29 +464,44 @@ class Entity:
                     if self.entity_type == 'target':
 
                         relationship = self.get_relation(G1, i, j)
+
+                        # if len(relationship.split(",")) > 2:
+                        #     relationships = relationship.split(",")
+                        # else:
+                        #     relationships = [relationship]
+                        #
+                        # for rel in relationships:
                         if if_triple:
-                            triples.append(
-                                "(" + standarlize_entity(
-                                    id_ent_dict1[i]) + "," + relationship + "," + standarlize_entity(
-                                    id_ent_dict1[j]) + ")"
-                            )
+
+                                triples.append(
+                                    "(" + standarlize_entity(
+                                        id_ent_dict1[i]) + "," + relationship + "," + standarlize_entity(
+                                        id_ent_dict1[j]) + ")"
+                                )
                         else:
-                            motifs_prompts += standarlize_entity(id_ent_dict1[i]) + relationship + standarlize_entity(id_ent_dict1[j]) + '\n'
+                                motifs_prompts += standarlize_entity(id_ent_dict1[i]) + relationship + standarlize_entity(id_ent_dict1[j]) + '\n'
 
                     elif self.entity_type == 'candidate':
 
                         relationship = self.get_relation(G2, i, j)
+
+                        # if len(relationship.split(",")) > 2:
+                        #     relationships = relationship.split(",")
+                        # else:
+                        #     relationships = [relationship]
+                        #
+                        # for rel in relationships:
                         if if_triple:
-                            triples.append(
-                                "("+standarlize_entity(
-                                    id_ent_dict2[i]) + "," + relationship + "," + standarlize_entity(
-                                    id_ent_dict2[j])+")"
-                            )
+                                triples.append(
+                                    "("+standarlize_entity(
+                                        id_ent_dict2[i]) + "," + relationship + "," + standarlize_entity(
+                                        id_ent_dict2[j])+")"
+                                )
                         else:
-                            motifs_prompts += standarlize_entity(id_ent_dict2[i]) + relationship + standarlize_entity(id_ent_dict2[j]) + '\n'
+                                motifs_prompts += standarlize_entity(id_ent_dict2[i]) + relationship + standarlize_entity(id_ent_dict2[j]) + '\n'
 
                 if if_triple:
-                    motifs_prompts += '['+','.join(triples)+']'
+                    motifs_prompts += '['+','.join(triples)+']'+'\n'
 
                 # motifs_prompts += nodes + '\n\n'
                 # motifs_prompts += edges + '\n\n'
@@ -613,7 +628,8 @@ class Entity:
                 2. Please note the forms with and without underscores for entities.
                 3. Please focus on entities with a small edit distance from the original entity.
                 4. Please rerank the candidate list and put the answer in the first place of candidate list.
-                5. the output format is: the rerank candidate lists is <most>[]</most> and the answer is <output></output>.
+                5. Please give a similarity score of each candidate in candidate list and target entity like (Xiao, 0.95), (patrick, 0.90).
+                6. the output format is: the rerank candidate lists is <most>[(Xiao, 0.95), (patrick, 0.90)...]</most> and the answer is <output></output>.
 
                 === Target Entities Info starts: ===
                 Entity Name: {}
@@ -636,12 +652,12 @@ class Entity:
 
         return self.entity_name, self.get_candidates(self.entity_name), prompts
 
-    def get_only_triangle_information(self, if_triple=0, info_type=''):
+    def get_only_triangle_information(self, if_triple=0, info_type='', top_n=5):
         """
         :return:
         """
 
-        triangle_motifs = self.get_triangle_motif(self.entity_id)
+        triangle_motifs = self.get_triangle_motif(self.entity_id, top_n=top_n)
 
         triangle_motifs_prompts = self.get_motifs_promts(self.entity_id, triangle_motifs, if_triple=if_triple, info_type=info_type)
 
@@ -708,12 +724,12 @@ class Entity:
 
         return star_traiagles_prompts
 
-    def get_dynamic_motifs_information(self, if_triple=0, info_type=''):
+    def get_dynamic_motifs_information(self, if_triple=0, info_type='', top_n=5):
         """
         :return:
         """
 
-        motifs = self.get_most_representative_motifs(self.entity_id)
+        motifs = self.get_most_representative_motifs(self.entity_id, top_n=top_n)
 
         prompts = self.get_motifs_promts(self.entity_id, motifs, if_triple=if_triple, info_type=info_type)
 
@@ -731,8 +747,8 @@ class Entity:
 
 def main():
 
-    ent_id_1_path = current_dir + '/data/{}/new_ent_ids_1'.format(dataset)
-    ent_id_2_path = current_dir + '/data/{}/new_ent_ids_2_aligned'.format(dataset)
+    ent_id_1_path = current_dir + '/data/{}/new_ent_ids_1_rs_0.3_new'.format(dataset)
+    ent_id_2_path = current_dir + '/data/{}/new_ent_ids_2_aligned_rs_0.3_new'.format(dataset)
 
     entity_type = 'candidate'
     # entity_type = 'target'
@@ -744,13 +760,13 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Louisa Hanoune"""
+    entity = """Abdulla Kurd"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
 
     # _, _, prompts = entity.get_baseline_prompts()
-    prompts = entity.get_only_triangle_information()
+    prompts = entity.get_only_triangle_information(if_triple=1)
 
     print(prompts)
 

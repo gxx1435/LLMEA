@@ -253,7 +253,7 @@ def find_star_motifs(graph, node):
     return stars
 
 
-def find_four_cycles(G, node):
+def find_four_cycles(G, node, top_n=5):
     """
     Find all 4 cycle motifs in the graph and return them as subgraphs.
 
@@ -273,7 +273,7 @@ def find_four_cycles(G, node):
 
 
     quad_counter = Counter(quadrilaterals)
-    top_5_quads = quad_counter.most_common(5)
+    top_5_quads = quad_counter.most_common(top_n)
 
     motif_graphs = []
     for idx, (quad, count) in enumerate(top_5_quads):
@@ -294,7 +294,7 @@ def find_four_cycles(G, node):
     return motif_graphs
 
 
-def find_chain_motifs(G, node):
+def find_chain_motifs(G, node, top_n=5):
     """
     Find all chain motifs of the specified length in the graph and return them as subgraphs.
 
@@ -314,7 +314,7 @@ def find_chain_motifs(G, node):
     chain_counter = Counter(chain_motifs)
 
     # 找出出现次数最多的前五个chain motif
-    top_5_chains = chain_counter.most_common(5)
+    top_5_chains = chain_counter.most_common(top_n)
 
     subgraphs = []
     for idx, (chain, count) in enumerate(top_5_chains):
@@ -324,7 +324,7 @@ def find_chain_motifs(G, node):
 
     return subgraphs
 
-def find_tree_motifs(graph, root, size):
+def find_tree_motifs(graph, root, size, top_n=5):
     """
     Find all tree motifs in the graph of a given size that include the specified root node and return them as subgraphs.
 
@@ -347,7 +347,7 @@ def find_tree_motifs(graph, root, size):
                 motifs.append(subgraph)
     return motifs
 
-def find_star_triangle_motifs(G, node):
+def find_star_triangle_motifs(G, node, top_n=5):
     """
     Find all star-triangle motifs in the graph and return them as subgraphs.
 
@@ -368,7 +368,7 @@ def find_star_triangle_motifs(G, node):
                             motifs.append(motif)
 
         motif_counter = Counter(motifs)
-        top_5_motifs = motif_counter.most_common(5)
+        top_5_motifs = motif_counter.most_common(top_n)
 
         subgraphs = []
         for idx, (motif, count) in enumerate(top_5_motifs):
