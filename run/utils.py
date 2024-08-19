@@ -378,11 +378,13 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
         for line in f.readlines():
             ent_ids_1.append(line.split('\t')[1].strip())
 
+
     ent_ids_2_aligned = []
     with open(ent_id_2_path, 'r') as f:
         for line in f.readlines():
             ent_ids_2_aligned.append(line.split('\t')[1].strip())
 
+    ent_idx_1 = get_ent_id_dict(ent_id_1_path)
     ent_ids_12_dict = dict(zip(ent_ids_1, ent_ids_2_aligned))
 
 
@@ -391,6 +393,8 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
     no_answer = 0
     with open(final_anwser_file, 'r') as f:
         final_answer = json.load(f)
+        n_badcase=0
+        n_correct = 0
         for key in final_answer.keys():
             # try:
                 if type == 'hit1':
@@ -404,7 +408,10 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
                         final_answer[key] = match.group(1)
 
                     if final_answer[key] != ent_ids_12_dict[key]:
-                        print(key, '\t', final_answer[key], '\t', ent_ids_12_dict[key])
+                        n_badcase += 1
+                        n_correct += 1
+                        print(ent_idx_1[key], '\t', key, '\t', final_answer[key], '\t', ent_ids_12_dict[key])
+
                     if final_answer[key] == ent_ids_12_dict[key]:
                         hit1 += 1
 
@@ -439,6 +446,8 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
                         hit10 += 1
             # except:
             #     pass
+    print("n badcases:{}".format(n_badcase))
+    print("n badcases:{}".format(n_correct))
     print("no answer rate:{}".format(float(no_answer/len(final_answer))))
 
     return float(hit1/len(final_answer)) if type == 'hit1' else float(hit10/len(final_answer))

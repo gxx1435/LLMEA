@@ -6,7 +6,7 @@ from run.utils import get_id_entity_dict, get_ent_id_dict
 from collections import Counter
 
 
-def find_triangle_or_star_motifs(graph, node, top_n=5):
+def find_triangle_or_star_motifs(graph, node, top_n=5, if_keep_top_n=1):
     """
     :param graph:
     :param node:
@@ -21,8 +21,12 @@ def find_triangle_or_star_motifs(graph, node, top_n=5):
             in_edges = list(graph.in_edges(center_node))
 
             # 对出边和入边分别按度数排序，并保留最多五条边
-            top_out_edges = sorted(out_edges, key=lambda edge: graph.degree(edge[1]), reverse=True)[:top_n]
-            top_in_edges = sorted(in_edges, key=lambda edge: graph.degree(edge[0]), reverse=True)[:top_n]
+            if if_keep_top_n:
+                top_out_edges = sorted(out_edges, key=lambda edge: graph.degree(edge[1]), reverse=True)[:top_n]
+                top_in_edges = sorted(in_edges, key=lambda edge: graph.degree(edge[0]), reverse=True)[:top_n]
+            else:
+                top_out_edges = sorted(out_edges, key=lambda edge: graph.degree(edge[1]), reverse=True)
+                top_in_edges = sorted(in_edges, key=lambda edge: graph.degree(edge[0]), reverse=True)
 
             # 构建星型motif子图
             star_motif = nx.DiGraph()
@@ -65,10 +69,12 @@ def find_triangle_or_star_motifs(graph, node, top_n=5):
                 all_shared_triangles.extend(triangles)
 
         # 找出前 top_n 个共享次数最多的三角形
-        top_shared_triangles = nlargest(top_n, set(all_shared_triangles), key=lambda t: all_shared_triangles.count(t))
+        if if_keep_top_n:
+            top_shared_triangles = nlargest(top_n, set(all_shared_triangles), key=lambda t: all_shared_triangles.count(t))
+        else:
+            top_shared_triangles = all_shared_triangles
 
-
-        # 构建包含这些三角形motif的子图
+            # 构建包含这些三角形motif的子图
         motif_graphs = []
         for triangle in top_shared_triangles:
             motif_graph = nx.Graph()
@@ -196,14 +202,14 @@ def find_triangle_or_star_motifs(graph, node, top_n=5):
     # return motif_graphs
 
 
-def find_star_motifs(graph, node):
+def find_star_motifs(graph, node, if_keep_top_n=1):
     """
     Find all star motifs in the graph and return them as subgraphs.
     :param graph: A NetworkX graph
     :return: A list of subgraphs, each representing a star motif
     """
 
-    def create_star_motif_with_how_many_edges(graph, center_node, num_edges=5):
+    def create_star_motif_with_how_many_edges(graph, center_node, num_edges=5, if_keep_top_n=1):
         """
         Create a star motif centered around the specified node in the graph, retaining up to num_edges edges.
 
@@ -229,8 +235,11 @@ def find_star_motifs(graph, node):
         combined_edges = out_edges + in_edges
         combined_edges = sorted(combined_edges, key=lambda edge: (edge[0], edge[1]))
 
-        # Keep only up to num_edges edges
-        combined_edges = combined_edges[:num_edges]
+        if if_keep_top_n:
+            # Keep only up to num_edges edges
+            combined_edges = combined_edges[:num_edges]
+        else:
+            combined_edges = combined_edges
 
         # Add the edges to the star motif
         star_motif.add_edges_from(combined_edges)
@@ -245,15 +254,17 @@ def find_star_motifs(graph, node):
     if len(neighbors) > 1:  # Node has more than one neighbor
             star_nodes = [node] + neighbors
             star = graph.subgraph(star_nodes).copy()
-
-            star = create_star_motif_with_how_many_edges(star, node, 8)
+            if if_keep_top_n:
+                star = create_star_motif_with_how_many_edges(star, node, 8, if_keep_top_n=1)
+            else:
+                star = create_star_motif_with_how_many_edges(star, node, 8, if_keep_top_n=0)
 
             stars.append(star)
 
     return stars
 
 
-def find_four_cycles(G, node, top_n=5):
+def find_four_cycles(G, node, top_n=5, if_keep_top_n=1):
     """
     Find all 4 cycle motifs in the graph and return them as subgraphs.
 
@@ -273,7 +284,10 @@ def find_four_cycles(G, node, top_n=5):
 
 
     quad_counter = Counter(quadrilaterals)
-    top_5_quads = quad_counter.most_common(top_n)
+    if if_keep_top_n:
+        top_5_quads = quad_counter.most_common(top_n)
+    else:
+        top_5_quads = quad_counter.most_common(len(quad_counter))
 
     motif_graphs = []
     for idx, (quad, count) in enumerate(top_5_quads):
@@ -294,7 +308,7 @@ def find_four_cycles(G, node, top_n=5):
     return motif_graphs
 
 
-def find_chain_motifs(G, node, top_n=5):
+def find_chain_motifs(G, node, top_n=5, if_keep_top_n=1):
     """
     Find all chain motifs of the specified length in the graph and return them as subgraphs.
 
@@ -313,8 +327,11 @@ def find_chain_motifs(G, node, top_n=5):
 
     chain_counter = Counter(chain_motifs)
 
-    # 找出出现次数最多的前五个chain motif
-    top_5_chains = chain_counter.most_common(top_n)
+    if if_keep_top_n:
+        # 找出出现次数最多的前五个chain motif
+        top_5_chains = chain_counter.most_common(top_n)
+    else:
+        top_5_chains = chain_counter.most_common(len(chain_counter))
 
     subgraphs = []
     for idx, (chain, count) in enumerate(top_5_chains):
@@ -347,7 +364,7 @@ def find_tree_motifs(graph, root, size, top_n=5):
                 motifs.append(subgraph)
     return motifs
 
-def find_star_triangle_motifs(G, node, top_n=5):
+def find_star_triangle_motifs(G, node, top_n=5, if_keep_top_n=1):
     """
     Find all star-triangle motifs in the graph and return them as subgraphs.
 
@@ -368,7 +385,10 @@ def find_star_triangle_motifs(G, node, top_n=5):
                             motifs.append(motif)
 
         motif_counter = Counter(motifs)
-        top_5_motifs = motif_counter.most_common(top_n)
+        if if_keep_top_n:
+            top_5_motifs = motif_counter.most_common(top_n)
+        else:
+            top_5_motifs = motif_counter.most_common(len(motif_counter))
 
         subgraphs = []
         for idx, (motif, count) in enumerate(top_5_motifs):

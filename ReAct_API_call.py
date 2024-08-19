@@ -12,8 +12,6 @@ from graph_motif_ReAct_reranking import *
 from graph_motif_ReAct_reranking_code import *
 from graph_motif_ReAct_reranking_text import *
 
-from graph_motif_code_generated import code_motif_prompts_generate
-
 
 # def dynamic_import(module_name):
 #     module = __import__(module_name)
@@ -247,6 +245,11 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
     :return:
     """
     from entity import Entity
+    if if_expel:
+        from graph_motif_code_generated_expel_version import code_motif_prompts_generate
+    else:
+        from graph_motif_code_generated import code_motif_prompts_generate
+
     def find_thought_and_act(s):
         thought_idx = s.find('Thought')
         act_idx = s.find('Act')
@@ -356,11 +359,15 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
         # return 'no code observation for this entity.'
 
     try:
-        with open('output/{}/{}/LLM_response_{}/thought_and_acts_{}.json'.format(LLM_type,save_dir, info_type, step), 'r') as f:
+        with open('output/{}/{}/LLM_response_{}/thought_and_acts_{}.json'.format(LLM_type, save_dir, info_type, step), 'r') as f:
             thought_and_acts = json.load(f)
 
         with open('output/{}/{}/LLM_response_{}/requests_{}.json'.format(LLM_type,save_dir, info_type, step), 'r') as f:
             requests = json.load(f)
+
+        with open('output/{}/{}/LLM_response_{}/observations_{}.json'.format(LLM_type, save_dir, info_type, step),
+                  'w') as f:
+            observations = json.load(f)
 
         with open('output/{}/{}/most_list_{}_{}.json'.format(LLM_type, save_dir, info_type, step), 'r') as f:
             most_list_dict = json.load(f)
@@ -399,24 +406,25 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
         if step == '1':
 
-            if os.path.exists('output/{}/thought_and_acts_{}.json'.format(LLM_type,  step)):
+            if os.path.exists('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, first_step_setting,  step)):
 
-                with open('output/{}/thought_and_acts_{}.json'.format(LLM_type, step)) as f:
+                with open('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, first_step_setting, step)) as f:
                     thought_and_acts = json.load(f)
 
-                with open('output/{}/requests_{}.json'.format(LLM_type, step)) as f:
+                with open('output/{}/{}/requests_{}.json'.format(LLM_type, first_step_setting, step)) as f:
                     requests = json.load(f)
 
             else:
                 responses = collect_response(message_list, LLM_type, **kwargs)
                 thought_and_acts = [response for response in responses]
+                thought_and_acts = dict(zip(idx_prompt_dict.keys(), thought_and_acts))
 
-                with open('output/{}/thought_and_acts_{}.json'.format(LLM_type, step),
+                with open('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, first_step_setting, step),
                           'w') as f:
                     json.dump(thought_and_acts, f, indent=4)
 
                 requests = [find_requests(response) for response in responses]
-                with open('output/{}/requests_{}.json'.format(LLM_type, step), 'w') as f:
+                with open('output/{}/{}/requests_{}.json'.format(LLM_type, first_step_setting, step), 'w') as f:
                     json.dump(requests, f, indent=4)
 
         else:
@@ -432,6 +440,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
                 responses = collect_response(message_list, LLM_type, **kwargs)
                 thought_and_acts = [response for response in responses]
+                thought_and_acts = dict(zip(idx_prompt_dict.keys(), thought_and_acts))
 
                 with open('output/{}/{}/LLM_response_{}/thought_and_acts_{}.json'.format(LLM_type, save_dir, info_type, step), 'w') as f:
                     json.dump(thought_and_acts, f, indent=4)
@@ -485,36 +494,50 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
                 if info_type == '1_neighbor':
 
-                    _1_neighbor_info = request_entity.get_only_1_neighbor_information(if_triple=1, info_type=info_type)
+                    _1_neighbor_info = request_entity.get_only_1_neighbor_information(if_triple=1, info_type=info_type, if_keep_top_n=1)
                     print(_1_neighbor_info)
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + _1_neighbor_info})
 
                 elif info_type == 'text_motif_lite':
 
-                    text_motif_info = request_entity.get_only_triangle_information(if_triple=1, info_type=info_type, top_n=top_n)
+                    text_motif_info = request_entity.get_only_triangle_information(if_triple=1, info_type=info_type, top_n=top_n, if_keep_top_n=0)
                     print(text_motif_info)
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + text_motif_info})
 
                 elif info_type == 'code_motif_lite':
 
-                    text_motif_info = request_entity.get_only_triangle_information(if_triple=1, info_type=info_type, top_n=top_n)
+                    text_motif_info = request_entity.get_only_triangle_information(if_triple=1, info_type=info_type, top_n=top_n, if_keep_top_n=1)
                     print(text_motif_info)
-                    code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
+
+                    if if_expel:
+                        with open(os.getcwd() + '/output/code_generated_rules.txt') as f:
+                            code_generated_rules = json.load(f)
+                        code_motif_prompt = code_motif_prompts_generate.format(code_generated_rules, text_motif_info)
+                    else:
+                        code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
+
                     code_motif_prompts.update({entity_id: code_motif_prompt})
 
                 elif info_type == 'text_motif_base':
 
                     """To do"""
-                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=1, info_type=info_type, top_n=top_n)
+                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=1, info_type=info_type, top_n=top_n, if_keep_top_n=1)
                     print(text_motif_info)
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + text_motif_info})
 
                 elif info_type == 'code_motif_base':
 
                     """To do"""
-                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=1, info_type=info_type, top_n=top_n)
+                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=1, info_type=info_type, top_n=top_n, if_keep_top_n=1)
                     print(text_motif_info)
-                    code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
+
+                    if if_expel:
+                        with open(os.getcwd() + '/output/code_generated_rules.txt') as f:
+                            code_generated_rules = json.load(f)
+                        code_motif_prompt = code_motif_prompts_generate.format(code_generated_rules, text_motif_info)
+                    else:
+                        code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
+
                     code_motif_prompts.update({entity_id: code_motif_prompt})
 
 
@@ -536,6 +559,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
             else:
                 code_generated_responses = collect_response(message_list, LLM_type, **kwargs)
+                # code_generated_responses = dict(zip(code_motif_prompts.keys(), code_generated_responses))
 
                 with open('output/{}/{}/LLM_response_{}/code_generated_{}.json'.format(LLM_type, save_dir, info_type, step), 'w') as f:
 
@@ -550,27 +574,30 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
             with open('output/{}/{}/LLM_response_{}/observations_{}.json'.format(LLM_type,save_dir, info_type, step), 'w') as f:
                 json.dump(observations, f, indent=4)
+        else:
 
+            with open('output/{}/{}/LLM_response_{}/observations_{}.json'.format(LLM_type, save_dir, info_type, step), 'w') as f:
+                json.dump(observations, f, indent=4)
 
         new_idx_prompt_dict = {}
         new_entity_list = []
         terminate_dict = {}
         most_list_dict ={}
         for i in range(len(entity_list)):
+            entity_id = entity_list[i].entity_id
             if requests[i] != -1:
-                entity_id = entity_list[i].entity_id
                 new_entity_list.append(entity_list[i])
                 new_idx_prompt_dict.update({
                     entity_id:
-                        idx_prompt_dict[entity_id] + thought_and_acts[i] + observations[entity_id]
+                        idx_prompt_dict[entity_id] + thought_and_acts[entity_id] + observations[entity_id]
                 })
             else:
                 if 'llama' in info_type:
-                    most_list_dict.update({entity_list[i].entity_name: find_most_list_llama(thought_and_acts[i])})
+                    most_list_dict.update({entity_list[i].entity_name: find_most_list_llama(thought_and_acts[entity_id])})
                 else:
-                    most_list_dict.update({entity_list[i].entity_name: find_most_list(thought_and_acts[i])})
+                    most_list_dict.update({entity_list[i].entity_name: find_most_list(thought_and_acts[entity_id])})
 
-                terminate_dict.update({entity_list[i].entity_name: find_Terminate(thought_and_acts[i])})
+                terminate_dict.update({entity_list[i].entity_name: find_Terminate(thought_and_acts[entity_id])})
 
         with open('output/{}/{}/most_list_{}_{}.json'.format(LLM_type, save_dir, info_type, step), 'w') as f:
             json.dump(most_list_dict, f, indent=4)
@@ -611,6 +638,9 @@ parser.add_argument('-top_n', '--top_n', type=int, help='How much motif we outpu
 
 parser.add_argument('-v', '--version', default='', type=str, help='version control')
 
+parser.add_argument('-e', '--expel', default=False, type=bool, help='If use expel mudule')
+
+
 
 # # 添加可选参数（带默认值）
 # parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
@@ -622,7 +652,9 @@ dataset = args.dataset
 info_type = args.info_type
 LLM_type = args.llm_type
 threshold = args.threshold
-
+top_n = args.top_n
+version = args.version
+if_expel = args.expel
 # module_name = args.react_file
 # ReAct_module = dynamic_import(module_name)
 # motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
@@ -663,7 +695,13 @@ elif args.candidate_num_1 == 50 and args.candidate_num_2 == 50:
     if 'llama' in LLM_type:
         motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_llama
     else:
-        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50
+        if version == 'v0':
+            motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_v0
+        elif version == 'v1':
+            motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_v1
+        else:
+            motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50
+
         motif_ReAct_example_prompt_code = motif_ReAct_example_prompt_cn50_cn50_code
         motif_ReAct_example_prompt_text = motif_ReAct_example_prompt_cn50_cn50_text
 
@@ -693,11 +731,9 @@ elif 'put_correct_ans_last' in sematic_embedding_candidates_path:
 
 candidate_num_1 = str(args.candidate_num_1)
 candifate_num_2 = str(args.candidate_num_2)
+
 ent_ids_1 = args.ent_ids_1
 ent_ids_2 = args.ent_ids_2
-top_n = args.top_n
-version = args.version
-
 current_path = os.getcwd()
 ent_ids_1_path = current_path + '/data/{}/{}'.format(dataset, ent_ids_1)
 ent_ids_2_path = current_path + '/data/{}/{}'.format(dataset, ent_ids_2)
@@ -708,8 +744,12 @@ else:
     save_dir = dataset+"_"+'t'+str(threshold)+'_'+candidate_num_1+"_"+candifate_num_2+'_' + first_step_setting+"_{}motif".format(top_n)
 
 if __name__ == '__main__':
+
     if not os.path.exists(current_path +'/output/{}'.format(LLM_type)):
         os.mkdir(current_path +'/output/{}'.format(LLM_type))
+
+    if not os.path.exists(current_path +'/output/{}/{}'.format(LLM_type, first_step_setting)):
+        os.mkdir(current_path +'/output/{}/{}'.format(LLM_type, first_step_setting))
 
     if not os.path.exists(current_path+ '/output/{}/{}'.format(LLM_type, save_dir)):
         os.mkdir(current_path+'/output/{}/{}'.format(LLM_type, save_dir))

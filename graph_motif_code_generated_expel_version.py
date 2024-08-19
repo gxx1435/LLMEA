@@ -31,12 +31,6 @@ Ne Win Threaten,Express intent to meet or negotiate Military (Myanmar)
 Ne Win connected with Kyaw Win
 Ne Win Threaten,Express intent to meet or negotiate Military (Myanmar)
 Kyaw Win Express intent to meet or negotiate,fight with artillery and tanks Military (Myanmar)
-
-"""
-"""[(Vladimir Putin, makes a visit, expresses intent to meet or negotiate, and consults with, Yury Nikolayevich Baluyevsky), (Yury Nikolayevich Baluyevsky, holds a visit, with Citizen (Russia)),(Citizen (Russia), is connected with, Vladimir Putin)]
-
-"""
-"""[(Vladimir Putin, makes a visit,Yury Nikolayevich Baluyevsky),( Vladimir Putin, expresses intent to meet or negotiate,Yury Nikolayevich Baluyevsky),(Vladimir Putin, and consults with , Yury Nikolayevich Baluyevsky), (Yury Nikolayevich Baluyevsky, holds a visit, with Citizen (Russia)),(Citizen (Russia), is connected with, Vladimir Putin)]
 """
 
 code_motif_prompts_generate = """
@@ -53,6 +47,8 @@ As a good Computer Science student good at coding, your task is to describe the 
   8. Please note the += relationship which represents multiple relationship between two nodes. It means two nodes have more than 1 type of relationship.
   9. A definition function represents a motif.
   10. The code should fully represent the structural information between nodes.
+  {}
+
   
 Please refer to the example below and handle a new task! 
 
@@ -114,9 +110,4 @@ Given triangle Motif information, generate its Code description.
 
 **Triangle Motif information:**
 {}
-
-""".format(
-    """
-    - Target entity: Thais United; Motif 1: [(Thais United, connected with ,Somkid Jatusripitak),(Thais United, connected with ,Kittiratt Na-Ranong),(Somkid Jatusripitak, member Of ,Thais United),(Kittiratt Na-Ranong, member Of ,Thais United)]
-     """
-)
+"""

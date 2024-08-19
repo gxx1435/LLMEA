@@ -109,6 +109,35 @@ class Entity:
         self.entity_id = entity_id
         self.entity_type = entity_type
 
+    def cut_off_motif_prompts(self, prompts):
+
+        import subprocess
+        import sys
+        def install(package):
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+        # 安装 tiktoken 库
+        try:
+            import tiktoken
+        except ModuleNotFoundError:
+            install("tiktoken")
+            import tiktoken
+
+        tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        tokens = tokenizer.encode(prompts)
+        max_token = 3500
+        current_lenngth = 0
+        current_chunk = []
+        for token in tokens:
+            if current_lenngth + 1 > max_token:
+                break
+            current_chunk.append(token)
+            current_lenngth += 1
+
+        text_chunk = tokenizer.decode(current_chunk)
+
+        return text_chunk
+
     def get_relation(self, G, ent_id_1, ent_id_2):
         """
         :return:
@@ -217,7 +246,7 @@ class Entity:
 
         return G
 
-    def get_triangle_motif(self, node, top_n=5):
+    def get_triangle_motif(self, node, top_n=5, if_keep_top_n=1):
         """
 
         :param node:
@@ -226,11 +255,11 @@ class Entity:
 
         G = self.get_subgraph_of_node(node, 2)
 
-        motifs = find_triangle_or_star_motifs(G, node, top_n=top_n)
+        motifs = find_triangle_or_star_motifs(G, node, top_n=top_n, if_keep_top_n=if_keep_top_n)
 
         return motifs
 
-    def get_star_motif(self, node):
+    def get_star_motif(self, node, if_keep_top_n):
         """
 
         :param node:
@@ -238,7 +267,7 @@ class Entity:
         """
         G = self.get_subgraph_of_node(node)
 
-        motifs = find_star_motifs(G, node)
+        motifs = find_star_motifs(G, node, if_keep_top_n)
 
         return motifs
 
@@ -287,7 +316,7 @@ class Entity:
 
         return motifs
 
-    def get_most_representative_motifs(self, node, top_n=5):
+    def get_most_representative_motifs(self, node, top_n=5, if_keep_top_n=1):
         """
         :return:
         """
@@ -367,20 +396,20 @@ class Entity:
 
         triangles = find_all_triangle_motifs(G, node)
 
-        stars = find_all_star_motifs(G, node)
+        # stars = find_all_star_motifs(G, node)
 
-        chains = find_all_chain_motifs(G)
+        # chains = find_all_chain_motifs(G)
 
         quadrilaterals = find_all_four_cycles(G, node)
 
-        star_triangles = find_all_star_triangle_motifs(G, node)
+        # star_triangles = find_all_star_triangle_motifs(G, node)
 
         motif_frequencies = {
             "triangle": len(triangles),
-            "star": len(stars),
-            'chain': len(chains),
+            # "star": len(stars),
+            # 'chain': len(chains),
             "quadrilateral": len(quadrilaterals),
-            "star_triangle": len(star_triangles)
+            # "star_triangle": len(star_triangles)
         }
 
         most_frequent_motif = max(motif_frequencies, key=motif_frequencies.get)
@@ -389,15 +418,17 @@ class Entity:
             f"The most representative motif is: {most_frequent_motif} with count: {motif_frequencies[most_frequent_motif]}")
 
         if most_frequent_motif == "triangle":
-            motifs = find_triangle_or_star_motifs(G, node, top_n)
-        elif most_frequent_motif == "star":
-            motifs = find_triangle_or_star_motifs(G, node, top_n)
+            motifs = find_triangle_or_star_motifs(G, node, top_n, if_keep_top_n)
+        # elif most_frequent_motif == "star":
+        #     motifs = find_triangle_or_star_motifs(G, node, top_n, if_keep_top_n)
         elif most_frequent_motif == "quadrilateral":
-            motifs = find_four_cycles(G, node, top_n)
-        elif most_frequent_motif == 'chain':
-            motifs = find_chain_motifs(G, node, top_n)
-        elif most_frequent_motif == 'star_triangle':
-            motifs = find_star_triangle_motifs(G, node, top_n)
+            motifs = find_four_cycles(G, node, top_n, if_keep_top_n)
+        # elif most_frequent_motif == 'chain':
+        #     motifs = find_chain_motifs(G, node, top_n, if_keep_top_n)
+        # elif most_frequent_motif == 'star_triangle':
+        #     motifs = find_star_triangle_motifs(G, node, top_n, if_keep_top_n)
+        else:
+            motifs = []
 
         return motifs
 
@@ -652,16 +683,31 @@ class Entity:
 
         return self.entity_name, self.get_candidates(self.entity_name), prompts
 
-    def get_only_triangle_information(self, if_triple=0, info_type='', top_n=5):
+    def get_only_1_neighbor_information(self, if_triple=0, info_type='', if_keep_top_n=1):
         """
         :return:
         """
 
-        triangle_motifs = self.get_triangle_motif(self.entity_id, top_n=top_n)
+        star_motifs = self.get_star_motif(self.entity_id, if_keep_top_n)
+
+        star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs, if_triple, info_type)
+
+        prompts = self.cut_off_motif_prompts(star_motifs_prompts)
+
+        return prompts
+
+    def get_only_triangle_information(self, if_triple=0, info_type='', top_n=5, if_keep_top_n=1):
+        """
+        :return:
+        """
+
+        triangle_motifs = self.get_triangle_motif(self.entity_id, top_n=top_n, if_keep_top_n=if_keep_top_n)
 
         triangle_motifs_prompts = self.get_motifs_promts(self.entity_id, triangle_motifs, if_triple=if_triple, info_type=info_type)
 
-        return triangle_motifs_prompts
+        prompts = self.cut_off_motif_prompts(triangle_motifs_prompts)
+
+        return prompts
 
     def get_only_star_information(self):
         """
@@ -671,16 +717,6 @@ class Entity:
         star_motifs = self.get_star_motif(self.entity_id)
 
         star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs)
-
-        return star_motifs_prompts
-
-    def get_only_1_neighbor_information(self, if_triple=0, info_type=''):
-        """
-        :return:
-        """
-        star_motifs = self.get_star_motif(self.entity_id)
-
-        star_motifs_prompts = self.get_motifs_promts(self.entity_id, star_motifs, if_triple, info_type)
 
         return star_motifs_prompts
 
@@ -724,15 +760,16 @@ class Entity:
 
         return star_traiagles_prompts
 
-    def get_dynamic_motifs_information(self, if_triple=0, info_type='', top_n=5):
+    def get_dynamic_motifs_information(self, if_triple=0, info_type='', top_n=5, if_keep_top_n=1):
         """
         :return:
         """
 
-        motifs = self.get_most_representative_motifs(self.entity_id, top_n=top_n)
+        motifs = self.get_most_representative_motifs(self.entity_id, top_n=top_n, if_keep_top_n=if_keep_top_n)
 
         prompts = self.get_motifs_promts(self.entity_id, motifs, if_triple=if_triple, info_type=info_type)
 
+        prompts = self.cut_off_motif_prompts(prompts)
 
         return prompts
 
@@ -760,7 +797,7 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Abdulla Kurd"""
+    entity = """Eder E. Ortiz Ortiz"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)

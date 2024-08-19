@@ -282,10 +282,10 @@ NOTE:
 
 New Task
 [USER (Boss)]: Please rerank the candidate list by the similarity to target entity and select 1 most similar entity from it to terminate. You have at most 4 turns to finish the task. If there is the same entity in the candidate list as the target entity, please select it directly. The answer format is: The most similar 20 entities are: <most>[]</most> and Terminate[answer]. The target entity is:
-'Víctor Quispe Palomino'
+'Dusko Markovic'
 
 The candidate entities list is:
-['Voltaire Gazmin', 'Vítor Constâncio', 'Vítor Gaspar', 'Viktor Uspaskich', 'Victor Ponta', 'Louisa Hanoune', 'Boris Yeltsin', 'Scottish Parliament', 'Viktor Yushchenko', 'Marcos Valério', 'Sule Lamido', 'Tomaz Salomão', 'Borut Pahor', 'Otto Pérez Molina', 'Georgi Parvanov', 'Vittorio Grilli', 'François Baroin', 'Patricio Aylwin', 'Verónica Macamo', 'Luis Walton', 'Comrade José']
+['Ante Marković', 'Dušan Čaplovič', 'Bisera Turković', 'Eugen Carpov', 'Erik Marais', 'Predrag Marković', 'Josip Manolić', 'Dick Marty', 'Dušan Vujović', 'Mirko Norac', 'Wade Mark', 'Pavao Miljavac', 'Tomaž Marušič', 'Rumen Petkov', 'Pedro Carmona', 'Ron Mark', 'Des Browne', 'Davit Narmania', 'Vuk Jeremić', 'Suzi Barbosa', 'Arsen Avakov', 'János Martonyi', 'Askar Mamin', 'Josip Boljkovac', 'Lisa Murkowski', 'David Mahlobo', 'Sue Myrick', 'Sukarno', 'Kuniko Ozaki', 'Gustavo Arcos', 'Dragan Čović', 'Ivan Barbalić', 'Slovakia', 'Karl Erjavec', 'Miloš Radulović', 'Manny Mori', 'Marko Veselica', 'Fabio Berardi', 'Mark Burton', 'Gerson Martínez', 'Marek Maďarič', 'Tito Petkovski', 'José Alperovich', 'Ernesto Martens', 'Luis Palomino', 'Hasan Tiro', 'Denmark', 'Brian Sandoval', 'Dulmatin', 'Duško Marković']
 
 NOTE:
 1. You have at most 4 turns to generate the final result. Please follow my example between "Example Start" and "Example End" above to answer the task with interleaving Thought, Code, Action, Result turns. Each turn contains one segment of the target code to solve the problem.
@@ -310,7 +310,7 @@ motif_ReAct_example_prompt_cn50_cn50 = """
 You are a programmer in a large company, tasked with selecting the most similar entity to a target entity from a candidate list. You will solve the task using a series of interleaving Thought, Action, and Observation steps. Thought can reason about the current situation, and Action can only be one of the following two types:
 
 - Request[entity]: Requests the context information of the entity from external Knowledge Graphs. You can only request one entity in each turn, and it must be from the candidate list or the target entity itself.
-- Terminate[answer]: Returns the answer and finishes the task. This action can only occur when you finish the task! When you decide to use terminate action, you mush put the most similar 50 entities into: "<MOST>[]</MOST>". Please note that if there is a direct match, please use act Terminate[] directly to end the precess.
+- The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]: Returns the answer and finishes the task. This action can only occur when you finish the task! When you decide to use terminate action, you mush put the most similar 50 entities into: "<MOST>[]</MOST>". Please note that if there is a direct match, please use act Terminate[] directly to end the precess.
 
 You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types. 
 
@@ -334,9 +334,8 @@ NOTE:
 
 ### Turn 1: (3 turns left to use "Terminate" action to provide final answer.)
 **Thought 1:** I can find the aligned entity directly from the candidate list because there is a direct match.
-**Act 1:** Terminate['Ne Win']
-**The most similar 50 entities are:** 
-<MOST>['Ne Win', 'Hla Min', 'Soe Thein', 'Chea Sim', 'Aung Min', 'Hla Tun', 'Su Chi', 'Tea Banh', 'Shwe Mann', 'Tin Oo', 'Aye Maung', 'Benin', 'Yen Ming', 'Jean Ping', 'Hun Sen', 'Ma Kai', 'Serbia', 'Bev Oda', 'Meretz', 'Spain', 'Ta Nea', 'Temelín', 'Basij', 'Joe Biden', 'Wu Sike', 'Fiji', 'Kuwait', 'Le Monde', 'Belize', 'Oman', 'Bahrain', 'NATO', 'New Vision', 'NASA', 'Mechel', 'Cemex', 'Telcel', 'Xerox', 'Niger', 'Mali', 'Gabon', 'Aung San', 'Sung Kim', 'Latvia', 'Naoto Kan', 'Haiti', 'Ukraine', 'Zambia']</MOST> 
+**Act 1:
+**The most similar 50 entities are:<MOST>['Ne Win', 'Hla Min', 'Soe Thein', 'Chea Sim', 'Aung Min', 'Hla Tun', 'Su Chi', 'Tea Banh', 'Shwe Mann', 'Tin Oo', 'Aye Maung', 'Benin', 'Yen Ming', 'Jean Ping', 'Hun Sen', 'Ma Kai', 'Serbia', 'Bev Oda', 'Meretz', 'Spain', 'Ta Nea', 'Temelín', 'Basij', 'Joe Biden', 'Wu Sike', 'Fiji', 'Kuwait', 'Le Monde', 'Belize', 'Oman', 'Bahrain', 'NATO', 'New Vision', 'NASA', 'Mechel', 'Cemex', 'Telcel', 'Xerox', 'Niger', 'Mali', 'Gabon', 'Aung San', 'Sung Kim', 'Latvia', 'Naoto Kan', 'Haiti', 'Ukraine', 'Zambia']</MOST> and Terminate['Ne Win']
 
 ------
 ## Example 2
@@ -356,140 +355,17 @@ NOTE:
 
 ### Turn 1: (3 turns left to use "Terminate" action to provide final answer.)
 **Thought 1:** I cannot find an entity in the candidate list that is a direct match for "Salauddin." I need more information about "Salauddin" to make an informed decision.
-**Act 1:** Request['Salauddin']
-**Observation 1:**
-```
-import is_connected_with, Use_unconventional_violence, Express_intent_to_meet_or_negotiate, Criticize_or_denounce, Make_pessimistic_comment, Cooperate_economically, Deny_responsibility, Make_statement, Use_conventional_military_force, Consult, Reject, Make_an_appeal_or_request, Grant_diplomatic_recognition, Make_a_visit, Make_optimistic_comment
-
-class Salauddin(object):
-
-    def __init__(self, Salauddin, Citizen_India, Police_India, Bangladesh, Member_Judiciary_Bangladesh, Ali_Ahsan_Mohammad_Mujahid, Abdul_Hamid, Head_of_Government_Qatar):
-        ## Initial function to define nodes
-        self.Salauddin = Salauddin
-        self.Citizen_India = Citizen_India
-        self.Police_India = Police_India
-        self.Bangladesh = Bangladesh
-        self.Member_Judiciary_Bangladesh = Member_Judiciary_Bangladesh
-        self.Ali_Ahsan_Mohammad_Mujahid = Ali_Ahsan_Mohammad_Mujahid
-        self.Abdul_Hamid = Abdul_Hamid
-        self.Head_of_Government_Qatar = Head_of_Government_Qatar
-
-    def Motif_1(self):
-        self.Citizen_India = is_connected_with(self.Salauddin)
-        self.Citizen_India += Use_unconventional_violence(self.Bangladesh)
-        self.Citizen_India += Express_intent_to_meet_or_negotiate(self.Bangladesh)
-        self.Citizen_India += Criticize_or_denounce(self.Bangladesh)
-        self.Citizen_India += Make_pessimistic_comment(self.Bangladesh)
-        self.Citizen_India += Cooperate_economically(self.Bangladesh)
-        self.Salauddin = Deny_responsibility(self.Bangladesh)
-
-        return self.Salauddin, self.Citizen_India, self.Bangladesh
-
-    def Motif_2(self):
-        self.Salauddin = is_connected_with(self.Police_India)
-        self.Salauddin = Deny_responsibility(self.Bangladesh)
-        self.Police_India += Express_intent_to_meet_or_negotiate(self.Bangladesh)
-        self.Police_India += Make_statement(self.Bangladesh)
-        self.Police_India += Use_conventional_military_force(self.Bangladesh)
-        self.Police_India += Criticize_or_denounce(self.Bangladesh)
-        self.Police_India += Consult(self.Bangladesh)
-
-        return self.Salauddin, self.Police_India, self.Bangladesh
-
-    def Motif_3(self):
-        self.Salauddin = is_connected_with(self.Member_Judiciary_Bangladesh)
-        self.Salauddin = Consult(self.Ali_Ahsan_Mohammad_Mujahid)
-        self.Member_Judiciary_Bangladesh = Reject(self.Ali_Ahsan_Mohammad_Mujahid)
-
-        return self.Salauddin, self.Member_Judiciary_Bangladesh, self.Ali_Ahsan_Mohammad_Mujahid
-
-    def Motif_4(self):
-        self.Salauddin = is_connected_with(self.Abdul_Hamid)
-        self.Salauddin = Deny_responsibility(self.Bangladesh)
-        self.Abdul_Hamid += Make_an_appeal_or_request(self.Bangladesh)
-        self.Abdul_Hamid += Make_statement(self.Bangladesh)
-        self.Abdul_Hamid += Grant_diplomatic_recognition(self.Bangladesh)
-        self.Abdul_Hamid += Make_a_visit(self.Bangladesh)
-        self.Abdul_Hamid += Make_optimistic_comment(self.Bangladesh)
-
-        return self.Salauddin, self.Abdul_Hamid, self.Bangladesh
-
-    def Motif_5(self):
-        self.Salauddin = Consult(self.Head_of_Government_Qatar)
-        self.Salauddin = Deny_responsibility(self.Bangladesh)
-        self.Head_of_Government_Qatar = Make_a_visit(self.Bangladesh)
-
-        return self.Salauddin, self.Head_of_Government_Qatar, self.Bangladesh
-
-```
-
-### Turn 2: (2 turns left to use "Terminate" action to provide final answer.)
-**Thought 2:** Based on the observation, 'Salauddin' has connections with Bangladesh, India, and Pervez Musharraf. Considering this information, I should now request information about the most relevant candidate entity.
-**Act 2:** Request['Abdulla Kurd']
-**Observation 2:**
-```
-# Importing necessary relations or actions
-import is_connected_with
-
-class Abdulla_Kurd(object):
-    
-    def __init__(self, Abdulla_Kurd, Turkey, node_1):
-        # Initialization function
-        self.Abdulla_Kurd = Abdulla_Kurd
-        self.Turkey = Turkey
-        self.node_1 = node_1
-    
-    def node_1_connected_with(self):
-        # Function describing the connection between node_1 and Turkey
-        self.node_1 = is_connected_with(self.Turkey)
-        self.node_1 = is_connected_with(self.Abdulla_Kurd)
-        self.Turkey = is_connected_with(self.Abdulla_Kurd)
-        
-        return self.node_1, self.Turkey, self.Abdulla_Kurd
-
-```
-
-### Turn 2: (1 turns left to use "Terminate" action to provide final answer.)
-**Thought 3:** Based on the observation, 'Abdulla Kurd' has connections with Turkey. Since 'Salauddin' has connections with regions including Bangladesh and India, I need to evaluate if there is a stronger match in the candidate list. Given this context, I should now request information about another potentially relevant candidate entity.
-**Act 3:** Request['Salahuddin of Selangor']
-**Observation 3:**
-```
-# Import the necessary relations for the motif
-import is_connected_with, contained_in_place, nationality
-
-class Salahuddin_of_Selangor(object):
-
-    def __init__(self, Salahuddin_of_Selangor, Kuala_Lumpur, Malaysia):
-        # Initialize the nodes involved in the motif
-        self.Salahuddin_of_Selangor = Salahuddin_of_Selangor
-        self.Kuala_Lumpur = Kuala_Lumpur
-        self.Malaysia = Malaysia
-
-    def Kuala_Lumpur_connected_with_Salahuddin_of_Selangor(self):
-        # Define the connection relationships between the nodes
-        self.Kuala_Lumpur = is_connected_with(self.Salahuddin_of_Selangor)
-        self.Kuala_Lumpur = contained_in_place(self.Malaysia)
-        self.Salahuddin_of_Selangor = nationality(self.Malaysia)
-
-        # Return the nodes involved in the motif
-        return self.Kuala_Lumpur, self.Salahuddin_of_Selangor, self.Malaysia
-
-```
-
-### Turn 4: (NOTE: MUST use "Terminate" action to provide final answer in this turn)
-**Thought 4:** Based on the observation, 'Salahuddin of Selangor' is connected with Kuala Lumpur and Malaysia. This information is not as relevant as the connections 'Salauddin' has with Bangladesh, India, and Pervez Musharraf. The connections of 'Abdulla Kurd' with Turkey seem more aligned with the context of 'Salauddin'.
-**Act 4:** Terminate['Abdulla Kurd']
-**The most similar 50 entities are:** 
-<MOST>['Abdulla Kurd', 'Salam Fayyad', 'Sule Lamido', 'Talal Arslan', 'Saad Hariri', 'Salou Djibo', 'Shwe Mann', 'Aung Min', 'Soe Thein', 'Suharto', 'Hla Min', 'Hla Tun', 'Jawed Ludin', 'Sima Samar', 'Samar', 'Sama', 'Shas', 'Fatah', 'Hamas', 'Gilad Erdan', 'Babar Awan', 'Hamid Mir', 'Ramdev', 'Imran Khan', 'Sylvia Lim', 'Kashmir', 'Ānanda', 'Sukarno', 'Sam Nujoma', 'Ne Win', 'Benin', 'Sula Lamido', 'Shwe Mann', 'Su Chi', 'Aung Min', 'Talal Arslan', 'Kashmir', 'Sule Lamido', 'Samar', 'Fatah', 'Hamas', 'Gilad Erdan', 'Babar Awan']</MOST>
+**Act 1: **The most similar 50 entities are:<MOST>['Abdulla Kurd', 'Salam Fayyad', 'Sule Lamido', 'Talal Arslan', 'Saad Hariri', 'Salou Djibo', 'Shwe Mann', 'Aung Min', 'Soe Thein', 'Suharto', 'Hla Min', 'Hla Tun', 'Jawed Ludin', 'Sima Samar', 'Samar', 'Sama', 'Shas', 'Fatah', 'Hamas', 'Gilad Erdan', 'Babar Awan', 'Hamid Mir', 'Ramdev', 'Imran Khan', 'Sylvia Lim', 'Kashmir', 'Ānanda', 'Sukarno', 'Sam Nujoma', 'Ne Win', 'Benin', 'Sula Lamido', 'Shwe Mann', 'Su Chi', 'Aung Min', 'Talal Arslan', 'Kashmir', 'Sule Lamido', 'Samar', 'Fatah', 'Hamas', 'Gilad Erdan', 'Babar Awan']</MOST> and Terminate['Abdulla Kurd']
 
 ------
 # New Task:
 [USER (Boss)]: Please rerank the candidate list by the similarity to target entity and select 1 most similar entity from it to terminate. If there is the same entity in the candidate list as the target entity, please select it directly. 
 
-**The target entity is:** {}
+**The target entity is:** 
+'Alija Behmen'
 
 **The candidate entities list is:**
-{}
+['Thijs Berman', 'Amina Mohamed', 'Ali Benhadj', 'Abiy Ahmed', 'Ali Waheed', 'Anifah Aman', 'Ali Haroun', 'Alice Rivlin', 'Ilie Verdeț', 'Aldo Bumçi', 'Ali al-Adeeb', 'Ajay Maken', 'Ali Rabiei', 'Siv Jensen', 'Melissa Bean', 'Lloyd Bentsen', 'Allan Bell', 'Yahya Jammeh', 'Nika Melia', 'Maura Healey', 'Askar Mamin', 'Ali Kafi', 'Ana Lovrin', 'Ivica Kirin', 'Anna Bligh', 'Adama Dieng', 'Atwar Bahjat', 'Sherry Rehman', 'Ali Treki', 'Alicia Kirchner', 'Aziz Pahad', 'Marine Le Pen', 'Abu Taher', 'Syda Bbumba', 'Wim Deetman', 'Milan Roćen', 'Alik Alik', 'Jaime Bermúdez', 'Hilary Benn', 'Ali Hammoud', 'Ali Karimli', 'Ali Nikzad', 'Ali Younesi', 'Phil Bredesen', 'Aamir Khan', 'Yossi Beilin', 'Aécio Neves', 'Elizabeth II', 'Assad Shoman', 'Alija Behmen']
 
 NOTE:
 1. You have at most 4 turns to generate the final result. Please follow my examples above to answer the task with interleaving Thought, Code, Action, Result turns. 
@@ -499,15 +375,21 @@ NOTE:
 5. If there is the same entity in the candidate list as the target entity, please select it directly and terminate the process. 
 6. You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types.
 7. Please follow the example format: thought, action, observation steps. Do not generate response by yourself.
-8. If you can find a direct match, please use act "Terminate[]" directly and do no need to confirm another entity.
+8. If you can find a direct match, please use act "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[]" directly and do no need to confirm another entity.
 9. If you are can not find a direct match, please request and do not terminate.
-10. If you are can not find a direct match, please request and do not terminate.
-11. Please do not generate any observations.
+10. Please do not generate any observations.
+11. The output format is "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]".
+12. Request[] action can only request an entity in candidate list or it is itself.
+13. Please output the ranked candidate list when terminate the process. 
+14. The entity in Terminate[] can not be 'answer' but an entity.
+15. You must require the relevant entities in candidate list to target entity according your knowledge.
+
 
 [YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment
 
 ### Turn 1: (3 turns left to use "Terminate" action to provide final answer.)
-**Thought 1:**"""
+**Thought 1:**
+"""
 
 
 motif_ReAct_example_prompt_cn50_cn50_llama = """
@@ -517,9 +399,8 @@ You will solve the task using a series of interleaving Thought, Action, and Obse
 
 1. Request[entity]: Requests the context information of the entity from Knowledge Graphs only when you are unsure about the answer. This context information may be given in code descriptions. You can only request one entity per turn, and it must be from the candidate list. 
 2. The most similar 10 entities are: Most[] and Terminate[answer]: Returns the answer and finishes the task. This action can only occur once!
-You must have an act from above two actions per turn no matter it is request or terminate.
-If there is a direct match, please use act Terminate[] directly to end the precess.
-If terminate, there is no need for another observations.
+You must have 'Action' after 'Thought', no matter it is request or terminate.
+If there is a direct match, please use act "Most[] and Terminate[answer]" directly to end the precess.
 
 
 Here are two examples:
@@ -540,7 +421,7 @@ NOTE:
 
 Turn 1:
 Thought 1: I can find the aligned entity directly from the candidate list because there is a direct match.
-Act 1: The most similar 50 entities are: Most['Ne Win', 'Hla Min', 'Soe Thein', 'Chea Sim', 'Aung Min', 'Hla Tun', 'Su Chi', 'Tea Banh', 'Shwe Mann', 'Tin Oo'] and Terminate['Ne Win'].
+Act 1: The most similar 10 entities are: Most['Ne Win', 'Hla Min', 'Soe Thein', 'Chea Sim', 'Aung Min', 'Hla Tun', 'Su Chi', 'Tea Banh', 'Shwe Mann', 'Tin Oo'] and Terminate['Ne Win'].
 
 Example 2
 [USER (Boss)]: Please select 10 most similar entities from candidate list and select 1 most similar entity from it to terminate. You have at most 4 turns to finish the task. If you can find a direct match, please use act Terminate[] directly. The answer format is: The most similar 10 entities are: Most[] and Terminate[answer], please output the full list. The target entity is:
@@ -556,7 +437,7 @@ NOTE:
 [YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!
     Turn 1:
     Thought 1: I can find an entity in the candidate list that is a direct match for "Salauddin."
-    Act 1: The most similar 50 entities are: Most['Abdulla Kurd', 'Salam Fayyad', 'Sule Lamido', 'Talal Arslan', 'Saad Hariri', 'Salou Djibo', 'Shwe Mann', 'Aung Min', 'Soe Thein', 'Suharto'] and Terminate['Abdulla Kurd'].
+    Act 1: The most similar 10 entities are: Most['Abdulla Kurd', 'Salam Fayyad', 'Sule Lamido', 'Talal Arslan', 'Saad Hariri', 'Salou Djibo', 'Shwe Mann', 'Aung Min', 'Soe Thein', 'Suharto'] and Terminate['Abdulla Kurd'].
 
 New Task
 [USER (Boss)]: Please select 10 most similar entities from candidate list and select 1 most similar entity from it to terminate. You have at most 4 turns to finish the task. If you can find a direct match, please use act Terminate[] directly. The answer format is: The most similar 10 entities are: Most[] and Terminate[answer], please output the full list. The target entity is:
@@ -569,14 +450,15 @@ NOTE:
 1. You have at most 4 turns to generate the final result. Please follow my example between "Example Start" and "Example End" above to answer the task with interleaving Thought, Action, Observation turns. Each turn contains one segment of the target code to solve the problem.
 2. Please put the entity in the terminate in the first entity of the candidate list reranked!!!
 3. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'!!!
-4. If you are very sure about the answer, please answer directly and terminate with answer. 
+4. If you are very sure about the answer, please answer directly and terminate with answer.
 5. If there is the same entity in the candidate list as the target entity, please select it directly and use terminate action to end the process, otherwise, you will got punished.
 6. The answer format is: The most similar 10 entities are: Most[] and Terminate[answer], please output the full list.
 7. Please must output the full list of 10 entities, otherwise, you will get punished or even fired.
 8. You can only request when you are not sure about the answer, otherwise, you will get punished or even fired.
 9. You must have an act in a turn, no matter it's request or terminate. The act can only be two types.
 10. please follow thought, action, observation steps. Do not generate response by yourself.
-11. If you can find a direct match, please use act Terminate[] directly and do no need to confirm another entity.
+11. If you can find a direct match, please use action Terminate[answer] directly and do no need to confirm another entity.
+12. Request[] action can only request an entity in candidate list or it is itself.
 
 [YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment
 
@@ -585,8 +467,24 @@ Thought 1: So?
 
 """
 
-7. If observation is not in code format, the reasoning and analysis process is required to must use the motif information.
 
+1. You have at most 4 turns to generate the final result. Please follow my example between "Example Start" and "Example End" above to answer the task with interleaving Thought, Action, Observation turns. Each turn contains one segment of the target code to solve the problem.
+2. Please put the entity in the terminate in the first entity of the candidate list reranked!!!
+3. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'!!!
+4. If you are very sure about the answer, please answer directly and terminate with answer.
+5. If there is the same entity in the candidate list as the target entity, please select it directly and use terminate action to end the process, otherwise, you will got punished.
+6. The answer format is: The most similar 10 entities are: Most[] and Terminate[answer], please output the full list.
+7. Please must output the full list of 10 entities, otherwise, you will get punished or even fired.
+8. You can only request when you are not sure about the answer, otherwise, you will get punished or even fired.
+9. You must have an act in a turn, no matter it's request or terminate. The act can only be two types.
+10. please follow thought, action, observation steps. Do not generate response by yourself.
+11. If you can find a direct match, please use act "The most similar 10 entities are: Most[] and Terminate[answer]" directly and do no need to confirm another entity.
+12. The output format is "The most similar 10 entities are: Most[] and Terminate[answer]"!!!
+13. Request[] action can only request an entity in candidate list or it is itself.
+14. Please output the ranked candidate list when terminate the process.
+15. The entity in Terminate[] can not be 'answer' but an entity.
+16. You must require the relevant entities in candidate list to target entity according your knowledge.
+17. If terminate, there is no need for another observations.
 
 'Coalition for Democratic Unity'
 ['Croatian Democratic Union', 'Christian Democratic Party', 'Maldivian Democratic Party', 'Gabonese Democratic Party',

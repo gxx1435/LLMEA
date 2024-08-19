@@ -37,7 +37,7 @@ code_motif_prompts_generate = """
 As a good Computer Science student good at coding, your task is to describe the graph structure in Python code format. Motifs are recurrent and statistically significant subgraphs or patterns of a larger graph. Each Motif instance will be viewed as a function with specialized name and node involved in the Motif instance will be the parameters in the function. 
 
 **Rules for generating code format Motif**
-  1. Function Name: Use a descriptive name for the function that represents the relationship between the nodes. The function name should indicate the type of relationship or action involving the nodes which is an abstract of the motif.
+  1. Function Name: Use a descriptive name for the function that is an abstract of the motif. The function name should indicate the type of relationship or action involving the nodes.
   2. Import Statements: Import the necessary relations or actions. Use descriptive names that match the relationships in the motif information.
   3. Function Parameters: Include all nodes involved in the motif as parameters to the function.
   4. Function Implementation: Implement the function by calling the imported relations with the appropriate parameters. Each relation call should correspond to the connections or actions described in the motif information.
@@ -46,6 +46,8 @@ As a good Computer Science student good at coding, your task is to describe the 
   7. Return Values: Return all the nodes involved in the motif as part of the function’s result. Ensure that the function returns the state or outcome after applying the relationships.
   8. Please note the += relationship which represents multiple relationship between two nodes. It means two nodes have more than 1 type of relationship.
   9. A definition function represents a motif.
+  10. The code should fully represent the structural information between nodes.
+
   
 Please refer to the example below and handle a new task! 
 

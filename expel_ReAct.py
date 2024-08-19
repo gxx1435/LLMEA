@@ -3,6 +3,359 @@
 """
 
 prompts = """
+    As a good learner, you learn from good and bad experiences of entity alignment task and want to generate a better motif code template for it. Motifs are recurrent and statistically significant subgraphs or patterns of a knowledge graph. A motif code template is a consistent and repeatable structure of code that uses specific behaviors, interactions, or relationships in the code to describe a motif. It serves as a template that helps the AI model understand and generate the required output for entity alignment tasks. 
+    ------
+    **Rules for generating motif code template**
+      1. Function Name: Use a descriptive name for the function that represents the relationship between the nodes. The function name should indicate the type of relationship or action involving the nodes which is an abstract of the motif.
+      2. Import Statements: Import the necessary relations or actions. Use descriptive names that match the relationships in the motif information.
+      3. Function Parameters: Include all nodes involved in the motif as parameters to the function.
+      4. Function Implementation: Implement the function by calling the imported relations with the appropriate parameters. Each relation call should correspond to the connections or actions described in the motif information.
+      5. Connection Relationships: For simple connections between nodes, use the connected_with relation.
+      6. Complex Relationships: For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
+      7. Return Values: Return all the nodes involved in the motif as part of the function’s result. Ensure that the function returns the state or outcome after applying the relationships.
+      8. Execution: In the "if __name__ == '__main__':" block, call the defined functions with sample nodes to demonstrate how the motif relationships are applied.
+      9. Please note the += relationship which represents multiple relationship between two nodes. It means two nodes have more than 1 type of relationship.
+    ------`
+    
+    You are doing an entity alignment task of two knowledge graphs (KGs), where you need to find the equivalent entity of the target entity. The target entity and the equivalent entity both have background information from KGs. The background information is represented by motif code template. You should align the target entity and equivalent entity (correct answer) based on the following rules. In the process of aligning the target entity to the correct answer, you MUST summarize some experience or rules in bullet point format that leads to writing perfect motif code templates.
+
+    You should regenerate the following case later according to the target entity and correct answer. You must follow the correct answer to regenerate the process. Futhermore, you should generate the rules writing better code motifs during the process. 
+    
+    ------
+    # Case:
+    You are a programmer in a large company, tasked with selecting the most similar entity to a target entity from a candidate list. You will solve the task using a series of interleaving Thought, Action, and Observation steps. Thought can reason about the current situation, and Action can only be one of the following two types:
+
+    - Request[entity]: Requests the context information of the entity from external Knowledge Graphs. You can only request one entity in each turn, and it must be from the candidate list or the target entity itself.
+    - The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]: Returns the answer and finishes the task. This action can only occur when you finish the task! When you decide to use terminate action, you mush put the most similar 50 entities into: "<MOST>[]</MOST>". Please note that if there is a direct match, please use act Terminate[] directly to end the precess.
+    
+    You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types. 
+    
+    **NOTE:** You must request the most relevant entity information from the candidate list to reduce your uncertainty and finally help you to finish this task correctly. If you request less important entities and fail to handle this task perfectly, you will be immediately fired! 
+    Below is a case task.
+    
+    ------
+    # New Task:
+    [USER (Boss)]: Please rerank the candidate list by the similarity to target entity and select 1 most similar entity from it to terminate. If there is the same entity in the candidate list as the target entity, please select it directly. 
+    
+    **The target entity is:** 
+    Ruam Jai Thai
+    
+    **The candidate entities list is:**
+    ['Rami Jarrah', 'Karam Ali Shah', 'Zhao Lianhai', 'Sai Mauk Kham', 'Luan Rama', 'Puan Maharani', 'Tan Jee Say', 'Hamzah Haz', 'Hamshahri', 'Rabi Ray', 'Bamir Topi', 'Chaman Lal', 'Hamada Madi', 'Fuad Qalaf', 'Cui Tiankai', 'Aamir Khan', 'Munir Said Thalib', 'Rudy Giuliani', 'Jamaica', 'Chiam See Tong', 'Chan Santokhi', 'Ma Kai', 'Tea Banh', 'Jaak Aab', 'Kundi Paihama', 'Sam Abal', 'Toomas Savi', 'Nur Misuari', 'Tulsi Giri', 'Fuat Oktay', 'Dullah Omar', 'Royal Thai Navy', 'Pap Saine', 'Pak Ui-chun', 'Michael Tsai', 'Yushau Shuaib', 'Ilham Tohti', 'Eda Rivas', 'Đinh La Thăng', 'Aamulehti', 'Liam Lawlor', 'Malalai Joya', 'Burhan Wani', 'Siim Kallas', 'Henry Van Thio', 'Russ Feingold', 'Rupiah Banda', 'Tin Naing Thein', 'Themba Godi', 'Hasan Tiro']
+    
+    NOTE:
+    1. You have at most 4 turns to generate the final result. Please follow my examples above to answer the task with interleaving Thought, Code, Action, Result turns. 
+    2. Please put the entity in the terminate in the first entity of the candidate list reranked!!!
+    3. The observation should contain code motif. 
+    4. If you are very sure about the answer, please answer directly. 
+    5. If there is the same entity in the candidate list as the target entity, please select it directly and terminate the process. 
+    6. You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types.
+    7. Please follow the example format: thought, action, observation steps. Do not generate response by yourself.
+    8. If you can find a direct match, please use act "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[]" directly and do no need to confirm another entity.
+    9. If you are can not find a direct match, please request and do not terminate.
+    10. The background information in observation is represented by code motif.
+    11. The output format is "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]".
+    12. Request[] action can only request an entity in candidate list or it is itself.
+    13. Please output the ranked candidate list when terminate the process. 
+    14. The entity in Terminate[] can not be 'answer' but an entity.
+    
+    
+    [YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment
+    
+    ### Turn 1: (3 turns left to use "Terminate" action to provide final answer.)
+    **Thought 1:**
+    Given the target entity "Ruam Jai Thai" and the candidate list provided, there is no direct match in the candidate list for "Ruam Jai Thai." Therefore, I cannot terminate the process immediately by selecting a direct match. To proceed, I need to request more information about the target entity "Ruam Jai Thai" or entities closely related to it from the candidate list to make an informed decision. Since "Ruam Jai Thai" directly translates to a concept of unity or coalition in Thai, and considering the context might be political or social, I should look for entities that could be related in terms of geography or domain. However, without direct knowledge or a clear match, I need to request information on the target entity itself if possible or a closely related entity from the list that might share a similar context, such as political figures or organizations from Thailand. Since I cannot request information on "Ruam Jai Thai" directly as it's not in the candidate list and no entity in the list directly matches or suggests being "Ruam Jai Thai," I will choose an entity that might have a contextual or geographical connection to the target entity.
+    
+    **Act 1:**
+    Request[Royal Thai Navy]Observation 1: The background information of the entity is below which is given in code format motifs: 
+    
+    import location
+    
+    class Royal_Thai_Navy(object):
+    
+        def __init__(self, Royal_Thai_Navy, Bangkok):
+            ## This is initial function
+            self.Royal_Thai_Navy = Royal_Thai_Navy
+            self.Bangkok = Bangkok
+    
+        def Royal_Thai_Navy_location(self):
+            self.Royal_Thai_Navy = location(self.Bangkok)
+            
+            return self.Royal_Thai_Navy, self.Bangkok
+    ``### Turn 2: (2 turns left to use "Terminate" action to provide final answer.)
+    **Thought 2:**
+    The information received about the Royal Thai Navy confirms its location in Bangkok, Thailand, which aligns with the geographical context I was considering for "Ruam Jai Thai." Given that "Ruam Jai Thai" could be related to a political or social coalition in Thailand, and the Royal Thai Navy is a significant entity within Thailand, this connection, however, does not directly help in identifying "Ruam Jai Thai" among the candidate entities. Since "Ruam Jai Thai" does not directly match any entity in the candidate list and the Royal Thai Navy, while relevant geographically, does not provide a direct link to the target entity, I need to consider other entities that might have a more direct connection to political or social movements or figures within Thailand. Looking at the candidate list again, I don't see entities that directly suggest a political party or coalition by name, which means I might need to request information on another entity that could potentially have a connection to Thai politics or social movements to narrow down the possibilities further.
+    
+    **Act 2:**
+    Request[Tin Naing Thein]Observation 2: The background information of the entity is below which is given in code format motifs: 
+    
+    import has_occupation, birth_place, nationality, member_of, is_connected_with
+    
+    class Tin_Naing_Thein(object):
+    
+        def __init__(self, Tin_Naing_Thein, Politician, Myanmar, Union_Solidarity_and_Development_Party):
+            ## This is initial function
+            self.Tin_Naing_Thein = Tin_Naing_Thein
+            self.Politician = Politician
+            self.Myanmar = Myanmar
+            self.Union_Solidarity_and_Development_Party = Union_Solidarity_and_Development_Party
+            
+        def Tin_Naing_Thein_Profile(self):
+            self.Tin_Naing_Thein = has_occupation(self.Politician)
+            self.Tin_Naing_Thein += birth_place(self.Myanmar)
+            self.Tin_Naing_Thein += nationality(self.Myanmar)
+            self.Tin_Naing_Thein += member_of(self.Union_Solidarity_and_Development_Party)
+            
+            self.Politician = is_connected_with(self.Tin_Naing_Thein)
+            self.Myanmar = is_connected_with(self.Tin_Naing_Thein)
+            self.Union_Solidarity_and_Development_Party = is_connected_with(self.Tin_Naing_Thein)
+            
+            return self.Tin_Naing_Thein, self.Politician, self.Myanmar, self.Union_Solidarity_and_Development_Party
+    ``### Turn 3: (1 turn left to use "Terminate" action to provide final answer.)
+    **Thought 3:**
+    The information on Tin Naing Thein, a politician from Myanmar associated with the Union Solidarity and Development Party, does not directly aid in identifying "Ruam Jai Thai" as it shifts the geographical focus away from Thailand. This indicates that my strategy of selecting entities based on potential political or geographical relevance might need adjustment. Given the lack of direct matches or clear connections to "Ruam Jai Thai" from the entities requested so far, and considering the urgency to make a decision with only one turn left, it might be prudent to select an entity that could potentially have a broader or more symbolic connection to the concept of unity or coalition within the context of Southeast Asia, if no direct information on "Ruam Jai Thai" is available. However, without a clear candidate that represents "Ruam Jai Thai" or its values, and with limited information to make a direct connection, the task becomes significantly challenging. At this point, a strategic guess based on the available information and the context of the entities might be necessary.
+    
+    **Act 3:**
+    Request[Puan Maharani]Observation 3: The background information of the entity is below which is given in code format motifs: 
+    
+    import is_connected_with, has_child
+    
+    class Puan_Maharani(object):
+    
+        def __init__(self, Indonesia, Megawati_Sukarnoputri, Puan_Maharani, Indonesian_Democratic_Party_of_Struggle, Politician):
+            ## This is initial function
+            self.Indonesia = Indonesia
+            self.Megawati_Sukarnoputri = Megawati_Sukarnoputri
+            self.Puan_Maharani = Puan_Maharani
+            self.Indonesian_Democratic_Party_of_Struggle = Indonesian_Democratic_Party_of_Struggle
+            self.Politician = Politician
+            
+        def Indonesia_connected_with_Megawati_and_Puan(self):
+            self.Indonesia = is_connected_with(self.Megawati_Sukarnoputri)
+            self.Indonesia = is_connected_with(self.Puan_Maharani)
+            self.Megawati_Sukarnoputri = has_child(self.Puan_Maharani)
+            
+            return self.Indonesia, self.Megawati_Sukarnoputri, self.Puan_Maharani
+    
+        def Indonesian_Democratic_Party_of_Struggle_connected_with_Megawati_and_Puan(self):
+            self.Indonesian_Democratic_Party_of_Struggle = is_connected_with(self.Megawati_Sukarnoputri)
+            self.Indonesian_Democratic_Party_of_Struggle = is_connected_with(self.Puan_Maharani)
+            self.Megawati_Sukarnoputri = has_child(self.Puan_Maharani)
+            
+            return self.Indonesian_Democratic_Party_of_Struggle, self.Megawati_Sukarnoputri, self.Puan_Maharani
+    
+        def Generic_connected_with_Megawati_and_Puan(self):
+            # Assuming '~' represents a generic or unspecified entity
+            self.Generic = is_connected_with(self.Megawati_Sukarnoputri)
+            self.Generic = is_connected_with(self.Puan_Maharani)
+            self.Megawati_Sukarnoputri = has_child(self.Puan_Maharani)
+            
+            return self.Generic, self.Megawati_Sukarnoputri, self.Puan_Maharani
+    
+        def Generic_connected_with_Indonesia_and_Puan(self):
+            # Assuming '~' represents a generic or unspecified entity
+            self.Generic = is_connected_with(self.Indonesia)
+            self.Generic = is_connected_with(self.Puan_Maharani)
+            self.Indonesia = is_connected_with(self.Puan_Maharani)
+            
+            return self.Generic, self.Indonesia, self.Puan_Maharani
+    
+        def Politician_connected_with_Megawati_and_Puan(self):
+            self.Politician = is_connected_with(self.Megawati_Sukarnoputri)
+            self.Politician = is_connected_with(self.Puan_Maharani)
+            self.Megawati_Sukarnoputri = has_child(self.Puan_Maharani)
+            
+            return self.Politician, self.Megawati_Sukarnoputri, self.Puan_Maharani
+    ``### Turn 4: (Last turn to use "Terminate" action to provide final answer.)
+    **Thought 4:**
+    The information on Puan Maharani, a prominent politician from Indonesia connected with the Indonesian Democratic Party of Struggle, and being the child of Megawati Sukarnoputri, provides a significant insight into political lineage and influence within Indonesia. However, this information, while valuable, does not directly assist in identifying "Ruam Jai Thai" within the context of the candidate list, as it shifts the focus to Indonesia rather than Thailand. Given the turns taken and the information gathered from the requested entities, it's clear that a direct connection to "Ruam Jai Thai" or a direct match within the candidate list is not evident based on the entities explored. With the final turn at hand and considering the geographical and political context explored so far, without a clear or direct match to "Ruam Jai Thai," I must conclude the task based on the information available and the context provided by the entities explored.
+    
+    **Act 4:**
+    The most similar 50 entities are:<MOST>['Royal Thai Navy', 'Tin Naing Thein', 'Puan Maharani', 'Rami Jarrah', 'Karam Ali Shah', 'Zhao Lianhai', 'Sai Mauk Kham', 'Luan Rama', 'Tan Jee Say', 'Hamzah Haz', 'Hamshahri', 'Rabi Ray', 'Bamir Topi', 'Chaman Lal', 'Hamada Madi', 'Fuad Qalaf', 'Cui Tiankai', 'Aamir Khan', 'Munir Said Thalib', 'Rudy Giuliani', 'Jamaica', 'Chiam See Tong', 'Chan Santokhi', 'Ma Kai', 'Tea Banh', 'Jaak Aab', 'Kundi Paihama', 'Sam Abal', 'Toomas Savi', 'Nur Misuari', 'Tulsi Giri', 'Fuat Oktay', 'Dullah Omar', 'Pap Saine', 'Pak Ui-chun', 'Michael Tsai', 'Yushau Shuaib', 'Ilham Tohti', 'Eda Rivas', 'Đinh La Thăng', 'Aamulehti', 'Liam Lawlor', 'Malalai Joya', 'Burhan Wani', 'Siim Kallas', 'Henry Van Thio', 'Russ Feingold', 'Rupiah Banda', 'Themba Godi', 'Hasan Tiro']</MOST> and Terminate['Royal Thai Navy']
+
+    
+    Insight summarization & Regenerate the process:
+    ** The case above is {}, please generate some experience or rules in bullet point format that leads to writing perfect motif code templates, according to the target entity and correct answer.
+    ** Please generate the correct reasoning process of above case, make target entity aligned with the correct answer. The target entity is:
+    {}
+    
+    The correct answer(aligned entity) is:
+    {}
+
+    The candidate entities list is: 
+    {}
+    
+    NOTE: 
+    Please enclose the generated experience or rules in '<rule>' and '</rule>' tags.
+    2. You have at most 4 turns to generate the final result. Please follow my examples above to answer the task with interleaving Thought, Code, Action, Result turns. 
+    3. Please generate the step-by-step thought process leading to the final answer.
+    4. You must use Code Motif in the reasoning path. Refer to the example provided.
+    5. The final answer in 'Terminate[answer]' should be the aligned entity.
+    6. please must have observation and code motif each turn in reasoning process.
+    
+    
+""".format('wrong',
+                'Ruam Jai Thai',
+                'Thais United',
+               ['Rami Jarrah', 'Karam Ali Shah', 'Zhao Lianhai', 'Sai Mauk Kham', 'Luan Rama', 'Puan Maharani', 'Tan Jee Say', 'Hamzah Haz', 'Hamshahri', 'Rabi Ray', 'Bamir Topi', 'Chaman Lal', 'Hamada Madi', 'Fuad Qalaf', 'Cui Tiankai', 'Aamir Khan', 'Munir Said Thalib', 'Rudy Giuliani', 'Jamaica', 'Chiam See Tong', 'Chan Santokhi', 'Ma Kai', 'Tea Banh', 'Jaak Aab', 'Kundi Paihama', 'Sam Abal', 'Toomas Savi', 'Nur Misuari', 'Tulsi Giri', 'Fuat Oktay', 'Dullah Omar', 'Royal Thai Navy', 'Pap Saine', 'Pak Ui-chun', 'Michael Tsai', 'Yushau Shuaib', 'Ilham Tohti', 'Eda Rivas', 'Đinh La Thăng', 'Aamulehti', 'Liam Lawlor', 'Malalai Joya', 'Burhan Wani', 'Siim Kallas', 'Henry Van Thio', 'Russ Feingold', 'Rupiah Banda', 'Tin Naing Thein', 'Themba Godi', 'Thais United']
+)
+
+
+
+
+
+prompts_v1 = """
+    You are experience learner, you learn from experience and generate better Code motif for a task. Code motif refer to a consistent and repeatable structure of code used to describe a specific behavior, interaction, or relationship in the code. It serves as a template or pattern that helps the AI model understand and generate the required output for similar tasks.
+
+    You are doing an entity alignement task. The target entity and aligned entity both have background information. The backgound information is represented by code motif. You should align the target entity and correct answer based on the following rules.
+
+    In the process of aligning target entity to correct answer, you should summarize some rules that write perfect code motifs.
+
+
+    ------
+    # Case:
+    {}
+    
+    Correction:
+    The case above is {}, please according to the target entity and correct answer generate rules write better code motif.
+
+
+    [USER (Boss)]: Please sort the candidate list according to similarity to the target entity and select the most aligned entity. You have at most 4 turns to finish the task. If there is the same entity in the candidate list as the target entity, please select it directly. The answer format is: Terminate[answer]. The target entity is:
+    The target entity is:
+    {}
+
+    The aligned entity is:
+    {}
+
+    The candidate entities list is: 
+    {}
+
+    Notes:
+    1. You have at most 4 turns to generate the final result. Please follow my examples above to answer the task with interleaving Thought, Code, Action, Result turns. 
+    2. Please generate the step-by-step thought process leading to the final answer.
+    3. You must use Code Motif in the reasoning path. Refer to the example provided.
+    4. Please summarize some rules on how to write better Code Motifs which can let LLM better understand motif in <rule></rule> tags in the final turn.
+    6. The final answer in 'Terminate[answer]' should be the aligned entity.
+    7. please must have observation and code motif each turn in reasoning process.
+
+    """
+
+
+prompts_v0 = """
+    You are experience learner, you learn from experience and generate better Code motif for a task. Code motif refer to a consistent and repeatable structure of code used to describe a specific behavior, interaction, or relationship in the code. It serves as a template or pattern that helps the AI model understand and generate the required output for similar tasks.
+
+    You are doing an entity alignement task. The target entity and aligned entity both have background information. The backgound information is represented by code motif. You should align the target entity and correct answer based on the following rules.
+    
+    In the process of aligning target entity to correct answer, you should summarize some rules that write perfect code motifs.
+    
+    
+    ------
+    # Case:
+    
+    You are a programmer in a large company, tasked with selecting the most similar entity to a target entity from a candidate list. You will solve the task using a series of interleaving Thought, Action, and Observation steps. Thought can reason about the current situation, and Action can only be one of the following two types:
+
+    - Request[entity]: Requests the context information of the entity from external Knowledge Graphs. You can only request one entity in each turn, and it must be from the candidate list or the target entity itself.
+    - The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]: Returns the answer and finishes the task. This action can only occur when you finish the task! When you decide to use terminate action, you mush put the most similar 50 entities into: "<MOST>[]</MOST>". Please note that if there is a direct match, please use act Terminate[] directly to end the precess.
+    
+    You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types. 
+    Note:
+    1. You have at most 4 turns to generate the final result. Please follow my examples above to answer the task with interleaving Thought, Code, Action, Result turns. 
+    2. Please put the entity in the terminate in the first entity of the candidate list reranked!!!
+    3. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'!!!
+    4. If you are very sure about the answer, please answer directly. 
+    5. If there is the same entity in the candidate list as the target entity, please select it directly and terminate the process. 
+    6. You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types.
+    7. Please follow the example format: thought, action, observation steps. Do not generate response by yourself.
+    8. If you can find a direct match, please use act "Terminate[]" directly and do no need to confirm another entity.
+    9. If you are can not find a direct match, please request and do not terminate.
+    10. Please do not generate any observations.
+    11. The output format is "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]".
+    12. Request[] action can only request an entity in candidate list or it is itself. 
+    13. please output the full candidate list.
+    
+    **NOTE:** You must request the most relevant entity information from the candidate list to reduce your uncertainty and finally help you to finish this task correctly. If you request less important entities and fail to handle this task perfectly, you will be immediately fired! 
+    
+    [USER (Boss)]: Please rerank the candidate list by the similarity to target entity and select 1 most similar entity from it to terminate. If there is the same entity in the candidate list as the target entity, please select it directly. 
+    
+    **The target entity is:** 
+    Ruam Jai Thai
+    
+    **The candidate entities list is:**
+    ['Rami Jarrah', 'Karam Ali Shah', 'Zhao Lianhai', 'Sai Mauk Kham', 'Luan Rama', 'Puan Maharani', 'Tan Jee Say', 'Hamzah Haz', 'Hamshahri', 'Rabi Ray', 'Bamir Topi', 'Chaman Lal', 'Hamada Madi', 'Fuad Qalaf', 'Cui Tiankai', 'Aamir Khan', 'Munir Said Thalib', 'Rudy Giuliani', 'Jamaica', 'Chiam See Tong', 'Chan Santokhi', 'Ma Kai', 'Tea Banh', 'Jaak Aab', 'Kundi Paihama', 'Sam Abal', 'Toomas Savi', 'Nur Misuari', 'Tulsi Giri', 'Fuat Oktay', 'Dullah Omar', 'Royal Thai Navy', 'Pap Saine', 'Pak Ui-chun', 'Michael Tsai', 'Yushau Shuaib', 'Ilham Tohti', 'Eda Rivas', 'Đinh La Thăng', 'Aamulehti', 'Liam Lawlor', 'Malalai Joya', 'Burhan Wani', 'Siim Kallas', 'Henry Van Thio', 'Russ Feingold', 'Rupiah Banda', 'Tin Naing Thein', 'Themba Godi', 'Hasan Tiro']
+    
+    [YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment
+    
+    ### Turn 1: (3 turns left to use "Terminate" action to provide final answer.)
+    **Thought 1:**
+    Given the target entity "Ruam Jai Thai" and the candidate list provided, there is no direct match in the list. "Ruam Jai Thai" suggests a Thai context, possibly related to politics, social movements, or organizations within Thailand. To make an informed decision, it's crucial to understand the nature of "Ruam Jai Thai" better. Among the candidates, entities related to Thai politics or society could be more relevant. However, without specific knowledge about "Ruam Jai Thai," it's challenging to pinpoint which candidate might be the most similar based on the names alone. Entities like "Royal Thai Navy" hint at a Thai connection but from a different sector. It might be beneficial to request information on "Ruam Jai Thai" itself if available to get a clearer understanding of its nature and then find the most similar entity based on that understanding.
+    
+    **Act 1:** Request[Ruam Jai Thai]Observation 1: The background information of the entity is below which is given in code format motifs: 
+    
+    import express_intent_to_engage_in_diplomatic_cooperation, make_statement, yield_interaction, demand_interaction, consult_interaction, make_an_appeal_or_request, praise_or_endorse
+    
+    class Ruam_Jai_Thai(object):
+    
+        def __init__(self, Chavalit_Yongchaiyudh, Ruam_Jai_Thai, Military_Thailand):
+            ## This is initial function
+            self.Chavalit_Yongchaiyudh = Chavalit_Yongchaiyudh
+            self.Ruam_Jai_Thai = Ruam_Jai_Thai
+            self.Military_Thailand = Military_Thailand
+    
+        def Chavalit_Yongchaiyudh_engage_Ruam_Jai_Thai(self):
+            self.Chavalit_Yongchaiyudh = express_intent_to_engage_in_diplomatic_cooperation(self.Ruam_Jai_Thai)
+            
+            return self.Chavalit_Yongchaiyudh, self.Ruam_Jai_Thai
+    
+        def Chavalit_Yongchaiyudh_interactions_with_Military(self):
+            self.Chavalit_Yongchaiyudh = make_statement(self.Military_Thailand)
+            self.Chavalit_Yongchaiyudh += yield_interaction(self.Military_Thailand)
+            self.Chavalit_Yongchaiyudh += demand_interaction(self.Military_Thailand)
+            self.Chavalit_Yongchaiyudh += consult_interaction(self.Military_Thailand)
+            self.Chavalit_Yongchaiyudh += make_an_appeal_or_request(self.Military_Thailand)
+            
+            return self.Chavalit_Yongchaiyudh, self.Military_Thailand
+    
+        def Ruam_Jai_Thai_endorse_Military(self):
+            self.Ruam_Jai_Thai = praise_or_endorse(self.Military_Thailand)
+            
+            return self.Ruam_Jai_Thai, self.Military_Thailand
+    ``### Turn 2: (2 turns left to use "Terminate" action to provide final answer.)
+    **Thought 2:**
+    The information provided about "Ruam Jai Thai" indicates a strong connection with Thai military and political spheres, specifically mentioning Chavalit Yongchaiyudh, a notable figure in Thai politics and military. This suggests that "Ruam Jai Thai" is likely a political or military entity within Thailand. Given this context, the most similar entity from the candidate list would likely be one that has a direct connection to Thai politics or military. "Royal Thai Navy" stands out as it is directly related to the military aspect of Thailand. However, it's important to note that "Ruam Jai Thai" seems to be more of a political or collective movement rather than a specific military branch. Therefore, while "Royal Thai Navy" is closely related, there might not be a direct match in the list that perfectly aligns with "Ruam Jai Thai" as a political entity. Given the information and the nature of "Ruam Jai Thai," it's crucial to select an entity that closely aligns with its political and military context within Thailand.
+    
+    **Act 2:** The most similar 50 entities are:<MOST>['Royal Thai Navy', 'Tan Jee Say', 'Puan Maharani', 'Hamzah Haz', 'Sai Mauk Kham', 'Luan Rama', 'Rami Jarrah', 'Karam Ali Shah', 'Zhao Lianhai', 'Hamshahri', 'Rabi Ray', 'Bamir Topi', 'Chaman Lal', 'Hamada Madi', 'Fuad Qalaf', 'Cui Tiankai', 'Aamir Khan', 'Munir Said Thalib', 'Rudy Giuliani', 'Jamaica', 'Chiam See Tong', 'Chan Santokhi', 'Ma Kai', 'Tea Banh', 'Jaak Aab', 'Kundi Paihama', 'Sam Abal', 'Toomas Savi', 'Nur Misuari', 'Tulsi Giri', 'Fuat Oktay', 'Dullah Omar', 'Pap Saine', 'Pak Ui-chun', 'Michael Tsai', 'Yushau Shuaib', 'Ilham Tohti', 'Eda Rivas', 'Đinh La Thăng', 'Aamulehti', 'Liam Lawlor', 'Malalai Joya', 'Burhan Wani', 'Siim Kallas', 'Henry Van Thio', 'Russ Feingold', 'Rupiah Banda', 'Tin Naing Thein', 'Themba Godi', 'Hasan Tiro']</MOST> and Terminate['Royal Thai Navy']
+
+    
+    Correction:
+    The case above is {}, please according to the target entity and correct answer generate rules write better code motif.
+    
+
+    [USER (Boss)]: Please sort the candidate list according to similarity to the target entity and select the most aligned entity. You have at most 4 turns to finish the task. If there is the same entity in the candidate list as the target entity, please select it directly. The answer format is: Terminate[answer]. The target entity is:
+    The target entity is:
+    {}
+    
+    The aligned entity is:
+    {}
+    
+    The candidate entities list is: 
+    {}
+    
+    Notes:
+    1. You have at most 4 turns to generate the final result. Please follow my examples above to answer the task with interleaving Thought, Code, Action, Result turns. 
+    2. Please generate the step-by-step thought process leading to the final answer.
+    3. You must use Code Motif in the reasoning path. Refer to the example provided.
+    4. Please summarize some rules on how to write better Code Motifs which can let LLM better understand motif in <rule></rule> tags in the final turn.
+    6. The final answer in 'Terminate[answer]' should be the aligned entity.
+    7. please must have observation and code motif each turn in reasoning process.
+    
+    """.format('wrong',
+                'Ruam Jai Thai',
+                'Thais United',
+               ['Rami Jarrah', 'Karam Ali Shah', 'Zhao Lianhai', 'Sai Mauk Kham', 'Luan Rama', 'Puan Maharani', 'Tan Jee Say', 'Hamzah Haz', 'Hamshahri', 'Rabi Ray', 'Bamir Topi', 'Chaman Lal', 'Hamada Madi', 'Fuad Qalaf', 'Cui Tiankai', 'Aamir Khan', 'Munir Said Thalib', 'Rudy Giuliani', 'Jamaica', 'Chiam See Tong', 'Chan Santokhi', 'Ma Kai', 'Tea Banh', 'Jaak Aab', 'Kundi Paihama', 'Sam Abal', 'Toomas Savi', 'Nur Misuari', 'Tulsi Giri', 'Fuat Oktay', 'Dullah Omar', 'Royal Thai Navy', 'Pap Saine', 'Pak Ui-chun', 'Michael Tsai', 'Yushau Shuaib', 'Ilham Tohti', 'Eda Rivas', 'Đinh La Thăng', 'Aamulehti', 'Liam Lawlor', 'Malalai Joya', 'Burhan Wani', 'Siim Kallas', 'Henry Van Thio', 'Russ Feingold', 'Rupiah Banda', 'Tin Naing Thein', 'Themba Godi', 'Thais United']
+               )
+
+prompts_original = """
+    
     You are a programmer. You can request useful entities from a candidate list but must avoid requesting irrelevant entities. Failure to adhere to this will result in termination. Your task is to solve a question-answering problem using interleaving Thought, Action, and Observation steps.
     
     Thought: Reason about the current situation.
@@ -10,9 +363,7 @@ prompts = """
     Request[entity] - Requests the entity context information from Knowledge Graphs. The context information may be given in code descriptions. You can only request one entity per turn and it must be from the candidate list.
     Terminate[answer] - Returns the answer and finishes the task.
     Example
-    [USER (Boss)]: Give me the most aligned entity of the target entity from the candidates entity list. If there is the same entity, please select it directly. 
-    The target entity is: 
-    'Salauddin'
+    [USER (Boss)]: Give me the most aligned entity of the target entity from the candidates entity list. If there is the same entity, please select it directly. The target entity is: 'Salauddin'
     
     The Candidate entities list is:
     ['Salahuddin of Selangor', 'Slovenia', 'Riad Salamé', 'Hla Tun', 'Qadri Jamil', 'Sweden', 'Palau', 'Spain', 'Sheikh Hasina', 'Hla Min', 'Malaysia', 'Mohamed Nasheed', 'Ahmed Chalabi', 'Nabil Shaath', 'Sirindhorn', 'Japan', 'Abdo Hussameddin', 'Macky Sall', 'Salam Fayyad', 'Malawi', 'Mourad Dhina', 'Jawed Ludin', 'Macau', 'Abdulla Kurd']
@@ -101,27 +452,15 @@ prompts = """
     New Task
     You are performing an entity alignment task.
 
-    [USER (Boss)]: Please sort the candidate list according to similarity to the target entity and select the most aligned entity. You have at most 4 turns to finish the task. If there is the same entity in the candidate list as the target entity, please select it directly. The answer format is: Terminate[answer]. The target entity is:
-    The target entity is:
-    {}
+    [USER (Boss)]: Please sort the candidate list according to similarity to the target entity and select the most aligned entity. You have at most 4 turns to finish the task. If there is the same entity in the candidate list as the target entity, please select it directly. The answer format is: The most similar 50 entities are: <most>[]</most> and Terminate[answer]. The target entity is:
+    The target entity is {}.
     
-    The aligned entity is:
-    {}
+    The candidate entities list is:{}
     
-    The candidate entities list is: 
-    {}
+    The aligned entity is {}.
     
     Notes:
     1. Please generate the step-by-step thought process leading to the final answer.
     3. You must use Code Motif in the reasoning path. Refer to the example provided.
     4. Please generate some rules on how to write Code Motifs in <rule></rule> tags in the final turn.
-    
-    """.format('Party of the Revolution',
-                'Chama Cha Mapinduzi',
-               ['Party of Regions', 'Rally of the Republicans', 'State of Law Coalition', 'Party of Democratic Action',
-                'Christine Boutin', 'Carlos De León', 'Park Taejoon', 'Beatrix of the Netherlands',
-                'Sprint Corporation', 'Daily Nation', 'Daily Nation', 'Oracle Corporation', 'Friends of the Earth',
-                'All Basotho Convention', 'Alliance for the Republic', 'Bank of Spain', 'Raymond Benjamin',
-                'Margaret Wilson', 'Marcos Valério', 'Bank of Mexico', 'Chama Cha Mapinduzi'],
-
-               )
+    """
