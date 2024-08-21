@@ -512,7 +512,8 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                     if if_expel:
                         with open(os.getcwd() + '/output/code_generated_rules.txt') as f:
                             code_generated_rules = json.load(f)
-                        code_motif_prompt = code_motif_prompts_generate.format(code_generated_rules, text_motif_info)
+                            rule = code_generated_rules[-1]
+                        code_motif_prompt = code_motif_prompts_generate.format(rule, text_motif_info)
                     else:
                         code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
 
@@ -521,7 +522,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                 elif info_type == 'text_motif_base':
 
                     """To do"""
-                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=1, info_type=info_type, top_n=top_n, if_keep_top_n=1)
+                    text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=1, info_type=info_type, top_n=top_n, if_keep_top_n=0)
                     print(text_motif_info)
                     observations.update({entity_id: 'Observation {}: \n'.format(step) + text_motif_info})
 
@@ -534,7 +535,8 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                     if if_expel:
                         with open(os.getcwd() + '/output/code_generated_rules.txt') as f:
                             code_generated_rules = json.load(f)
-                        code_motif_prompt = code_motif_prompts_generate.format(code_generated_rules, text_motif_info)
+                            rule = code_generated_rules[-1]
+                        code_motif_prompt = code_motif_prompts_generate.format(rule, text_motif_info)
                     else:
                         code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
 
@@ -582,7 +584,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
         new_idx_prompt_dict = {}
         new_entity_list = []
         terminate_dict = {}
-        most_list_dict ={}
+        most_list_dict = {}
         for i in range(len(entity_list)):
             entity_id = entity_list[i].entity_id
             if requests[i] != -1:

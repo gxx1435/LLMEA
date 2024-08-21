@@ -43,16 +43,16 @@ code_motif_prompts_generate = """
 As a good Computer Science student good at coding, your task is to describe the graph structure in Python code format. Motifs are recurrent and statistically significant subgraphs or patterns of a larger graph. Each Motif instance will be viewed as a function with specialized name and node involved in the Motif instance will be the parameters in the function. 
 
 **Rules for generating code format Motif**
-  1. Function Name: Use a descriptive name for the function that is an abstract of the motif. The function name should indicate the type of relationship or action involving the nodes.
-  2. Import Statements: Import the necessary relations or actions. Use descriptive names that match the relationships in the motif information.
-  3. Function Parameters: Include all nodes involved in the motif as parameters to the function.
-  4. Function Implementation: Implement the function by calling the imported relations with the appropriate parameters. Each relation call should correspond to the connections or actions described in the motif information.
-  5. Connection Relationships: For simple connections between nodes, use the connected_with relation.
-  6. Complex Relationships: For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
-  7. Return Values: Return all the nodes involved in the motif as part of the function’s result. Ensure that the function returns the state or outcome after applying the relationships.
-  8. Please note the += relationship which represents multiple relationship between two nodes. It means two nodes have more than 1 type of relationship.
-  9. A definition function represents a motif.
-  10. The code should fully represent the structural information between nodes.
+- **Descriptive Function Names:** Ensure the function name clearly represents the relationship or interaction between the entities involved in the motif. This aids in understanding the motif's purpose at a glance.
+- **Relevant Import Statements:** Import statements should directly relate to the actions or relationships depicted in the motif, enhancing code readability and maintainability.
+- **Comprehensive Function Parameters:** Include all entities involved in the motif as parameters, ensuring the function accurately represents the motif's structure and interactions.
+- **Clear Function Implementation:** The function should implement the motif by utilizing the imported relations appropriately, reflecting the actual connections or interactions among the entities.
+- **Use of Connection Relationships:** Employ the `connected_with` relation for straightforward connections, making the code intuitive for simple relationships.
+- **Employment of Complex Relationships:** For intricate interactions, such as meetings or negotiations, use specific relations like `make_a_visit` or `express_intent_to_meet_or_negotiate`, providing depth to the motif.
+- **Inclusive Return Values:** Return all entities involved in the motif, along with the state or outcome post-relationship application, offering a complete view of the motif's effect.
+- **Demonstrative Execution Block:** Use the `if __name__ == '__main__':` block to demonstrate the motif's application, showcasing its functionality with sample nodes.
+- **Understanding += Relationship:** Recognize the `+=` relationship as indicative of multiple types of connections between two nodes, enriching the motif's complexity.
+- **～**:** represent a single node.
   
 Please refer to the example below and handle a new task! 
 
@@ -117,6 +117,6 @@ Given triangle Motif information, generate its Code description.
 
 """.format(
     """
-    - Target entity: Thais United; Motif 1: [(Thais United, connected with ,Somkid Jatusripitak),(Thais United, connected with ,Kittiratt Na-Ranong),(Somkid Jatusripitak, member Of ,Thais United),(Kittiratt Na-Ranong, member Of ,Thais United)]
-     """
+- Target entity: Lukoil; Motif 1: [(~, connected with ,Vagit Alekperov),(~, connected with ,Lukoil),(Vagit Alekperov, connected with ,Lukoil)]
+"""
 )

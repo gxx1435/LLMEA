@@ -619,22 +619,22 @@
 # txt = "```python\nimport is_connected_with\n\nclass Enrique_Mugica(object):\n\n    def __init__(self, Enrique_Mugica, Communist_Party_of_Spain):\n        ## This is initial function\n        self.Enrique_Mugica = Enrique_Mugica\n        self.Communist_Party_of_Spain = Communist_Party_of_Spain\n\n    def Enrique_Mugica_connected_with_Communist_Party(self):\n        # Establishing connections between Enrique M\u00fagica and the Communist Party of Spain\n        self.Communist_Party_of_Spain = is_connected_with(self.Enrique_Mugica)\n        self.Enrique_Mugica = is_connected_with(self.Communist_Party_of_Spain)\n        \n        return self.Enrique_Mugica, self.Communist_Party_of_Spain\n```"
 # print(find_code(txt))
 
-import subprocess
-import sys
-
-def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-# 示例: 安装 requests 库
-install("tiktoken")
-
-exit()
+# import subprocess
+# import sys
+#
+# def install(package):
+#     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+#
+# # 示例: 安装 requests 库
+# install("tiktoken")
+#
+# exit()
 
 import json
 from run.utils import hit_1_10_rate, baseline_hit_rate
 final_answers = {}
 for i in [2,3,4]:
-    with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_original_5motif_v4/final_answer_code_motif_lite_{}.json'.format(i), 'r') as f:
+    with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_corrected_5motif_v7/final_answer_text_motif_lite_{}.json'.format(i), 'r') as f:
         final_answer = json.load(f)
         final_answers.update(final_answer)
 print(len(final_answers))
@@ -642,7 +642,7 @@ print(len(final_answers))
 #     print(key, final_answers[key])
 # exit()
 
-with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_original_5motif_v4/final_answer_code_motif_lite_recall_all.json', 'w') as f:
+with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_corrected_5motif_v7/final_answer_text_motif_lite_recall_all.json', 'w') as f:
     json.dump(final_answers, f, indent=4)
 
 
@@ -653,7 +653,7 @@ ent2_f = 'new_ent_ids_2_aligned_rs_0.3_new'
 # baseline_response = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_50_50_corrected/baseline/idx_prompt_dict_baseline_final_ans.json'
 # hit_rate = baseline_hit_rate(baseline_response,dataset, ent1_f, ent2_f, 'hit1')
 
-hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_original_5motif_v4/final_answer_code_motif_lite_recall_all.json',
+hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_yago_t5000_50_50_corrected_5motif_v7/final_answer_text_motif_lite_recall_all.json',
                          dataset=dataset,
                          ent1_f=ent1_f,
                          ent2_f=ent2_f,

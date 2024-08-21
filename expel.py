@@ -2,7 +2,7 @@ import argparse
 import json
 import os
 import random
-from entity import Entity
+from entity_expel import Entity
 from run.utils import get_ent_id_dict
 # from API_bank import get_gpt_4_turbo
 
@@ -169,6 +169,17 @@ def expel():
     """
     :return:
     """
+    rule = """
+      1. Function Name: Use a descriptive name for the function that represents the relationship between the nodes. The function name should indicate the type of relationship or action involving the nodes which is an abstract of the motif.
+      2. Import Statements: Import the necessary relations or actions. Use descriptive names that match the relationships in the motif information.
+      3. Function Parameters: Include all nodes involved in the motif as parameters to the function.
+      4. Function Implementation: Implement the function by calling the imported relations with the appropriate parameters. Each relation call should correspond to the connections or actions described in the motif information.
+      5. Connection Relationships: For simple connections between nodes, use the connected_with relation.
+      6. Complex Relationships: For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
+      7. Return Values: Return all the nodes involved in the motif as part of the function’s result. Ensure that the function returns the state or outcome after applying the relationships.
+      8. Execution: In the "if __name__ == '__main__':" block, call the defined functions with sample nodes to demonstrate how the motif relationships are applied.
+      9. Please note the += relationship which represents multiple relationship between two nodes. It means two nodes have more than 1 type of relationship.
+    """
     def find_rules(s):
         start_idx = s.find('<rule>')
         end_idx = s.find("</rule>")
@@ -195,7 +206,7 @@ def expel():
         if_wrong, case = get_case(entity, aligned_entity)
 
         print(if_wrong)
-        prompts = prompts.format(case, if_wrong, target_entity, aligned_entity, cand_list)
+        prompts = prompts.format(rule, case, if_wrong, target_entity, aligned_entity, cand_list)
 
 
         msg = prompts

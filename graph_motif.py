@@ -25,8 +25,8 @@ def find_triangle_or_star_motifs(graph, node, top_n=5, if_keep_top_n=1):
                 top_out_edges = sorted(out_edges, key=lambda edge: graph.degree(edge[1]), reverse=True)[:top_n]
                 top_in_edges = sorted(in_edges, key=lambda edge: graph.degree(edge[0]), reverse=True)[:top_n]
             else:
-                top_out_edges = sorted(out_edges, key=lambda edge: graph.degree(edge[1]), reverse=True)
-                top_in_edges = sorted(in_edges, key=lambda edge: graph.degree(edge[0]), reverse=True)
+                top_out_edges = out_edges
+                top_in_edges = in_edges
 
             # 构建星型motif子图
             star_motif = nx.DiGraph()
