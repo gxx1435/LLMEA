@@ -16,8 +16,8 @@ from graph_motif import (find_triangle_or_star_motifs, find_star_motifs,
 current_dir = os.getcwd()
 save_dir = current_dir + '/data'
 def get_paths():
-    dataset = 'icews_yago'
-    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_50_5041_all add_put_correct_ans_last.txt'.format(save_dir, dataset)
+    dataset = 'icews_wiki'
+    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_50_1496_all add_put_correct_ans_last.txt'.format(save_dir, dataset)
 
     # from ReAct_API_call import dataset, sematic_embedding_candidates_path
 
@@ -788,7 +788,7 @@ def main():
     ent_id_2_path = current_dir + '/data/{}/new_ent_ids_2_aligned_rs_0.3_new'.format(dataset)
 
     entity_type = 'candidate'
-    # entity_type = 'target'
+    entity_type = 'target'
 
     ent_id_dict = {}
     if entity_type == ('target'):
@@ -797,7 +797,7 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Lukoil"""
+    entity = """Andrew Adonis"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)

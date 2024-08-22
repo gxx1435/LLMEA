@@ -284,26 +284,98 @@ motif_ReAct_example_prompt_cn50_cn50 = """
     21. When requesting information, prioritize entities with the highest name similarity and potential contextual relevance to the target entity.
     22. If a direct match is not found, choose the entity with the highest similarity based on the motif code analysis.
     23. If there is same entity with target entity in the candidate list, please select directly.
-    24. Try to understand code motif, follow the following code motif generation rules:
-    - **Descriptive Function Names:** Ensure the function name clearly represents the relationship or interaction between the entities involved in the motif. This aids in understanding the motif's purpose at a glance.
-    - **Relevant Import Statements:** Import statements should directly relate to the actions or relationships depicted in the motif, enhancing code readability and maintainability.
-    - **Comprehensive Function Parameters:** Include all entities involved in the motif as parameters, ensuring the function accurately represents the motif's structure and interactions.
-    - **Clear Function Implementation:** The function should implement the motif by utilizing the imported relations appropriately, reflecting the actual connections or interactions among the entities.
-    - **Use of Connection Relationships:** Employ the `connected_with` relation for straightforward connections, making the code intuitive for simple relationships.
-    - **Employment of Complex Relationships:** For intricate interactions, such as meetings or negotiations, use specific relations like `make_a_visit` or `express_intent_to_meet_or_negotiate`, providing depth to the motif.
-    - **Inclusive Return Values:** Return all entities involved in the motif, along with the state or outcome post-relationship application, offering a complete view of the motif's effect.
-    - **Demonstrative Execution Block:** Use the `if __name__ == '__main__':` block to demonstrate the motif's application, showcasing its functionality with sample nodes.
-    - **Understanding += Relationship:** Recognize the `+=` relationship as indicative of multiple types of connections between two nodes, enriching the motif's complexity.
-
+    24. Try to understand code motif, here ia an example of code motif:
+    # Import relevant relationships and actions
+    import connected_with, Make_statement, Consult, Host_a_visit, Sign_formal_agreement, Make_optimistic_comment
+    
+    class Andrew_Adonis(object):
+    
+        def __init__(self, Theresa_May, The_Observer, United_Kingdom, Stephen_Byers, Government_United_Kingdom, Jeremy_Corbyn):
+            # Initializing entities
+            self.Theresa_May = Theresa_May
+            self.The_Observer = The_Observer
+            self.United_Kingdom = United_Kingdom
+            self.Stephen_Byers = Stephen_Byers
+            self.Government_United_Kingdom = Government_United_Kingdom
+            self.Jeremy_Corbyn = Jeremy_Corbyn
+    
+        def Theresa_May_Make_statement(self):
+            # Motif 1: Theresa May makes a statement, connected with Andrew Adonis, and The Observer consults with Andrew Adonis
+            self.Theresa_May = Make_statement(self.The_Observer)
+            self.Theresa_May += connected_with(self.Andrew_Adonis)
+            self.The_Observer = Consult(self.Andrew_Adonis)
+    
+            return self.Theresa_May, self.The_Observer, self.Andrew_Adonis
+    
+        def United_Kingdom_Make_statement(self):
+            # Motif 2: United Kingdom makes a statement, connected with Andrew Adonis, and The Observer consults with Andrew Adonis
+            self.United_Kingdom = Make_statement(self.The_Observer)
+            self.United_Kingdom += connected_with(self.Andrew_Adonis)
+            self.The_Observer = Consult(self.Andrew_Adonis)
+    
+            return self.United_Kingdom, self.The_Observer, self.Andrew_Adonis
+    
+        def United_Kingdom_Host_a_visit(self):
+            # Motif 3: United Kingdom hosts a visit with Stephen Byers, connected with Andrew Adonis, and Stephen Byers signs a formal agreement with Andrew Adonis
+            self.United_Kingdom = Host_a_visit(self.Stephen_Byers)
+            self.United_Kingdom += connected_with(self.Andrew_Adonis)
+            self.Stephen_Byers = Sign_formal_agreement(self.Andrew_Adonis)
+    
+            return self.United_Kingdom, self.Stephen_Byers, self.Andrew_Adonis
+    
+        def Government_United_Kingdom_connected_with(self):
+            # Motif 4: Government of the United Kingdom connected with Stephen Byers, connected with Andrew Adonis, and Stephen Byers signs a formal agreement with Andrew Adonis
+            self.Government_United_Kingdom = connected_with(self.Stephen_Byers)
+            self.Government_United_Kingdom += connected_with(self.Andrew_Adonis)
+            self.Stephen_Byers = Sign_formal_agreement(self.Andrew_Adonis)
+    
+            return self.Government_United_Kingdom, self.Stephen_Byers, self.Andrew_Adonis
+    
+        def Government_United_Kingdom_Make_optimistic_comment(self):
+            # Motif 5: Government of the United Kingdom connected with Andrew Adonis, connected with Jeremy Corbyn, and Andrew Adonis makes an optimistic comment to Jeremy Corbyn
+            self.Government_United_Kingdom = connected_with(self.Andrew_Adonis)
+            self.Government_United_Kingdom += connected_with(self.Jeremy_Corbyn)
+            self.Andrew_Adonis = Make_optimistic_comment(self.Jeremy_Corbyn)
+    
+            return self.Government_United_Kingdom, self.Andrew_Adonis, self.Jeremy_Corbyn
+    
+    
+    # Demonstrative Execution Block
+    if __name__ == '__main__':
+        andrew_adonis_motifs = Andrew_Adonis(
+            Theresa_May="Theresa May",
+            The_Observer="The Observer",
+            United_Kingdom="United Kingdom",
+            Stephen_Byers="Stephen Byers",
+            Government_United_Kingdom="Government (United Kingdom)",
+            Jeremy_Corbyn="Jeremy Corbyn"
+        )
+        
+        # Execute and demonstrate each motif
+        print(andrew_adonis_motifs.Theresa_May_Make_statement())
+        print(andrew_adonis_motifs.United_Kingdom_Make_statement())
+        print(andrew_adonis_motifs.United_Kingdom_Host_a_visit())
+        print(andrew_adonis_motifs.Government_United_Kingdom_connected_with())
+        print(andrew_adonis_motifs.Government_United_Kingdom_Make_optimistic_comment())
+        
+    How can we understand the above code motif? Below is the explanation of the above code motif.
+    ** A class represented an entity.
+    ** Fuction name: The function name is an abstract of the motif. Each function represent a motif.
+    ** Relevant import statements: The import statement is relationship between entities.
+    ** Function parameter: The function parameters are the entities in a motif.
+    ** Function Implementation: Implement the function by calling the imported relations with the appropriate entities(parameters). Each relation call should correspond to the connections or actions described in the motif information.
+    ** Relationship: For simple connections between nodes, use the connected_with relation. For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
+    ** Return values: Return all the entities involved in the motif as part of the function’s result.
+    ** Multiple relationship: Recognize the `+=` relationship as indicative of multiple types of connections between two entities, enriching the motif's complexity.
+    ** ~: Represent unknown entity.
+    ** Demonstrative Execution: Use the `if __name__ == '__main__':` block to showcase the motif's application, offering a practical example of its use.
+        
     
     [YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment
     
     ### Turn 1: (3 turns left to use "Terminate" action to provide final answer.)
     **Thought 1:**
-""".format(
-    'Yukos',
-    ['Eskom', 'Lukoil', 'Turkey', 'Yemen', 'Sudan', 'Guam', 'Wales', 'Xerox', 'Togo', 'Niger', 'Comoros', 'Japan', 'Russia', 'Chile', 'Libya', 'Spain', 'Syria', 'Ecuador', 'Seeka', 'Sacyr', 'PORA', 'Basij', 'Qena', 'Dexia', 'Subaru', 'Oman', 'USKOK', 'Lenovo', 'Qatar', 'Télam', 'Quryna', 'Wu Jin', 'Giza', 'Fatih', 'Abrar', 'Intel', 'PIMCO', 'UNITA', 'CANTV', 'UBS', 'IBM', 'Nani', 'CNN', 'Xiaomi', 'Linz', 'Reuters', 'Indosat', 'Kosovo', 'Brunei', 'Yukos']
-)
+"""
 
 motif_ReAct_example_prompt_cn50_cn50_v0 = """
 You are a programmer in a large company, tasked with selecting the most similar entity to a target entity from a candidate list. You will solve the task using a series of interleaving Thought, Action, and Observation steps. Thought can reason about the current situation, and Action can only be one of the following two types:

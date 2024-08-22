@@ -406,12 +406,12 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
 
         if step == '1':
 
-            if os.path.exists('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, first_step_setting,  step)):
+            if os.path.exists('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, dataset+"_"+first_step_setting,  step)):
 
-                with open('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, first_step_setting, step)) as f:
+                with open('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, dataset+"_"+first_step_setting, step)) as f:
                     thought_and_acts = json.load(f)
 
-                with open('output/{}/{}/requests_{}.json'.format(LLM_type, first_step_setting, step)) as f:
+                with open('output/{}/{}/requests_{}.json'.format(LLM_type, dataset+"_"+first_step_setting, step)) as f:
                     requests = json.load(f)
 
             else:
@@ -419,12 +419,12 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                 thought_and_acts = [response for response in responses]
                 thought_and_acts = dict(zip(idx_prompt_dict.keys(), thought_and_acts))
 
-                with open('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, first_step_setting, step),
+                with open('output/{}/{}/thought_and_acts_{}.json'.format(LLM_type, dataset+"_"+first_step_setting, step),
                           'w') as f:
                     json.dump(thought_and_acts, f, indent=4)
 
                 requests = [find_requests(response) for response in responses]
-                with open('output/{}/{}/requests_{}.json'.format(LLM_type, first_step_setting, step), 'w') as f:
+                with open('output/{}/{}/requests_{}.json'.format(LLM_type, dataset+"_"+first_step_setting, step), 'w') as f:
                     json.dump(requests, f, indent=4)
 
         else:
@@ -746,6 +746,9 @@ else:
     save_dir = dataset+"_"+'t'+str(threshold)+'_'+candidate_num_1+"_"+candifate_num_2+'_' + first_step_setting+"_{}motif".format(top_n)
 
 if __name__ == '__main__':
+
+    if not os.path.exists(current_path +'/output/{}'.format(dataset)):
+        os.mkdir(current_path +'/output/{}'.format(dataset))
 
     if not os.path.exists(current_path +'/output/{}'.format(LLM_type)):
         os.mkdir(current_path +'/output/{}'.format(LLM_type))

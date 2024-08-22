@@ -280,12 +280,12 @@ def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, o
 
         if ent_right[i] in candidates:
            cnt += 1
-        #    candidates.remove(ent_right[i])
-        #    candidates.append(ent_right[i])
-        #
-        # elif ent_right[i] not in candidates:
-        #     candidates.remove(candidates[-1])
-        #     candidates.append(ent_right[i])
+           candidates.remove(ent_right[i])
+           candidates.append(ent_right[i])
+
+        elif ent_right[i] not in candidates:
+            candidates.remove(candidates[-1])
+            candidates.append(ent_right[i])
 
         candidates_list.append(candidates)
         print(ent_right[i], len(candidates), '\n')

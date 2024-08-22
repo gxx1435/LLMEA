@@ -8,7 +8,7 @@
 #python3 machine_translation.py
 
 echo "Start encoding and EA"
-python3 LLMEA_zero_base.py ../data/icews_wiki/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/icews_yago/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_icews_wiki/ > out_log/Output_LLMEA_base_rs_30%_icews_wiki_all_add.txt
+python3 LLMEA_zero_base.py ../data/icews_wiki/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/icews_wiki/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_zeroembed_icews_wiki/ 30000 > out_log/Output_LLMEA_base_rs_30%_icews_wiki_all_add.txt
 
 #python3 LLMEA_base_icews.py ../data/icews_yago/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/icews_yago/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_icews_yago/ > out_log/Output_LLMEA_base_rs_30%_icews_yago_all_add.txt
 

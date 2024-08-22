@@ -245,10 +245,11 @@ if __name__ == '__main__':
     input_prompt_dir_2 = sys.argv[2] 
     llm_resp_save_dir = sys.argv[3]
     mid_results_dir = sys.argv[4]
+    thresh_num = sys.argv[5]
 
 
-    # thresh_num = 1116
-    thresh_num = 30000
+    if not os.path.exists(os.getcwd()+mid_results_dir[:-1]):
+        os.mkdir(os.getcwd()+mid_results_dir[:-1])
 
     bert_model = 'bert-base-uncased'  #"bert-base-multilingual-cased"
     try:

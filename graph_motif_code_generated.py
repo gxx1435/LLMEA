@@ -37,16 +37,16 @@ code_motif_prompts_generate = """
 As a good Computer Science student good at coding, your task is to describe the graph structure in Python code format. Motifs are recurrent and statistically significant subgraphs or patterns of a larger graph. Each Motif instance will be viewed as a function with specialized name and node involved in the Motif instance will be the parameters in the function. 
 
 **Rules for generating code format Motif**
-  1. Function Name: Use a descriptive name for the function that is an abstract of the motif. The function name should indicate the type of relationship or action involving the nodes.
-  2. Import Statements: Import the necessary relations or actions. Use descriptive names that match the relationships in the motif information.
-  3. Function Parameters: Include all nodes involved in the motif as parameters to the function.
-  4. Function Implementation: Implement the function by calling the imported relations with the appropriate parameters. Each relation call should correspond to the connections or actions described in the motif information.
-  5. Connection Relationships: For simple connections between nodes, use the connected_with relation.
-  6. Complex Relationships: For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
-  7. Return Values: Return all the nodes involved in the motif as part of the function’s result. Ensure that the function returns the state or outcome after applying the relationships.
-  8. Please note the += relationship which represents multiple relationship between two nodes. It means two nodes have more than 1 type of relationship.
-  9. A definition function represents a motif.
-  10. The code should fully represent the structural information between nodes.
+    - **Descriptive Function Names**: Always use function names that clearly describe the relationship or interaction between entities. This helps in understanding the motif's purpose at a glance.
+    - **Relevant Import Statements**: Import only those relations or actions that are directly relevant to the motif's theme. This keeps the code clean and focused.
+    - **Comprehensive Function Parameters**: Include parameters for all entities involved in the motif to ensure that the function accurately represents the relationships or interactions.
+    - **Accurate Function Implementation**: The function should precisely implement the relationships or interactions described in the motif, using the imported relations and parameters effectively.
+    - **Use of Connection Relationships**: Employ the `connected_with` relation for straightforward connections, ensuring clarity in representing simple relationships.
+    - **Employment of Complex Relationships**: For depicting more intricate interactions, utilize specific relations like `make_a_visit` or `express_intent_to_meet_or_negotiate`, which add depth to the motif.
+    - **Clear Return Values**: The function must return all involved entities and their state or outcome post-relationship application, providing a complete picture of the motif's effect.
+    - **Demonstrative Execution**: Use the `if __name__ == '__main__':` block to showcase the motif's application, offering a practical example of its use.
+    - **Understanding Multiple Relationships**: Recognize the `+=` relationship to denote multiple types of connections between two entities, enriching the motif's complexity.
+    - **Limitation on Rules**: Maintain a concise set of rules, not exceeding 50, to ensure clarity and focus in motif code template generation.
 
   
 Please refer to the example below and handle a new task! 

@@ -53,6 +53,7 @@ As a good Computer Science student good at coding, your task is to describe the 
 - **Demonstrative Execution Block:** Use the `if __name__ == '__main__':` block to demonstrate the motif's application, showcasing its functionality with sample nodes.
 - **Understanding += Relationship:** Recognize the `+=` relationship as indicative of multiple types of connections between two nodes, enriching the motif's complexity.
 - **～**:** represent a single node.
+- ** Demonstrative Execution: Use the `if __name__ == '__main__':` block to showcase the motif's application, offering a practical example of its use.
   
 Please refer to the example below and handle a new task! 
 
@@ -117,6 +118,10 @@ Given triangle Motif information, generate its Code description.
 
 """.format(
     """
-- Target entity: Lukoil; Motif 1: [(~, connected with ,Vagit Alekperov),(~, connected with ,Lukoil),(Vagit Alekperov, connected with ,Lukoil)]
-"""
+    - Target entity:Andrew Adonis;Motif 1: [(Theresa May, Make statement ,The Observer),(Theresa May, connected with ,Andrew Adonis),(The Observer, Consult ,Andrew Adonis)]
+    - Target entity:Andrew Adonis;Motif 2: [(United Kingdom, Make statement ,The Observer),(United Kingdom, connected with ,Andrew Adonis),(The Observer, Consult ,Andrew Adonis)]
+    - Target entity:Andrew Adonis;Motif 3: [(United Kingdom, Host a visit ,Stephen Byers),(United Kingdom, connected with ,Andrew Adonis),(Stephen Byers, Sign formal agreement ,Andrew Adonis)]
+    - Target entity:Andrew Adonis;Motif 4: [(Government (United Kingdom), connected with ,Stephen Byers),(Government (United Kingdom), connected with ,Andrew Adonis),(Stephen Byers, Sign formal agreement ,Andrew Adonis)]
+    - Target entity:Andrew Adonis;Motif 5: [(Government (United Kingdom), connected with ,Andrew Adonis),(Government (United Kingdom), connected with ,Jeremy Corbyn),(Andrew Adonis, Make optimistic comment ,Jeremy Corbyn)]
+    """
 )
