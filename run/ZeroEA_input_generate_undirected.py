@@ -8,7 +8,7 @@ from tqdm import tqdm
 import time
 
 def text_save(filename, data):
-    file = open(filename,'w')
+    file = open(filename, 'w')
     for i in range(len(data)):
         s = str(data[i])#.replace('[','').replace(']','')
         s = s + "\n"
@@ -189,8 +189,8 @@ text_input_all_1 = []
 text_input_all_2 = []
 wiki_correction_dict = {}
 
-# with open(data_dir+"ill_ent_ids", "r") as GT_file:
-with open(data_dir+"new_ref_ent_ids", "r") as GT_file:
+with open(data_dir+"ill_ent_ids_new", "r") as GT_file:
+# with open(data_dir+"new_ref_ent_ids", "r") as GT_file:
     print('Gold Truth pairs')
     counter = 0
     for line in tqdm(GT_file.readlines()):
@@ -200,6 +200,8 @@ with open(data_dir+"new_ref_ent_ids", "r") as GT_file:
             tmp = tmp.replace('\n',"")
             content = tmp.split("\t")
             print(content[0], content[1])
+            id_l = content[0]
+            id_r = content[1]
             text_id_l = nodes[content[0]]
             ent_l_text = ent_ids[content[0]]
             text_id_r = nodes[content[1]]
@@ -214,8 +216,8 @@ with open(data_dir+"new_ref_ent_ids", "r") as GT_file:
             if error_flg_l:
                 continue
 
-            text_input_1 = head_text_en_l + ": "
-            text_input_2 = head_text_en_r + ": "
+            text_input_1 = id_l + ": "
+            text_input_2 = id_r + ": "
             for text in text_to_add_l:
                 text_input_1 = text_input_1 + text + ". "
             for text in text_to_add_r:
@@ -247,8 +249,10 @@ with open(data_dir+"new_ref_ent_ids", "r") as GT_file:
             print(text_input_1)
             print(text_input_2)
 
-            text_input_1 = ent_l_text + ':' +'The node not in graph.'
-            text_input_2 = ent_r_text + ':' +'The node not in graph.'
+            # text_input_1 = ent_l_text + ':' +'The node not in graph.'
+            # text_input_2 = ent_r_text + ':' +'The node not in graph.'
+            text_input_1 = id_l + ':' + 'The node not in graph.'
+            text_input_2 = id_r + ':' + 'The node not in graph.'
             text_input_all_1.append(text_input_1)
             text_input_all_2.append(text_input_2)
 

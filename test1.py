@@ -632,32 +632,55 @@
 
 import json
 from run.utils import hit_1_10_rate, baseline_hit_rate
-final_answers = {}
-for i in [1, 2,3,4]:
-    with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_wiki_t5000_50_50_corrected_5motif_v0/final_answer_text_motif_lite_{}.json'.format(i), 'r') as f:
-        final_answer = json.load(f)
-        final_answers.update(final_answer)
-print(len(final_answers))
-# for key in final_answers:
-#     print(key, final_answers[key])
-# exit()
 
-with open('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_wiki_t5000_50_50_corrected_5motif_v0/final_answer_text_motif_lite_recall_all.json', 'w') as f:
-    json.dump(final_answers, f, indent=4)
-
-
-dataset = 'icews_wiki'
+dataset = 'icews_yago'
+save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/{}/gpt_4_turbo/t5000_50_50_corrected_5motif_v16'.format(dataset)
 ent1_f = 'new_ent_ids_1_rs_0.3_new'
 ent2_f = 'new_ent_ids_2_aligned_rs_0.3_new'
+type = 'recall_all'
+method = 'text'
+
+
+if dataset == 'icews_wiki':
+    length_all = 1496
+elif dataset == 'icews_yago':
+    length_all = 4999
+with open(save_dir + '/final_answer_{}_motif_lite_1.json'.format(method)) as f:
+    final_answer_direct_match = json.load(f)
+length_recall_all = length_all - len(final_answer_direct_match)
+
+
+final_answers = {}
+if type == 'recall_all':
+    for i in [2, 3, 4]:
+        with open(save_dir + '/final_answer_{}_motif_lite_{}.json'.format(method, i), 'r') as f:
+            final_answer = json.load(f)
+            final_answers.update(final_answer)
+elif type == 'all':
+    for i in [1, 2, 3, 4]:
+        with open(save_dir + '/final_answer_{}_motif_lite_{}.json'.format(method, i), 'r') as f:
+            final_answer = json.load(f)
+            final_answers.update(final_answer)
+
+print(length_all, length_recall_all, len(final_answers))
+
+with open(save_dir+'/final_answer_{}_motif_lite_{}.json'.format(method, type), 'w') as f:
+    json.dump(final_answers, f, indent=4)
 
 # baseline_response = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/icews_yago_gpt_4_turbo_t5000_50_50_corrected/baseline/idx_prompt_dict_baseline_final_ans.json'
 # hit_rate = baseline_hit_rate(baseline_response,dataset, ent1_f, ent2_f, 'hit1')
 
-hit_rate = hit_1_10_rate('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/gpt_4_turbo/icews_wiki_t5000_50_50_corrected_5motif_v0/final_answer_text_motif_lite_recall_all.json',
+if type == 'all':
+    length = length_all
+elif type == 'recall_all':
+    length = length_recall_all
+
+hit_rate = hit_1_10_rate(save_dir+'/final_answer_{}_motif_lite_{}.json'.format(method, type),
                          dataset=dataset,
                          ent1_f=ent1_f,
                          ent2_f=ent2_f,
-                         type='hit1')
+                         hit='hit1',
+                         length=length)
 print(hit_rate)
 
 # from run.utils import mean_reciprocal_rank

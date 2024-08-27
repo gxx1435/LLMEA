@@ -16,8 +16,8 @@ from graph_motif import (find_triangle_or_star_motifs, find_star_motifs,
 current_dir = os.getcwd()
 save_dir = current_dir + '/data'
 def get_paths():
-    dataset = 'icews_wiki'
-    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_50_1496_all add_put_correct_ans_last.txt'.format(save_dir, dataset)
+    dataset = 'icews_yago'
+    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_50_5041_all add_put_correct_ans_last.txt'.format(save_dir, dataset)
 
     # from ReAct_API_call import dataset, sematic_embedding_candidates_path
 
@@ -208,7 +208,10 @@ class Entity:
         if self.entity_type == 'target':
             newgraph_path = current_dir + '/data/{}/newgraph_1'.format(dataset)
         elif self.entity_type == 'candidate':
-            newgraph_path = current_dir + '/data/{}/newgraph_2'.format(dataset)
+            if dataset == 'icews_yago':
+                newgraph_path = current_dir + '/data/{}/newgraph_2_remove_26863'.format(dataset)
+            else:
+                newgraph_path = current_dir + '/data/{}/newgraph_2'.format(dataset)
 
         graph_edges_kg = read_graph(newgraph_path)
         kg = nx.Graph()
@@ -226,15 +229,15 @@ class Entity:
         :return:
         """
 
-        if k == 2:
-            try:
-                G = self.get_subgraph_offline(node)
-            except:
+        # if k == 2:
+        #     try:
+        #         G = self.get_subgraph_offline(node)
+        #     except:
+        #
+        #         G = self.get_subgraph_online(node, k)
+        # else:
 
-                G = self.get_subgraph_online(node, k)
-        else:
-
-            G = self.get_subgraph_online(node, k)
+        G = self.get_subgraph_online(node, k)
 
         # G1 = self.get_subgraph_online(node, k)
         # G2 = self.get_subgraph_offline(node)
@@ -797,13 +800,14 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Andrew Adonis"""
+    entity = """Jimmy Rasta"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
 
     # _, _, prompts = entity.get_baseline_prompts()
     prompts = entity.get_only_triangle_information(if_triple=1)
+    # prompts = entity.get_dynamic_motifs_information(if_triple=1)
 
     print(prompts)
 

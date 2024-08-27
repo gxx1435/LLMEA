@@ -3,7 +3,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import editdistance
 import json
 import re
-
+from urllib.parse import unquote
 def split_camel_case(s):
     return re.sub('([a-z])([A-Z])', r'\1 \2', s)
 
@@ -363,7 +363,7 @@ def baseline_hit_rate(final_answer_file, dataset, ent1_f,ent2_f, type='hit1'):
 
     return float(cnt/len(final_answer))
 
-def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
+def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, hit='hit1', length=1):
     """
     :param final_anwser_file:
     :param type:
@@ -391,31 +391,33 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
     hit1 = 0
     hit10 = 0
     no_answer = 0
-    with open(final_anwser_file, 'r') as f:
+    with open(final_anwser_file, 'r', encoding='ascii') as f:
         final_answer = json.load(f)
         n_badcase=0
-        n_correct = 0
         for key in final_answer.keys():
             # try:
-                if type == 'hit1':
+                if hit == 'hit1':
 
                     pattern = r'"([^"]*)"'
                     if final_answer[key] == -1:
+                        print('no answer: ', ent_idx_1[key], key)
                         no_answer += 1
                         continue
                     match = re.search(pattern, final_answer[key])
                     if match:
                         final_answer[key] = match.group(1)
 
+                    final_answer[key] = unquote(final_answer[key])
+                    ent_ids_12_dict[key] = unquote(ent_ids_12_dict[key])
+
                     if final_answer[key] != ent_ids_12_dict[key]:
                         n_badcase += 1
-                        n_correct += 1
                         print(ent_idx_1[key], '\t', key, '\t', final_answer[key], '\t', ent_ids_12_dict[key])
 
                     if final_answer[key] == ent_ids_12_dict[key]:
                         hit1 += 1
 
-                elif type == 'hit10':
+                elif hit == 'hit10':
                     if final_answer[key] == -1:
                         continue
                     word = ent_ids_12_dict[key]
@@ -444,13 +446,13 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, type='hit1'):
                     if word in wordlist:
                         print(key, len(wordlist))
                         hit10 += 1
-            # except:
-            #     pass
+
+    print('hit1:{}'.format(hit1))
     print("n badcases:{}".format(n_badcase))
-    print("n badcases:{}".format(n_correct))
+    print("no answer case:{}".format(no_answer))
     print("no answer rate:{}".format(float(no_answer/len(final_answer))))
 
-    return float(hit1/len(final_answer)) if type == 'hit1' else float(hit10/len(final_answer))
+    return float(hit1/length) if hit == 'hit1' else float(hit10/length)
 
 def mean_reciprocal_rank(final_answers):
     """
