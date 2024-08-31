@@ -170,56 +170,57 @@ def get_target_embed(filename, tokenizer, model):
             counter += 1
             tmp = line.strip().replace("...", "")
             real_label = tmp.replace("\n", '')
-            
-            ### Adding wrod_embed
-            entity_text = real_label.split(":")[0].strip()
-            # entity_text = entity_text.split('(')[0].strip()
-            # entity_text = entity_text.split('（')[0].strip()
-            
-            # remove punctuation
-            # punctuation_eng = string.punctuation
-            # punctuation_zh = punctuation
-            # for i in punctuation_eng:
-            #     entity_text = entity_text.replace(i, '')
-            #
-            # for j in punctuation_zh:
-            #     entity_text = entity_text.replace(j, '')
 
+            ### Adding word_embed
+            entity_text = real_label.split(":")[0].strip()
+            original_entity_text = entity_text
+            entity_text = entity_text.split('(')[0].strip()
+            entity_text = entity_text.split('（')[0].strip()
+
+            # remove punctuation
+            punctuation_eng = string.punctuation
+            punctuation_zh = punctuation
+            for i in punctuation_eng:
+                entity_text = entity_text.replace(i, '')
+
+            for j in punctuation_zh:
+                entity_text = entity_text.replace(j, '')
+            #
             entity_text = entity_text.replace('_', ' ')
-            # print(entity_text)
-                
+            print(original_entity_text, '\t', entity_text)
+
             sep_idx = real_label.index(":")
             real_label = entity_text + real_label[sep_idx:]
             input_txt_list = real_label.split(":")
             input_txt_all = entity_text + ": " + "[MASK] is identical with " + entity_text +'. '
             for i in input_txt_list[1:]:
                 input_txt_all = input_txt_all + i
-                
+
             entity_text_all.append(entity_text)
-            
+
             input_txt_ent = "[MASK] is identical with " + entity_text +'. '
             tokens_ent = tokenizer(
-                input_txt_ent,               
-                return_token_type_ids=False,   
-                return_attention_mask=True,     
-                return_tensors='pt')        
-            
+                input_txt_ent,
+                return_token_type_ids=False,
+                return_attention_mask=True,
+                return_tensors='pt')
+
             tokenized_ent_text = tokenizer.convert_ids_to_tokens(tokens_ent["input_ids"][0])
             encoded_layers_ent = model(input_ids=tokens_ent["input_ids"], attention_mask=tokens_ent["attention_mask"])['last_hidden_state']
             last_hidden_state_ent = encoded_layers_ent[0]
             mask_idx = tokenized_ent_text.index("[MASK]")
             entity_embed = last_hidden_state_ent[mask_idx]
             entity_embed_all.append(entity_embed.detach().numpy())
-            
+
             tokens = tokenizer(
-                input_txt_all,                  
-                return_token_type_ids=False,   
-                return_attention_mask=True,   
-                return_tensors='pt')           
-            
+                input_txt_all,
+                return_token_type_ids=False,
+                return_attention_mask=True,
+                return_tensors='pt')
+
             tokenized_text = tokenizer.convert_ids_to_tokens(tokens["input_ids"][0])
 
-            with torch.no_grad():    
+            with torch.no_grad():
                 try:
                     encoded_layers = model(input_ids=tokens["input_ids"], attention_mask=tokens["attention_mask"])['last_hidden_state']
                     last_hidden_state = encoded_layers[0]
@@ -229,15 +230,96 @@ def get_target_embed(filename, tokenizer, model):
                     counter_list.append(counter)
                     target_embed.append(len(entity_embed)*[0])
 
-            print('counter:', counter,
-                  'target_embed:', len(target_embed),
-                  'entity_embed_all:', len(entity_embed_all))
+            # print('counter:', counter,
+            #       'target_embed:', len(target_embed),
+            #       'entity_embed_all:', len(entity_embed_all))
 
             if counter == thresh_num:
+                print('\n\n')
                 break
 
     # return counter_list, entity_text_all, target_embed
     return counter_list, entity_text_all, np.array(target_embed)+np.array(entity_embed_all)
+
+
+# def get_target_embed(filename, tokenizer, model):
+#     with open(filename, "r") as input_f:
+#         entity_text_all = []
+#         target_embed = []
+#         entity_embed_all = []
+#         counter = 0
+#         counter_list = []
+#         for line in input_f:
+#             tmp = line.strip().replace("...", "")
+#             real_label = tmp.replace("\n", '')
+#
+#             ### Adding wrod_embed
+#             entity_text = real_label.split(":")[0].strip()
+#             entity_text = entity_text.split('(')[0].strip()
+#             entity_text = entity_text.split('（')[0].strip()
+#
+#             # remove punctuation
+#             punctuation_eng = string.punctuation
+#             punctuation_zh = punctuation
+#             for i in punctuation_eng:
+#                 entity_text = entity_text.replace(i, '')
+#
+#             for j in punctuation_zh:
+#                 entity_text = entity_text.replace(j, '')
+#
+#             sep_idx = real_label.index(":")
+#             real_label = entity_text + real_label[sep_idx:]
+#             input_txt_list = real_label.split(":")
+#             input_txt_all = entity_text + ": " + "[MASK] is identical with " + entity_text + '. '
+#             for i in input_txt_list[1:]:
+#                 input_txt_all = input_txt_all + i
+#
+#             entity_text_all.append(entity_text)
+#
+#             input_txt_ent = "[MASK] is identical with " + entity_text + '. '
+#             tokens_ent = tokenizer(
+#                 input_txt_ent,
+#                 return_token_type_ids=False,
+#                 return_attention_mask=True,
+#                 return_tensors='pt')
+#
+#             tokenized_ent_text = tokenizer.convert_ids_to_tokens(tokens_ent["input_ids"][0])
+#             encoded_layers_ent = model(input_ids=tokens_ent["input_ids"], attention_mask=tokens_ent["attention_mask"])[
+#                 'last_hidden_state']
+#             last_hidden_state_ent = encoded_layers_ent[0]
+#             mask_idx = tokenized_ent_text.index("[MASK]")
+#             entity_embed = last_hidden_state_ent[mask_idx]
+#             entity_embed_all.append(entity_embed.detach().numpy())
+#
+#             tokens = tokenizer(
+#                 input_txt_all,
+#                 return_token_type_ids=False,
+#                 return_attention_mask=True,
+#                 return_tensors='pt')
+#
+#             tokenized_text = tokenizer.convert_ids_to_tokens(tokens["input_ids"][0])
+#
+#             with torch.no_grad():
+#                 try:
+#                     encoded_layers = model(input_ids=tokens["input_ids"], attention_mask=tokens["attention_mask"])[
+#                         'last_hidden_state']
+#                     last_hidden_state = encoded_layers[0]
+#                     tokens = get_embed(last_hidden_state, tokenized_text)
+#                     target_embed.append(tokens.numpy())
+#                 except:
+#                     counter_list.append(counter)
+#                     target_embed.append(len(entity_embed) * [0])
+#
+#             print('counter:', counter,
+#                               'target_embed:', len(target_embed),
+#                               'entity_embed_all:', len(entity_embed_all))
+#
+#             if counter > thresh_num:
+#                 break
+#             counter += 1
+#
+#     # return counter_list, entity_text_all, target_embed
+#     return counter_list, entity_text_all, np.array(target_embed) + np.array(entity_embed_all)
 
 
 if __name__ == '__main__':
@@ -245,7 +327,7 @@ if __name__ == '__main__':
     input_prompt_dir_2 = sys.argv[2] 
     llm_resp_save_dir = sys.argv[3]
     mid_results_dir = sys.argv[4]
-    thresh_num = sys.argv[5]
+    thresh_num = int(sys.argv[5])
 
 
     if not os.path.exists(os.getcwd()+mid_results_dir[:-1]):
@@ -307,25 +389,25 @@ if __name__ == '__main__':
         
         save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "aligned_entity_")
         with open(save_dir, 'w', encoding='utf8') as f:
-            json.dump(ent_right, f)
+            json.dump(ent_right, f, indent=4)
 
         save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "target_entity_")
         with open(save_dir, 'w', encoding='utf8') as f:
-            json.dump(ent_left, f)
+            json.dump(ent_left, f,  indent=4)
 
-        save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "ranks_").replace(".json", ".pkl")
-        pickle.dump(ranks, open(save_dir, "wb"))
-
-        save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl")
-        pickle.dump(candidates_idx_list, open(save_dir, "wb"))
+        # save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "ranks_").replace(".json", ".pkl")
+        # pickle.dump(ranks, open(save_dir, "wb"))
+        #
+        # save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "candidates_").replace(".json", ".pkl")
+        # pickle.dump(candidates_idx_list, open(save_dir, "wb"))
 
         save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_text_left_")
         with open(save_dir, 'w', encoding='utf8') as f:
-            json.dump(entity_text_left, f)
+            json.dump(entity_text_left, f, indent=4)
 
         save_dir = llm_resp_save_dir.replace("/llm_response/", mid_results_dir).replace("gpt4_turbo_", "entity_text_right_")
         with open(save_dir, 'w', encoding='utf8') as f:
-            json.dump(entity_text_right, f)
+            json.dump(entity_text_right, f, indent=4)
 
     refine_all(ent_left, candidates_idx_list, entity_text_right, llm_resp_save_dir)
 

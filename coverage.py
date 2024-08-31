@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 from run.utils import coverage_eval, get_candidates, get_entity_names,coverage_eval_segment
-# from Test import get_hits
+from test import get_hits
 
 
 def get_performance_of_semantic_embedding_similarity(
@@ -29,8 +29,6 @@ def get_performance_of_semantic_embedding_similarity(
     matrix1 = semantic_embedding_matrix_left
     matrix2 = semantic_embedding_matrix_right
 
-    # matrix1 = subgraph_motif_embeddig_matrix_left
-    # matrix2 = subgraph_motif_embeddig_matrix_right
 
     # get_hits(matrix1, matrix2)
     # exit()
@@ -41,12 +39,10 @@ def get_performance_of_semantic_embedding_similarity(
     with open(entity_right_path) as f:
         entity_right = json.load(f)
 
-    # entity_left = get_entity_names(entity_ids_1_path, thres_hold)
-    # entity_right = get_entity_names(entity_ids_2_path, thres_hold)
 
 
-    n_cand = 1
-    method = 'all add'
+    n_cand = 50
+    method = 'cosine'
     candidates_idx_list, ent_left, ent_right = get_candidates(matrix1,
                                                               matrix2,
                                                               entity_left,
@@ -74,7 +70,8 @@ def get_performance_of_semantic_embedding_similarity(
                                                  ent_left,
                                                  ent_right,
                                                  ent_right,
-                                                 out_file
+                                                 out_file,
+                                                 dataset = dataset
                                                  ))
 
     # cut_indices = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200]
@@ -83,14 +80,12 @@ def get_performance_of_semantic_embedding_similarity(
     #     print("{} candidates, Coverage is:".format(cut_indice), coverage)
 
 if __name__ == '__main__':
-    dataset = 'icews_yago'
-    threshold = 5647
-    mid_reuslts = '/mid_results_rs_0.3_zeroembed_icews_yago/'
+    dataset = 'DBP15K/fr_en'
+    threshold = 4500
+    mid_reuslts = '/mid_results_rs_0.3_zeroembed_DBP15K_fr_en/'
 
     llm_resp_save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json'
 
-    # entity_ids_1_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_{}/new_ent_ids_1'.format(type)
-    # entity_ids_2_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/icews_{}/new_ent_ids_2'.format(type)
     entity_left_path = llm_resp_save_dir.replace("/llm_response/", mid_reuslts).replace("gpt4_turbo_", "entity_text_left_")
     entity_right_path = llm_resp_save_dir.replace("/llm_response/", mid_reuslts).replace("gpt4_turbo_", "entity_text_right_")
 
@@ -99,6 +94,7 @@ if __name__ == '__main__':
 
     print(len(semantic_embedding_matrix_left))
     print(len(semantic_embedding_matrix_right))
+
     candidates_save_path = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/'.format(dataset)
 
     get_performance_of_semantic_embedding_similarity(

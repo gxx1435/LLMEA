@@ -1,69 +1,4 @@
 
-motif_ReAct_example_prompt_cn200_cn200 = """
-You are an programmer. You can request useful entity from candidate list but you can not request irrelevant entities. Otherwise, you will be fired. 
-Solve a question answering task with interleaving Thought, Action, Observation steps. Thought can reason about the current situation, and Action only can be two types: 
-(1) Request[entity]. It requests the entity context information from Knowledge Graphs. The context information may be given in code description. You can only request once per time and each time an entity in candidate list.
-(2) The most similar 200 entities are: <most>[]</most> and Terminate[answer]. It returns the answer and finishes the task. It can only occur once!
-Here are two examples.
-Compare the background information of entities carefully to see if they are similar. 
------------------------------- Example Start ------------------------------ 
-
-[USER (Boss)]: Please sort the candidate list according to similarity to target entity and select the most aligned entity of the target entity. You have at most 4 turns to finish the task. If there is same entity in candidate list for target entity, please select directly. The answer format is: The most similar 200 entities are: <most>[]</most> and Terminate[answer]. The target entity is:
-'Ne Win'
-
-The Candidate entities list is: 
-['Ne Win', 'Wu Jin', 'Hla Min', 'Nani', 'Le Lynx', 'Dexia', 'Serbia', 'Chea Sim', 'Ben Bot', 'Nyan Tun', 'Jean Ping', 'Yemen', 'Aung Min', 'Ma Kai', 'Spain', 'Yang Bin', 'Saw Tun', 'Meretz', 'Niue', 'Luo Gan', 'Qena', 'Wan Li', 'Temelín', 'Tep Vong', 'Tea Banh', 'Basij', 'Ted Poe', 'Fatih', 'Oman', 'Seeka', 'Lukoil', 'Lenovo', 'Nelly Olin', 'NATO', 'Safran', 'Linz', 'Idi Amin', 'Holcim', 'Roshen', 'Bahrain', 'Telmex', 'Boeing', 'Verisign', 'Xerox', 'Niger', 'Sudan', 'Russia', 'Thein Tun', 'Shwe Mann', 'Namibia', 'RENAMO', 'Japan', 'Jordan', 'Aye Maung', 'Germany', 'Syria', 'Sirikit', 'Eswatini', 'Pat Cox', 'Sukarno', 'Kai Ko', 'Togo', 'Mike Eman', 'Đỗ Mười', 'Mike DeWine', 'Jon Kyl', 'Pap Saine', 'Joyce Quin', 'Yukos', 'Dulmatin', 'Komeito', 'Naruhito', 'Taliban', 'Palau', 'Brunei', 'Greg Hunt', 'Vũ Khoan', 'Ānanda', 'Bob Rae', 'Quryna', 'Giza', 'Yesh Atid', 'Lien Chan', 'PORA', 'Syriza', 'Sinn Féin', 'UNITA', 'Rusnano', 'Len Brown', 'Kosovo', 'La Nación', 'Qatar', 'Le Phare', 'Wales', 'UBS', 'El País', 'USKOK', 'Kashmir', 'Intel', 'La Región', 'Akihito', 'Foxconn', 'Télam', 'Eskom', 'Sacyr', 'Jamaica', 'PIMCO', 'CANTV', 'Fiji Sun', 'Petronas', 'Abrar', 'Tuvalu', 'Algeria', 'Zagazig', 'IBM', 'Hyatt', 'Toshiba', 'Guam', 'Subaru', 'Xiaomi', 'Reuters', 'CNN', 'VMware', 'Senegal', 'Turkey', 'Cameroon', 'Khun Sa', 'Estonia', 'Iceland', 'Poland', 'Belarus', 'Thein Swe', 'Wade Mark', 'Rose Akol', 'Liberia', 'Sam Abal', 'Anote Tong', 'Ieng Sary', 'Theo Waigel', 'Ung Huot', 'Jack Ma', 'Hun Manet', 'U Thaung', 'Denmark', 'Jean Obeid', 'Romania', 'Angus King', 'Libya', 'Stern Hu', 'Mike Sonko', 'Chile', 'France', 'Fred Gumo', 'Canada', 'Joseph Zen', 'Tião Viana', 'Des Browne', 'Wayne Swan', 'Suharto', 'Noel Davern', 'Mark Kirk', 'Bill Weld', 'Ali Roba', 'Terry Gou', 'Noemí Sanín', 'Mongolia', 'Lin Chuan', 'Ben Nelson', 'John Bani', 'Anne Holt', 'Sidik Mia', 'Jim Molan', 'Alex Otti', 'Lee Terry', 'Udi Adam', 'Joe Stork', 'Kim Wan-su', 'Jack Lew', 'Jaak Aab', 'Bob Dole', 'Peter Obi', 'Bob Carr', 'Jamie Dimon', 'Nika Melia', 'José Bono', 'Liam Fox', 'Bodoland', 'Maldives', 'Mus Sema', 'Hervé Morin', 'Joe Modise', 'Yane Yanev', 'Timo Soini', 'Mike Rama', 'Pete Geren', 'Than Nyun', 'Dave Camp', 'Monsanto', 'Ethiopia', 'Kyaw Myint']
-
-NOTE: 
-1. You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
-2. The entity in terminate must be in the first entity in the candidate list returned!
-
-[YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
-################### Your Answer Starts Here: ################### 
-Turn 1:
-# 4 turns left to provide final answer. Please select 200 most similar answer and 1 most similar entity from the candidates list. If you are very sure about the answer, please answer directly. Otherwise, you can request the entity you are not sure to increase your confidency. Please do not request entity randomly, otherwise, you will be punished! You can only request one entity per time.
-Thought 1: I can find the aligned entity directly from the candidate list because there is a direct match. 
-Act 1: The most similar 200 entities are: <most>['Ne Win', 'Nyan Tun', 'Aung Min', 'Saw Tun', 'Shwe Mann', 'Hla Min', 'Thein Tun', 'Thein Swe', 'U Thaung', 'Than Nyun', 'Khun Sa', 'Chea Sim', 'Ieng Sary', 'Tep Vong', 'Ung Huot', 'Tea Banh', 'Suharto', 'Idi Amin', 'Ben Bot', 'Jean Ping', 'Pat Cox', 'Pap Saine', 'Greg Hunt', 'Dulmatin', 'Joe Stork', 'Sukarno', 'Fred Gumo', 'Rose Akol', 'Jean Obeid', 'Jack Ma', 'Mike Sonko', 'Yane Yanev', 'Mike DeWine', 'Jon Kyl', 'Bob Rae', 'Jaak Aab', 'Anote Tong', 'Stern Hu', 'Kai Ko', 'Mike Eman', 'Ted Poe', 'Fatih', 'Vũ Khoan', 'Sam Abal', 'Lin Chuan', 'Ma Kai', 'Yang Bin', 'Luo Gan', 'Wan Li', 'Sinn Féin', 'Temelín', 'Nani', 'Ted Poe', 'Timo Soini', 'Nelly Olin', 'Noel Davern', 'Alex Otti', 'Bill Weld', 'Pete Geren', 'Wayne Swan', 'Des Browne', 'Jim Molan', 'Noemí Sanín', 'Ben Nelson', 'Peter Obi', 'Bob Carr', 'José Bono', 'Liam Fox', 'Joe Stork', 'Ali Roba', 'Hervé Morin', 'Jack Lew', 'Yemen', 'Jordan', 'Namibia', 'Niger', 'Guam', 'Jamaica', 'Liberia', 'Libya', 'Lesotho', 'Iceland', 'Estonia', 'Belarus', 'Turkey', 'Syria', 'Japan', 'Germany', 'France', 'Chile', 'Canada', 'Senegal', 'Qatar', 'Spain', 'Sudan', 'Russia', 'Serbia', 'Togo', 'Poland', 'Palau', 'Oman', 'Nauru', 'Mongolia', 'Monaco', 'Malta', 'Maldives', 'Lesotho', 'Liberia', 'Libya', 'Lesotho', 'Kyrgyzstan', 'Kosovo', 'Kuwait', 'Kiribati', 'Kenya', 'Kazakhstan', 'Jordan', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Ivory Coast', 'Honduras', 'Haiti', 'Greece', 'Ghana', 'Georgia', 'Gabon', 'Finland', 'Fiji', 'El Salvador', 'Dominica', 'Djibouti', 'Denmark', 'Cyprus', 'Cuba', 'Croatia', 'Costa Rica', 'Congo', 'Colombia', 'China', 'Chad', 'Central African Republic', 'Cape Verde', 'Cameroon', 'Burundi', 'Burkina Faso', 'Bulgaria', 'Brunei', 'Brazil', 'Botswana', 'Bosnia and Herzegovina', 'Bhutan', 'Benin', 'Belgium', 'Belize', 'Belarus', 'Barbados', 'Bangladesh', 'Bahrain', 'Bahamas', 'Azerbaijan', 'Austria', 'Australia', 'Armenia', 'Argentina', 'Angola', 'Andorra', 'Algeria', 'Albania', 'Afghanistan']</most> ans Terminate['Ne Win'].
------------------------------- Example End ------------------------------ 
-
------------------------------- Example Start ------------------------------ 
-
-[USER (Boss)]: Please sort the candidate list according to similarity to target entity and select the most aligned entity of the target entity. You have at most 4 turns to finish the task. If there is same entity in candidate list for target entity, please select directly. The answer format is: The most similar 200 entities are: <most>[]</most> and Terminate[answer]. The target entity is:
-'Salauddin'
-
-The Candidate entities list is: 
-['Palau', 'Hla Min', 'Salou Djibo', 'Attajdid', 'Malawi', 'Bahrain', 'Malaysia', 'Raila Odinga', 'Spain', 'Valdivia', 'San Marino', 'Hla Tun', 'Carl Levin', 'Tatarstan', 'Soe Thein', 'Salzburg', 'Sinn Féin', 'Macau', 'Sirindhorn', 'Jawed Ludin', 'Fatah', 'Kadima', 'Babar Awan', 'Hamid Mir', 'Gilad Erdan', 'Qatar', 'Alexandria', 'Kuwait', 'Basij', 'Naruhito', 'Jean Ping', 'Oman', 'Susan Rice', 'Naoto Kan', 'Mali', 'Sam Nujoma', 'Joe Biden', 'Burundi', 'Ma Kai', 'Shas', 'Madrid', 'Ne Win', 'Dagestan', 'Paul Martin', 'Bayan Muna', 'Jamaica', 'Chea Sim', 'Maldives', 'Shwe Mann', 'Sung Kim', 'Hau Lungpin', 'Sukarno', 'Benin', 'Sam Sesay', 'Mao Zedong', 'Poland', 'Ron Wyden', 'Japan', 'Somalia', 'Suharto', 'Vanuatu', 'Panama', 'Hamas', 'Lara Giddings', 'Ramdev', 'Cambodia', 'Sweden', 'Aung Min', 'Kalyan Singh', 'Sylvia Lim', 'Ānanda', 'Dan Burton', 'Su Chi', 'La Nación', 'Khakassia', 'Politiken', 'Kashmir', 'Kashmir', 'Slovenia', 'Canada', 'Samoa', 'Paula Cox', 'Wales', 'Barbados', 'Jay Nixon', 'Bermuda', 'Télam', 'Haaretz', 'Madeira', 'Navarre', 'Sirius XM', 'Salam Fayyad', 'Saad Hariri', 'J B Dauda', 'Sule Lamido', 'Ban Kimoon', 'Talal Arslan', 'Raúl', 'Shaul Mofaz', 'Isa Yuguda', 'Imran Khan', 'Yabloko', 'L K Advani', 'L K Advani', 'Sima Samar', 'Sadullah Ergin', 'Safar Abiyev', 'Sri Mulyani', 'Yair Lapid', 'Likud', 'AlAlam', 'Talla Sylla', 'Taleb Rifai', 'Satsuki Eda', 'Masood Khan', 'Syriza', 'Selim Hoss', 'Mart Laar', 'Paul Biya', 'Mallikarjun', 'Paskal Milo', 'Milan Panić', 'AlAhram', 'Umar', 'ArNamys', 'Vlad Filat', 'Saddam Hussein', 'Al Wefaq', 'Jim Molan', 'Sharad Yadav', 'Bev Oda', 'Salim Saleh', 'Kamal Nath', 'Peter Hain', 'Khalid Ali', 'Ro Tuchol', 'Max Baucus', 'Gabon', 'Sidwaya', 'Sali Berisha', 'Radek John', 'Dharam Singh', 'Matt Mead', 'Danilo Medina', 'Giza', 'César Ham', 'Khun Sa', 'Wu Denyih', 'South Sudan', 'Harry Reid', 'Bangladesh', 'Pagan Amum', 'Hun Sen', 'Baldev Singh', 'Iran', 'Sukh Ram', 'Temelín', 'Ioan Rus', 'Mar Roxas', 'Ivica Kirin', 'Malik Agar', 'Angus King', 'Aung San', 'Jordan', 'Vilma Espín', 'Saint Lucia', 'Khin Yi', 'Mongolia', 'Finland', 'India', 'Kazakhstan', 'Marat Tazhin', 'Cameroon', 'Lamar Smith', 'Pakistan', 'Laos', 'Boediono', 'Milan Kučan', 'Neal S Wolin', 'Honduras', 'Latvia', 'Curaçao', 'Milan Roćen', 'Hilary Onek', 'Sam Ongeri', 'Uganda', 'Bola Tinubu', 'Mark Kirk', 'Moldova', 'Iceland', 'Ukraine', 'Maung Oo', 'Haiti', 'Tony Tan', 'Jason Hu', 'Mauritius', 'Belize', 'Fiji', 'Paraguay', 'South Asia', 'Abdulla Kurd']
-
-NOTE: 
-1. You have at most 4 turns to generate final results, which means you have to provide the answer at or earlier than Thought 4.  If you are very sure about the answer, please answer directly.
-2. The entity in terminate must be in the first entity in the candidate list returned!
-
-[YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!  
-################### Your Answer Starts Here: ################### 
-Turn 1:
-# 4 turns left to provide the final answer. 
-Thought 1: I can find a direct match.
-Act 1: The most similar 200 entities are: <most>['Abdulla Kurd', 'Salou Djibo', 'Salam Fayyad', 'Saad Hariri', 'Sule Lamido', 'Sadullah Ergin', 'Safar Abiyev', 'Sali Berisha', 'Sam Ongeri', 'Salim Saleh', 'Shaul Mofaz', 'Sima Samar', 'Satsuki Eda', 'Sukh Ram', 'Shwe Mann', 'Susan Rice', 'Sylvia Lim', 'Sinn Féin', 'Sukarno', 'Somalia', 'Soe Thein', 'Sung Kim', 'Suharto', 'San Marino', 'Hla Min', 'Attajdid', 'Malawi', 'Bahrain', 'Malaysia', 'Raila Odinga', 'Spain', 'Valdivia', 'Hla Tun', 'Carl Levin', 'Tatarstan', 'Salzburg', 'Macau', 'Jawed Ludin', 'Fatah', 'Kadima', 'Babar Awan', 'Hamid Mir', 'Gilad Erdan', 'Qatar', 'Alexandria', 'Kuwait', 'Basij', 'Naruhito', 'Jean Ping', 'Oman', 'Naoto Kan', 'Sam Nujoma', 'Joe Biden', 'Burundi', 'Ma Kai', 'Shas', 'Madrid', 'Ne Win', 'Dagestan', 'Paul Martin', 'Bayan Muna', 'Jamaica', 'Chea Sim', 'Maldives', 'Hau Lungpin', 'Benin', 'Sam Sesay', 'Mao Zedong', 'Poland', 'Ron Wyden', 'Japan', 'Vanuatu', 'Panama', 'Hamas', 'Lara Giddings', 'Ramdev', 'Cambodia', 'Sweden', 'Aung Min', 'Kalyan Singh', 'Ānanda', 'Dan Burton', 'Su Chi', 'La Nación', 'Khakassia', 'Politiken', 'Kashmir', 'Slovenia', 'Canada', 'Paula Cox', 'Wales', 'Barbados', 'Jay Nixon', 'Bermuda', 'Télam', 'Haaretz', 'Madeira', 'Navarre', 'Sirius XM', 'J B Dauda', 'Ban Kimoon', 'Talal Arslan', 'Raúl', 'Isa Yuguda', 'Imran Khan', 'Yabloko', 'L K Advani', 'Sima Samar', 'Taleb Rifai', 'Masood Khan', 'Syriza', 'Selim Hoss', 'Mart Laar', 'Paul Biya', 'Mallikarjun', 'Paskal Milo', 'Milan Panić', 'AlAhram', 'Umar', 'ArNamys', 'Vlad Filat', 'Saddam Hussein', 'Al Wefaq', 'Jim Molan', 'Sharad Yadav', 'Bev Oda', 'Kamal Nath', 'Peter Hain', 'Khalid Ali', 'Ro Tuchol', 'Max Baucus', 'Gabon', 'Sidwaya', 'Radek John', 'Dharam Singh', 'Matt Mead', 'Danilo Medina', 'Giza', 'César Ham', 'Khun Sa', 'Wu Denyih', 'South Sudan', 'Harry Reid', 'Bangladesh', 'Pagan Amum', 'Hun Sen', 'Baldev Singh', 'Iran', 'Temelín', 'Ioan Rus', 'Mar Roxas', 'Ivica Kirin', 'Malik Agar', 'Angus King', 'Aung San', 'Jordan', 'Vilma Espín', 'Khin Yi', 'Mongolia', 'Finland', 'India', 'Kazakhstan', 'Marat Tazhin', 'Cameroon', 'Lamar Smith', 'Pakistan', 'Laos', 'Boediono', 'Milan Kučan', 'Neal S Wolin', 'Honduras', 'Latvia', 'Curaçao', 'Milan Roćen', 'Hilary Onek', 'Sam Ongeri', 'Uganda', 'Bola Tinubu', 'Mark Kirk', 'Moldova', 'Iceland', 'Ukraine', 'Maung Oo', 'Haiti', 'Tony Tan', 'Jason Hu', 'Mauritius', 'Belize', 'Fiji', 'Paraguay', 'South Asia']</most> and Terminate[Abdulla Kurd]
------------------------------- Example End ------------------------------ 
-
-[USER (Boss)]: Please sort the candidate list according to similarity to target entity and select the most aligned entity of the target entity. You have at most 4 turns to finish the task. If there is same entity in candidate list for target entity, please select directly. The answer format is: The most similar 200 entities are: <most>[]</most> and Terminate[answer]. The target entity is:
-{}
-
-The Candidate entities list is: 
-{}
-  
-NOTE: 
-1. You have at most 4 turns to generate final results. Please follow my example between "Example Start" and "Example End" above to answer task with interleaving Thought, Code, Action, Result turns. Each turn contains one segment of the target code to solve the problem. 
-2. The entity in terminate must be in the first entity in the candidate list returned!
-
-[YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment task turn by turn! 
-################### Your Answer Starts Here: ################### 
-
-Turn 1:
-# [Important!] 4 turns left to provide final answer. If you are very sure about the answer, please answer directly. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'!!! Otherwise, you will be punished.
-Thought 1:
-
-"""
 
 motif_ReAct_example_prompt_cn100_cn100 = """
 You are an programmer. You can request useful entity from candidate list but you can not request irrelevant entities. Otherwise, you will be fired. 
@@ -207,32 +142,54 @@ motif_ReAct_example_prompt_cn50_cn50 = """
     
     You must have a 'Thought' and 'Act' each turn, no matter the 'Act' is 'Request[entity]' or 'The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]'. The 'Act' can only be two types. During the alignemnt task, you must follow the following rules:
     Entity alignment rules:
-    1. Analyze the target entity's name and background to identify potential matches in the candidate list.
-    2. Use name similarity as the primary filter to narrow down the candidate list.
-    3. Request information about entities that closely resemble the target entity in name or context.
-    4. When requesting information, prioritize entities with the highest name similarity and contextual relevance to the target entity.
-    5. If a direct match or a clear connection to the target entity is found, terminate the process immediately with the identified entity.
-    6. If no direct match is found, select the entity with the highest similarity based on name and contextual relevance.
-    7. Use the information gathered to validate the best possible match to the target entity.
-    8. Ensure that the final termination action includes the most similar 50 entities list.
-    9. If an entity in the candidate list is an exact match or a well-known abbreviation/translation of the target entity, select it directly.
-    10. If the correct match is found through contextual or background information, terminate the process promptly with the correct entity.
-    11. Update the candidate list based on the latest observations to reflect the most accurate matches.
-    12. Follow a systematic approach in evaluating and requesting information to ensure alignment with the target entity.
-    13. Prioritize entities with geographical, political, or contextual connections to the target entity.
-    14. Confirm the selected entity through multiple rounds of analysis if necessary.
-    15. Always terminate the process with the most similar entity based on comprehensive analysis and observed connections.
-    16. The entity selected in the termination step must reflect the most accurate alignment with the target entity.
-    17. Maintain consistency in the entity selection process based on the gathered information.
-    18. The output format should be: "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[entity]."
-    19. Avoid selecting entities that shift focus away from the target entity's geographical or contextual relevance.
-    20. Adapt the process based on the available information to ensure the accurate alignment of entities.
-    21. The action can only be two types: "Request[entity]" and "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[entity]."
-    22. Do not generate the observations and wait User to generate.
-    23. The output format should be: "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[entity]."
+    1. You have at most 4 turns to generate the final result. Please answer the task with interleaving Thought, Code, Action, Result turns. 
+    2. Please put the entity in the terminate in the first entity of the candidate list reranked!!! 
+    3. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'!!!
+    4. If you are very sure about the answer, please answer directly. 
+    5. If there is the same entity in the candidate list as the target entity, please select it directly and terminate the process. 
+    6. You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types.
+    7. Please follow the example format: thought, action, observation steps. Do not generate response by yourself.
+    8. If you can find a direct match, please use act "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[]" directly and do no need to confirm another entity.
+    11. The output format is "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]".
+    10. Please do not generate any observations.
+    12. Request[] action can only request an entity in candidate list or it is itself.
+    13. Please output the ranked candidate list when terminate the process. 
+    14. The entity in Terminate[] can not be 'answer' but an entity.
+    14. The entity in Request[] can not be 'entity' but an real entity.
+    15. You must require the relevant entities in candidate list to target entity according your knowledge.
+    16. Please prioritize requesting the entity that most closely resembles the target entity in appearance..
+    17. Please note whether the abbreviation or translation of the target entity is in the candidate list.
+    18. Always start by analyzing the target entity's name and background to identify potential matches in the candidate list.
+    19. Use the name similarity as a primary filter to narrow down the candidate list.
+    20. Terminate the process with the most similar entity based on the comprehensive analysis of name similarity and background information connections.
+    21. When requesting information, prioritize entities with the highest name similarity and potential contextual relevance to the target entity.
+    22. If a direct match is not found, choose the entity with the highest similarity based on the motif code analysis.
+    23. If there is same entity with target entity in the candidate list, please select directly.
     24. Please pay attention to the full candidate list including the tail of candidate list for candidate entities has high name similarity with the target entity.
-    25. If there is same entity with target entity in the candidate list, please select and terminate with it directly.
+    25. You must response Thought, Act in each turn after observation. Do not generate response randomly.
+    Supplement rules：
+    1. Directly terminate the process if the target entity exactly matches any entity in the candidate list, considering potential rearrangements or slight name variations.
+    2. Use "Request[entity]" to gather more context about entities that share significant similarities in name or background with the target entity.
+    3. "Terminate[answer]" should be used only when confident about the entity's match; include the most similar 50 entities in the format "<MOST>[]</MOST>".
+    4. Prioritize entities that share a direct name match or are closely related in context to the target entity, including rearranged names.
+    5. Analyze the target entity's name, background, and any additional titles to identify potential matches in the candidate list.
+    6. Consider the historical, geographical, and contextual background of entities to ensure accurate alignment.
+    7. If a direct match is not found, request information on the entity that appears most similar based on name similarity and potential contextual relevance.
+    8. The entity used in "Terminate[]" must be from the candidate list and cannot be labeled as 'answer'.
+    9. Ensure the entity selected in "Terminate[]" is placed at the top of the reranked candidate list.
+    10. Limit the use of "Request[]" action to entities within the candidate list or the target entity itself.
+    11. The final decision should be based on a comprehensive analysis of the information gathered through requests and the initial candidate list.
+    12. Always verify the final entity against the target entity's known attributes to ensure the highest accuracy in alignment.
+    13. Ensure that the alignment process is transparent and justifiable based on the gathered information and analysis.
+    14. Focus on entities with a clear connection to the target entity's domain for more accurate alignment.
+    15. Update and refine rules based on feedback and outcomes of previous alignment tasks to improve accuracy and efficiency.
+    16. In cases of uncertainty, prioritize additional requests for information over premature termination.
+    17. Entities from the same domain as the target entity should be given priority due to potential shared ideologies or involvement.
+    18. If the target entity's full name is not directly matched but a variation or partial match is present in the candidate list, prioritize these entities for "Request[]" actions.
+    19. Remove any redundant or overlapping rules to maintain clarity and efficiency in the alignment process.
+    20. Ensure all actions taken during the alignment process are in strict adherence to these rules to maintain consistency and reliability.
 
+    
     Furthermore, the context information of an entity is given in code motif. How can you understand the code motif? Below is an example and the explanation of the code motif:
     Example:
     - Target entity: Carlos Johnny Méndez; Motif 1: [(Carlos Johnny Méndez, has Occupation ,Politician),(Carlos Johnny Méndez, nationality ,United States),(Carlos Johnny Méndez, given Name ,Carlos (given name)),(Carlos Johnny Méndez, member Of ,New Progressive Party (Puerto Rico)),(Carlos Johnny Méndez, alumni Of ,University of Puerto Rico),(Politician, connected with ,Carlos Johnny Méndez),(United States, connected with ,Carlos Johnny Méndez),(Carlos (given name), connected with ,Carlos Johnny Méndez),(New Progressive Party (Puerto Rico), connected with ,Carlos Johnny Méndez),(University of Puerto Rico, connected with ,Carlos Johnny Méndez)]
@@ -298,6 +255,8 @@ motif_ReAct_example_prompt_cn50_cn50 = """
     1. You have at most 4 turns to generate the final result. Please answer the task with interleaving Thought, Code, Action, Result turns. 
     2. Please put the entity in the terminate in the first entity of the candidate list reranked!!!
     3. The output format should be: "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[entity]."
+    4. If there is same entity with target entity in the candidate list, please select directly.
+
     
     [YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!
     
@@ -320,6 +279,7 @@ motif_ReAct_example_prompt_cn50_cn50 = """
     1. You have at most 4 turns to generate the final result. Please answer the task with interleaving Thought, Code, Action, Result turns. 
     2. Please put the entity in the terminate in the first entity of the candidate list reranked!!! 
     3. The output format should be: "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[entity]."
+    4. If there is same entity with target entity in the candidate list, please select directly.
     
     [YOU (Programmer)]: Let's break down the code generation and solve the Entity Alignment task turn by turn!
     
@@ -342,13 +302,67 @@ motif_ReAct_example_prompt_cn50_cn50 = """
     1. You have at most 4 turns to generate the final result. Please follow my examples above to answer the task with interleaving Thought, Code, Action, Result turns. 
     2. Please put the entity in the terminate in the first entity of the candidate list reranked!!!
     3. The output format should be: "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[entity]."
-    
+    4. If there is same entity with target entity in the candidate list, please select directly.
     
     [YOU (Programmer)]: Let's break down the code generation into several turns and solve the Entity Alignment
     
     ### Turn 1: (3 turns left to use "Terminate" action to provide final answer.)
     **Thought 1:**
     
+"""
+
+entity_alignment_rules_v18 = """
+1. You have at most 4 turns to generate the final result. Please answer the task with interleaving Thought, Code, Action, Result turns. 
+    2. Please put the entity in the terminate in the first entity of the candidate list reranked!!! 
+    3. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'!!!
+    4. If you are very sure about the answer, please answer directly. 
+    5. If there is the same entity in the candidate list as the target entity, please select it directly and terminate the process. 
+    6. You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types.
+    7. Please follow the example format: thought, action, observation steps. Do not generate response by yourself.
+    8. If you can find a direct match, please use act "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[]" directly and do no need to confirm another entity.
+    11. The output format is "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]".
+    10. Please do not generate any observations.
+    12. Request[] action can only request an entity in candidate list or it is itself.
+    13. Please output the ranked candidate list when terminate the process. 
+    14. The entity in Terminate[] can not be 'answer' but an entity.
+    14. The entity in Request[] can not be 'entity' but an real entity.
+    15. You must require the relevant entities in candidate list to target entity according your knowledge.
+    16. Please prioritize requesting the entity that most closely resembles the target entity in appearance..
+    17. Please note whether the abbreviation or translation of the target entity is in the candidate list.
+    18. Always start by analyzing the target entity's name and background to identify potential matches in the candidate list.
+    19. Use the name similarity as a primary filter to narrow down the candidate list.
+    20. Terminate the process with the most similar entity based on the comprehensive analysis of name similarity and background information connections.
+    21. When requesting information, prioritize entities with the highest name similarity and potential contextual relevance to the target entity.
+    22. If a direct match is not found, choose the entity with the highest similarity based on the motif code analysis.
+    23. If there is same entity with target entity in the candidate list, please select directly.
+"""
+
+entity_alignment_rules_v19 = """
+        1. You have at most 4 turns to generate the final result. Please answer the task with interleaving Thought, Code, Action, Result turns. 
+    2. Please put the entity in the terminate in the first entity of the candidate list reranked!!! 
+    3. Please only genenrate 'Thought' and 'Act' and wait the User to generate 'Observation'!!!
+    4. If you are very sure about the answer, please answer directly. 
+    5. If there is the same entity in the candidate list as the target entity, please select it directly and terminate the process. 
+    6. You must have an act from above two actions per turn no matter it is request or terminate. The act can only be two types.
+    7. Please follow the example format: thought, action, observation steps. Do not generate response by yourself.
+    8. If you can find a direct match, please use act "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[]" directly and do no need to confirm another entity.
+    11. The output format is "The most similar 50 entities are: <MOST>[]</MOST> and Terminate[answer]".
+    10. Please do not generate any observations.
+    12. Request[] action can only request an entity in candidate list or it is itself.
+    13. Please output the ranked candidate list when terminate the process. 
+    14. The entity in Terminate[] can not be 'answer' but an entity.
+    14. The entity in Request[] can not be 'entity' but an real entity.
+    15. You must require the relevant entities in candidate list to target entity according your knowledge.
+    16. Please prioritize requesting the entity that most closely resembles the target entity in appearance..
+    17. Please note whether the abbreviation or translation of the target entity is in the candidate list.
+    18. Always start by analyzing the target entity's name and background to identify potential matches in the candidate list.
+    19. Use the name similarity as a primary filter to narrow down the candidate list.
+    20. Terminate the process with the most similar entity based on the comprehensive analysis of name similarity and background information connections.
+    21. When requesting information, prioritize entities with the highest name similarity and potential contextual relevance to the target entity.
+    22. If a direct match is not found, choose the entity with the highest similarity based on the motif code analysis.
+    23. If there is same entity with target entity in the candidate list, please select directly.
+    24. Please pay attention to the full candidate list including the tail of candidate list for candidate entities has high name similarity with the target entity.
+    25. You must response Thought, Act in each turn after observation. Do not generate response randomly.
 """
 
 motif_ReAct_example_prompt_cn50_cn50_v0 = """

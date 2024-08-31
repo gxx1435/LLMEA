@@ -37,10 +37,50 @@ code_motif_prompts_generate = """
 As a good Computer Science student good at coding, your task is to describe the graph structure in Python code format. Motifs are recurrent and statistically significant subgraphs or patterns of a larger graph. Each Motif instance will be viewed as a function with specialized name and node involved in the Motif instance will be the parameters in the function. 
 
 **Rules for generating code format Motif**
-  {}
-
-  
-Please refer to the example below and handle a new task! 
+    {}
+    ** Class: A class represented an entity.
+    ** Descriptive Function Names: Ensure the function name clearly represents the abstract of the motif. This aids in understanding the motif's purpose at a glance.
+    ** Relevant import statements: The import statement is relationship between entities.
+    ** Function parameter: The function parameters are all the entities of a motif.
+    ** Function Implementation: Implement the function by calling the imported relations with the appropriate entities(parameters). Each relation call should correspond to the connections or actions described in the motif information.
+    ** Relationship: For simple connections between nodes, use the connected_with relation. For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
+    ** Return values: Return all the entities involved in the motif as part of the function’s result.
+    ** Multiple relationship: Recognize the `+=` relationship as indicative of multiple types of connections between two entities, enriching the motif's complexity.
+    ** Demonstrative Execution: Use the `if __name__ == '__main__':` block to showcase the motif's application, offering a practical example of its use.
+    ** Triple: A triple in triangle information represent a motif and is expressed as a function in code motif, like:
+    - Target entity: Carlos Johnny Méndez; Motif 1: [(Carlos Johnny Méndez, has Occupation ,Politician),(Carlos Johnny Méndez, nationality ,United States),(Carlos Johnny Méndez, given Name ,Carlos (given name)),(Carlos Johnny Méndez, member Of ,New Progressive Party (Puerto Rico)),(Carlos Johnny Méndez, alumni Of ,University of Puerto Rico),(Politician, connected with ,Carlos Johnny Méndez),(United States, connected with ,Carlos Johnny Méndez),(Carlos (given name), connected with ,Carlos Johnny Méndez),(New Progressive Party (Puerto Rico), connected with ,Carlos Johnny Méndez),(University of Puerto Rico, connected with ,Carlos Johnny Méndez)]    
+    import has_Occupation, nationality, given_Name, member_Of, alumni_Of, connected_with
+    class Carlos_Johnny_Mendez(object):
+        
+            def __init__(self, Carlos_Johnny_Mendez, Politician, United_States, Carlos_given_name, New_Progressive_Party_Puerto_Rico, University_of_Puerto_Rico):
+                ## This is initial function
+                self.Carlos_Johnny_Mendez = Carlos_Johnny_Mendez
+                self.Politician = Politician
+                self.United_States = United_States
+                self.Carlos_given_name = Carlos_given_name
+                self.New_Progressive_Party_Puerto_Rico = New_Progressive_Party_Puerto_Rico
+                self.University_of_Puerto_Rico = University_of_Puerto_Rico
+        
+            def Carlos_Johnny_Mendez_Profile(self):
+                self.Carlos_Johnny_Mendez = has_Occupation(self.Politician)
+                self.Carlos_Johnny_Mendez += nationality(self.United_States)
+                self.Carlos_Johnny_Mendez += given_Name(self.Carlos_given_name)
+                self.Carlos_Johnny_Mendez += member_Of(self.New_Progressive_Party_Puerto_Rico)
+                self.Carlos_Johnny_Mendez += alumni_Of(self.University_of_Puerto_Rico)
+                
+                self.Politician = connected_with(self.Carlos_Johnny_Mendez)
+                self.United_States = connected_with(self.Carlos_Johnny_Mendez)
+                self.Carlos_given_name = connected_with(self.Carlos_Johnny_Mendez)
+                self.New_Progressive_Party_Puerto_Rico = connected_with(self.Carlos_Johnny_Mendez)
+                self.University_of_Puerto_Rico = connected_with(self.Carlos_Johnny_Mendez)
+                
+                return self.Carlos_Johnny_Mendez, self.Politician, self.United_States, self.Carlos_given_name, self.New_Progressive_Party_Puerto_Rico, self.University_of_Puerto_Rico
+        
+        if __name__ == '__main__':
+            # Example usage
+            cmn = Carlos_Johnny_Mendez('Carlos Johnny Méndez', 'Politician', 'United States', 'Carlos (given name)', 'New Progressive Party (Puerto Rico)', 'University of Puerto Rico')
+    
+Note: Please refer to the example below and handle a new task! 
 
 ## Example Starts: 
 Given triangle Motif information, generate its Code description.
@@ -97,7 +137,10 @@ class Vladimir_Putin(object):
 
 ## New Task Starts:
 Given triangle Motif information, generate its Code description.
-
+    
 **Triangle Motif information:**
 {}
+    
+Note: There is no need for you to generate code description for empty triangle motif information.
+
 """

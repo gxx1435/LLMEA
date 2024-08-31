@@ -3,7 +3,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 import editdistance
 import json
 import re
+import string
+from zhon.hanzi import punctuation
 from urllib.parse import unquote
+
+
 def split_camel_case(s):
     return re.sub('([a-z])([A-Z])', r'\1 \2', s)
 
@@ -255,7 +259,7 @@ def coverage_eval_segment(candidates_idx_list, ent_left, ent_right, entity_text_
 
 
 
-def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, out_file=''):
+def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, out_file='', dataset = 'icews_yago'):
     """
     :param ent_left: source entity
     :param candidates_idx_list: candidates idx list
@@ -264,36 +268,48 @@ def coverage_eval(candidates_idx_list, ent_left, ent_right, entity_text_right, o
     :param out_file:
     :return:
     """
+    ent_left_ids = [line.split('\t')[0] for line in open(
+        '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/{}/new_ent_ids_1_rs_0.3_new'.format(dataset)).readlines()]
+    if 'DBP15K' in dataset:
+        lang = dataset.split('/')[-1].split('_')[0]
+        if 'zh' ==  lang:
+            id_ent_dict = get_id_entity_dict(
+                '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/DBP15K/{}_en/ent_ids_1_cn'.format(lang))
+        else:
+            id_ent_dict = get_id_entity_dict(
+                '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/DBP15K/{}_en/ent_ids_1_{}'.format(lang, lang))
+
     cnt = 0
-    # ent_id_1_dict = get_ent_id_dict('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/DBP15K/zh_en/ent_ids_1')
-    # id_ent_1_cn_dict = get_id_entity_dict('/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/data/DBP15K/zh_en/ent_ids_1_cn')
-    candidates_list = []
-    for i in range(len(ent_left)):
-        cand_list = candidates_idx_list[i]
-        candidates = []
-        for j in cand_list:
-
-            cand_txt = entity_text_right[j]
-            candidates.append(cand_txt)
-
-        # print(ent_left[i], candidates, ent_right[i])
-
-        if ent_right[i] in candidates:
-           cnt += 1
-           candidates.remove(ent_right[i])
-           candidates.append(ent_right[i])
-
-        elif ent_right[i] not in candidates:
-            candidates.remove(candidates[-1])
-            candidates.append(ent_right[i])
-
-        candidates_list.append(candidates)
-        print(ent_right[i], len(candidates), '\n')
-
     with open(out_file, 'w') as f:
         for i in range(len(ent_left)):
-            f.write(ent_left[i] + '\t' + ','.join(candidates_list[i]) + '\n')
+            cand_list = candidates_idx_list[i]
+            candidates = []
 
+            for j in cand_list:
+
+                cand_txt = entity_text_right[j]
+
+                candidates.append(cand_txt)
+
+            # print(ent_left[i], candidates, ent_right[i])
+
+            if ent_right[i] in candidates:
+                cnt += 1
+                candidates.remove(ent_right[i])
+                candidates.append(ent_right[i])
+
+            elif ent_right[i] not in candidates:
+                candidates.remove(candidates[-1])
+                candidates.append(ent_right[i])
+
+
+            original_target_entity = id_ent_dict[ent_left_ids[i]]
+            print(original_target_entity, len(candidates), '\n')
+            f.write(original_target_entity + '\t' + ','.join(candidates) + '\n')
+
+    # with open(out_file, 'w') as f:
+    #     for i in range(len(ent_left)):
+    #         f.write(original_target_entity + '\t' + ','.join(candidates_list[i]) + '\n')
 
     return float(cnt / len(ent_left))
 
@@ -376,6 +392,7 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, hit='hit1', length
     ent_ids_1 = []
     with open(ent_id_1_path, 'r') as f:
         for line in f.readlines():
+            ent = line.split('\t')[1].strip()
             ent_ids_1.append(line.split('\t')[1].strip())
 
 
@@ -384,6 +401,7 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, hit='hit1', length
         for line in f.readlines():
             ent_ids_2_aligned.append(line.split('\t')[1].strip())
 
+    ##
     ent_idx_1 = get_ent_id_dict(ent_id_1_path)
     ent_ids_12_dict = dict(zip(ent_ids_1, ent_ids_2_aligned))
 
@@ -394,10 +412,9 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, hit='hit1', length
     with open(final_anwser_file, 'r', encoding='ascii') as f:
         final_answer = json.load(f)
         n_badcase=0
-        for key in final_answer.keys():
+        for i, key in enumerate(final_answer.keys()):
             # try:
                 if hit == 'hit1':
-
                     pattern = r'"([^"]*)"'
                     if final_answer[key] == -1:
                         print('no answer: ', ent_idx_1[key], key)
@@ -408,6 +425,7 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, hit='hit1', length
                         final_answer[key] = match.group(1)
 
                     final_answer[key] = unquote(final_answer[key])
+
                     ent_ids_12_dict[key] = unquote(ent_ids_12_dict[key])
 
                     if final_answer[key] != ent_ids_12_dict[key]:
@@ -419,13 +437,17 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, hit='hit1', length
 
                 elif hit == 'hit10':
                     if final_answer[key] == -1:
+                        no_answer += 1
                         continue
+                    # correct answer
                     word = ent_ids_12_dict[key]
                     wordlist = final_answer[key]
 
+                    # wordlist = eval(final_answer[key])
                     wordlist = wordlist.split(',')
                     wordlist[0] = wordlist[0][1:]
                     wordlist[-1] = wordlist[-1][:-1]
+
                     pattern1 = r"'([^']*)'"
                     for i, word_ in enumerate(wordlist):
                         match = re.search(pattern1, word_)
@@ -440,14 +462,16 @@ def hit_1_10_rate(final_anwser_file, dataset, ent1_f, ent2_f, hit='hit1', length
                             word_ = match.group(1)
                         wordlist[i] = word_
 
-                    word = word[1:-1] if word[0] == "'" or word[0] == "\"" else word
                     wordlist = wordlist[:10]
 
                     if word in wordlist:
-                        print(key, len(wordlist))
+                        print(key, len(wordlist), wordlist)
                         hit10 += 1
+                    else:
+                        n_badcase += 1
 
     print('hit1:{}'.format(hit1))
+    print('hit10:{}'.format(hit10))
     print("n badcases:{}".format(n_badcase))
     print("no answer case:{}".format(no_answer))
     print("no answer rate:{}".format(float(no_answer/len(final_answer))))
@@ -535,3 +559,27 @@ def mean_reciprocal_rank(final_answers):
     #     mrr = sum(reciprocal_ranks) / len(ranks)
     #     mrrs.append(mrr)
     # return np.mean(mrrs)
+
+def clear_entity_text(ent):
+    """
+    remove punctuation of text
+    :param ent:
+    :return:
+    """
+    ## The same with text prompt
+    ent_txt = ent.strip().replace("...", "")
+    ent_txt = ent_txt.split('(')[0].strip()
+    ent_txt = ent_txt.split('（')[0].strip()
+
+    # remove punctuation
+    punctuation_eng = string.punctuation
+    punctuation_zh = punctuation
+    for i in punctuation_eng:
+        ent_txt = ent_txt.replace(i, '')
+
+    for j in punctuation_zh:
+        ent_txt = ent_txt.replace(j, '')
+    #
+    ent_txt = ent_txt.replace('_', ' ')
+
+    return ent_txt

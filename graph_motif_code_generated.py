@@ -4,8 +4,6 @@ code_motif_prompts_generate = """
     During the code motif generation task, you should follow the below rules:
     **Rules for generating Code Description**
         ** Class: A class represented an entity.
-        ** If triangle motif information is '', its code description is ''.
-        ** There is no need for you to generate code description for empty triangle motif information.
         ** Descriptive Function Names: Ensure the function name clearly represents the abstract of the motif. This aids in understanding the motif's purpose at a glance.
         ** Relevant import statements: The import statement is relationship between entities.
         ** Function parameter: The function parameters are all the entities of a motif.

@@ -19,7 +19,7 @@ def get_paths():
     dataset = 'icews_yago'
     sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_50_5041_all add_put_correct_ans_last.txt'.format(save_dir, dataset)
 
-    # from ReAct_API_call import dataset, sematic_embedding_candidates_path
+    from ReAct_API_call import dataset, sematic_embedding_candidates_path
 
     ent_id_1_path = '{}/{}/new_ent_ids_1'.format(save_dir, dataset)
     ent_id_2_path = '{}/{}/new_ent_ids_2_aligned'.format(save_dir, dataset)
@@ -56,6 +56,7 @@ def get_candidates():
                         open(sematic_embedding_candidates_path).readlines()]
     candidates = dict(zip(entity_keys, cand_list_values))
     return candidates
+
 candidates = get_candidates()
 
 def get_Graph():
@@ -64,8 +65,13 @@ def get_Graph():
     """
     triple1 = '{}/{}/triples_1'.format(save_dir,dataset)
     triple2 = '{}/{}/triples_2'.format(save_dir,dataset)
-    new_triples1 = '{}/{}/new_triples_1'.format(save_dir,dataset)
-    new_triples2 = '{}/{}/new_triples_2'.format(save_dir, dataset)
+    if 'DBP15K' in dataset:
+        new_triples1 = triple1
+        new_triples2 = triple2
+    else:
+        new_triples1 = '{}/{}/new_triples_1'.format(save_dir,dataset)
+        new_triples2 = '{}/{}/new_triples_2'.format(save_dir, dataset)
+
     G1 = nx.MultiDiGraph()
     with open(new_triples1) as f:
             for line in f.readlines():
@@ -88,16 +94,39 @@ G1, G2 = get_Graph()
 def get_rel_dict():
     ##  获取relation of two nodes
     rel_1_dict = dict()
-    rel_ids_1 = '{}/{}/rel_ids_1'.format(save_dir, dataset)
+
+    if 'zh_en' in dataset:
+        rel_ids_1 = '{}/{}/rel_ids_1_cn'.format(save_dir, dataset)
+    elif 'ja_en' in dataset:
+        rel_ids_1 = '{}/{}/rel_ids_1_ja'.format(save_dir, dataset)
+    elif 'fr_en' in dataset:
+        rel_ids_1 = '{}/{}/rel_ids_1_fr'.format(save_dir, dataset)
+    else:
+        rel_ids_1 = '{}/{}/rel_ids_1'.format(save_dir, dataset)
+
     with open(rel_ids_1) as f:
             for line in f.readlines():
-                rel_1_dict.update({line.split('\t')[0]: line.split('\t')[1].strip()})
+                line = line.split('\t')
+                if 'DBP15K' in dataset:
+                    id = line[0].strip()
+                    rel = line[1].split('/')[-1].strip()
+                else:
+                    id = line[0].strip()
+                    rel = line[1].strip()
+                rel_1_dict.update({id: rel})
 
     rel_2_dict = dict()
     rel_ids_2 = '{}/{}/rel_ids_2'.format(save_dir, dataset)
     with open(rel_ids_2) as f:
             for line in f.readlines():
-                rel_2_dict.update({line.split('\t')[0]: line.split('\t')[1].strip()})
+                line = line.split('\t')
+                if 'DBP15K' in dataset:
+                    id = line[0].strip()
+                    rel = line[1].split('/')[-1].strip()
+                else:
+                    id = line[0].strip()
+                    rel = line[1].strip()
+                rel_2_dict.update({id: rel})
 
     return rel_1_dict, rel_2_dict
 rel_1_dict, rel_2_dict = get_rel_dict()
@@ -550,6 +579,7 @@ class Entity:
         :param node:
         :return:
         """
+
         return candidates[entity_name]
 
     def get_prompts_with_text_motif(self):

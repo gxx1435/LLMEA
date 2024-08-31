@@ -6,9 +6,17 @@
 # wait
 
 #python3 machine_translation.py
+#echo "Test"
+#python3 LLMEA_zero_base.py ../data/DBP15K/fr_en/text_input_no_train_11_wxt.txt ../data/DBP15K/fr_en/text_input_no_train_22_wxt.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_zeroembed_DBP15K_fr_en_sample_500/ 500 > out_log/Output_LLMEA_zero_base_sample500_DBP15K_fr_en_all_add.txt
+#python3 LLMEA_zero_base.py ../data/DBP15K/ja_en/text_input_no_train_11_wxt_KI.txt ../data/DBP15K/ja_en/text_input_no_train_22_wxt_KI.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_zeroembed_DBP15K_ja_en_sample_500/ 500 > out_log/Output_LLMEA_zero_base_sample500_DBP15K_ja_en_all_add.txt
+#python3 LLMEA_zero_base.py ../data/DBP15K/zh_en/text_input_no_train_11_wxt_KI.txt ../data/DBP15K/zh_en/text_input_no_train_22_wxt_KI.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_zeroembed_DBP15K_zh_en_sample_500/ 500 > out_log/Output_LLMEA_zero_base_sample500_DBP15K_zh_en_all_add.txt
 
-echo "Start encoding and EA"
-python3 LLMEA_zero_base.py ../data/DBP15K/zh_en/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/DBP15K/zh_en/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_zeroembed_DBP15K_zh_en/ 30000 > out_log/Output_LLMEA_zero_base_rs_30%_DBP15K_zh_en_all_add.txt
+
+echo "Start DBP15K"
+python3 LLMEA_zero_base.py ../data/DBP15K/fr_en/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/DBP15K/fr_en/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_zeroembed_DBP15K_fr_en/ 5000 > out_log/Output_LLMEA_zero_base_rs_30%_DBP15K_fr_en_all_add.txt
+#python3 LLMEA_zero_base.py ../data/DBP15K/ja_en/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/DBP15K/ja_en/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_zeroembed_DBP15K_ja_en/ 5000 > out_log/Output_LLMEA_zero_base_rs_30%_DBP15K_ja_en_all_add.txt
+#python3 LLMEA_zero_base.py ../data/DBP15K/zh_en/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/DBP15K/zh_en/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_zeroembed_DBP15K_zh_en/ 5000 > out_log/Output_LLMEA_zero_base_rs_30%_DBP15K_zh_en_all_add.txt
+
 #python3 LLMEA_zero_base.py ../data/icews_yago/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/icews_yago/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_zeroembed_icews_yago/ 30000 > out_log/Output_LLMEA_zero_base_rs_30%_icews_yago_all_add.txt
 #python3 LLMEA_zero_base.py ../data/icews_wiki/text_input_no_train_11_wxt_rs_0.3_new.txt ../data/icews_wiki/text_input_no_train_22_wxt_rs_0.3_new.txt '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/run/llm_response/gpt4_turbo_.json' /mid_results_rs_0.3_zeroembed_icews_wiki/ 30000 > out_log/Output_LLMEA_zero_base_rs_30%_icews_wiki_all_add.txt
 

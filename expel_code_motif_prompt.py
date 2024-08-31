@@ -9,7 +9,7 @@ prompts = """
     **Rules for generating code motif**
     {}
           
-    Task 1: Please add, delete, update the above motif code rules and keep no more than 20 rules. Please enclose all the generated rules in the '<rule>' and '</rule>' tag.
+    Task 1: Please add, delete, update the above motif code rules and keep no more than 50 rules. Please enclose all the generated rules in the '<rule>' and '</rule>' tag.
     Task 2: You should regenerate the code motifs of request entities of the following case later according to the target entity and correct answer. 
     [Important!]NOTE: 
     1. Please generate the step-by-step thought process leading to the final correct answer.
@@ -23,7 +23,7 @@ prompts = """
     2. xxxx
     3. xxxx
     ... ...
-    20. xxxx
+    50. xxxx
     </rule>
     7. You must terminate with correct answer!
     8. Apply the code motif template rules to the regeneration process.
@@ -48,6 +48,56 @@ prompts = """
     The candidate entities list is: 
     {}
 """
+
+prompts_expel_v3 = """
+You are doing an entity alignment task of two knowledge graphs (KGs), where you need to find the equivalent entity of the target entity. You have 2 tasks, one is generating rules for writing perfect code motifs and another is regenerate the code motifs of the case given. 
+    As a good learner, you learn from bad experiences of entity alignment task and want to generate a better motif code template for it. Motifs are recurrent and statistically significant subgraphs or patterns of a knowledge graph. A motif code template is a consistent and repeatable structure of code that uses specific behaviors, interactions, or relationships in the code to describe a motif. It serves as a template that helps the AI model understand and generate the required output for entity alignment tasks. 
+
+    ------
+    **Rules for generating code motif**
+    
+    <rule>
+    ** Class: A class represented an entity.
+    ** Descriptive Function Names: Ensure the function name clearly represents the abstract of the motif. This aids in understanding the motif's purpose at a glance.
+    ** Relevant import statements: The import statement is relationship between entities.
+    ** Function parameter: The function parameters are all the entities of a motif.
+    ** Function Implementation: Implement the function by calling the imported relations with the appropriate entities(parameters). Each relation call should correspond to the connections or actions described in the motif information.
+    ** Relationship: For simple connections between nodes, use the connected_with relation. For more complex interactions (e.g., meetings, visits), use specific relations like make_a_visit, express_intent_to_meet_or_negotiate, etc.
+    ** Return values: Return all the entities involved in the motif as part of the function’s result.
+    ** Multiple relationship: Recognize the `+=` relationship as indicative of multiple types of connections between two entities, enriching the motif's complexity.
+    ** Demonstrative Execution: Use the `if __name__ == '__main__':` block to showcase the motif's application, offering a practical example of its use.
+    ** Triple: A triple in triangle information represent a motif and is expressed as a function in code motif, like:
+    </rule>
+    
+          
+    Task 1: Please add, delete, update the above motif code rules and keep no more than 20 rules. Please enclose all the generated rules in a '<rule>' and '</rule>' tags like:
+    Task 2: You should regenerate the code motifs of request entities of the following case later according to the target entity and correct answer. 
+    [Important!]NOTE: 
+    1. Please generate the step-by-step thought process leading to the final correct answer.
+    2. You must use Code Motif in the reasoning path. Refer to the Case provided.
+    3. The final answer in 'Terminate[answer]' should be the aligned entity given.
+    4. please use code motif each turn in the reasoning process.
+    5. You must align the target entity with correct answer given after the regeneration process.
+    7. You must terminate with correct answer!
+    8. Apply the code motif template rules to the regeneration process.
+
+    Below is the case of wrong reasoning process due to bad code motif.
+    ------
+    **Case**:
+    {}   
+    
+    ------
+    ** Code motif rule summarization & Code regeneration**:
+    ** The case above is Wrong! Please generate some experience or rules in bullet point format that leads to writing perfect motif code templates, according to the target entity and correct answer.
+    ** Please generate the correct reasoning process of above case, make target entity aligned with the correct answer. 
+    
+    [**Important!**]The correct answer(aligned entity) is:
+    {}
+    
+    The candidate entities list is: 
+    {}
+}
+"""
 prompts_0826 = """
     You are doing an entity alignment task of two knowledge graphs (KGs), where you need to find the equivalent entity of the target entity. You have 2 tasks, one is generating rules for writing perfect code motifs and another is regenerate the code motifs of the case given. 
     As a good learner, you learn from bad experiences of entity alignment task and want to generate a better motif code template for it. Motifs are recurrent and statistically significant subgraphs or patterns of a knowledge graph. A motif code template is a consistent and repeatable structure of code that uses specific behaviors, interactions, or relationships in the code to describe a motif. It serves as a template that helps the AI model understand and generate the required output for entity alignment tasks. 
@@ -67,7 +117,7 @@ prompts_0826 = """
     ** Triple: A triple in triangle information represent a motif and is expressed as a function in code motif.
     </rule>
 
-    Task 1: Please add, delete, update the above motif code rules and keep no more than 20 rules. Please enclose all the generated rules in the '<rule>' and '</rule>' tag.
+    Task 1: Please add, delete, update the above motif code rules and keep no more than 50 rules. Please enclose all the generated rules in the '<rule>' and '</rule>' tag.
     Task 2: You should regenerate the code motifs of request entities of the following case later according to the target entity and correct answer. 
     [Important!]NOTE: 
     1. Please generate the step-by-step thought process leading to the final correct answer.
@@ -81,7 +131,7 @@ prompts_0826 = """
     2. xxxx
     3. xxxx
     ... ...
-    20. xxxx
+    50. xxxx
     </rule>
     7. You must terminate with correct answer!
     8. Apply the code motif template rules to the regeneration process.

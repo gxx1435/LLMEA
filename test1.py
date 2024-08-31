@@ -634,7 +634,7 @@ import json
 from run.utils import hit_1_10_rate, baseline_hit_rate
 
 dataset = 'icews_yago'
-save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/{}/gpt_4_turbo/t5000_50_50_corrected_5motif_v16'.format(dataset)
+save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/{}/gpt_4_turbo/t5000_50_50_corrected_5motif_v18'.format(dataset)
 ent1_f = 'new_ent_ids_1_rs_0.3_new'
 ent2_f = 'new_ent_ids_2_aligned_rs_0.3_new'
 type = 'recall_all'

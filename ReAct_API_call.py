@@ -5,6 +5,7 @@ import sys
 import random
 import numpy as np
 import argparse
+from tqdm import tqdm
 from run.utils import get_ent_id_dict, get_id_entity_dict
 # from API_bank_multi import collect_response
 from graph_motif_ReAct_selecting import *
@@ -26,7 +27,7 @@ def read_idx_entity_file():
     dataset_file = ent_ids_1_path
     idx_entity_dict = {}
     with open(dataset_file) as f:
-        for line in f.readlines():
+        for line in tqdm(f.readlines()):
             idx = line.split('\t')[0]
             entity = line.split('\t')[1].strip()
             idx_entity_dict.update({idx: entity})
@@ -44,7 +45,7 @@ def baseline():
     idx_entity_dict = read_idx_entity_file()
     idx_prompt_dict = {}
     i = 0
-    for idx in idx_entity_dict.keys():
+    for idx in tqdm(idx_entity_dict.keys()):
         entity_name = idx_entity_dict[idx]
         entity_id = idx
         entity_type = 'target'
@@ -57,7 +58,7 @@ def baseline():
         i += 1
         if i == threshold: break
 
-        print(entity_name, cand_list)
+        print(entity_name)
 
         idx_prompt_dict.update({idx: prompt})
 
@@ -169,21 +170,21 @@ def generate_message_lists(threshold):
         idx_prompt_dict = {}
         entity_list = []
         i = 0
-        for idx in idx_entity_dict.keys():
+        for idx in tqdm(idx_entity_dict.keys()):
             entity_name = idx_entity_dict[idx]
             entity_type = 'target'
 
-            try:
-                entity_id = idx
-                entity = Entity(entity_name, entity_id, entity_type)
-                _, cand_list, _ = entity.get_baseline_prompts()
-            except:
-                continue
+            # try:
+            entity_id = idx
+            entity = Entity(entity_name, entity_id, entity_type)
+            _, cand_list, _ = entity.get_baseline_prompts()
+            # except:
+            #     continue
 
             i += 1
             if i == threshold: break
 
-            print(entity_name, cand_list)
+            print(entity_name)
             # if 'code_motif' in info_type:
             #
             #     prompt = motif_ReAct_example_prompt_code.format(entity_name, cand_list, i=i)
@@ -193,8 +194,21 @@ def generate_message_lists(threshold):
             #     prompt = motif_ReAct_example_prompt_text.format(entity_name, cand_list, i=i)
             #
             # else:
+            # if expel != 0 and os.path.exists(os.getcwd() + '/output/expel_v4/expel_process_rules_v{}.txt'.format(str(expel))):
+            #     from graph_motif_ReAct_reranking_expel_version import motif_ReAct_example_prompt_cn50_cn50
+            #     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50
+            #
+            #
+            #     with open(os.getcwd() + '/output/expel_v4/expel_process_prompts_rules_v{}.txt'.format(str(expel))) as f:
+            #         entity_alignment_rules = f.read().split('\n\n')
+            #         for i in range(1, len(entity_alignment_rules)):
+            #             if entity_alignment_rules[-i] != '-1\n':
+            #                 rule = entity_alignment_rules[-i]
+            #                 break
+            #     prompt = motif_ReAct_example_prompt.format(rule, entity_name, cand_list)
+            # else:
 
-            prompt = motif_ReAct_example_prompt.format(entity_name, cand_list, i=i)
+            prompt = motif_ReAct_example_prompt.format(entity_name, cand_list)
 
             idx_prompt_dict.update({idx: prompt})
             entity_list.append(entity)
@@ -215,7 +229,7 @@ def collect_response(message_list, model_name, num_threads = 10, **kwargs):
         if seed > 0.5:
             response = """
             Thought 1: xxxxxxxxxxxxxxxxxxx.
-            Act 1: Request[Institutional Revolutionary Party] xxxxxxxxxxxxxxxxxxx.
+            Act 1: Request[Sony Pictures Animation] xxxxxxxxxxxxxxxxxxx.
             <code>
             xxxxxxxxxxxxxx
             xxxxxxxxxxxxxx
@@ -226,7 +240,7 @@ def collect_response(message_list, model_name, num_threads = 10, **kwargs):
 
             response = """
             Thought 1: xxxxxxxxxxxxxxxxxxx.
-            Act 1: Terminate['Institutional Revolutionary Party'] xxxxxxxxxxxxxxxxxxx.
+            Act 1: Terminate['Sony Pictures Animation'] xxxxxxxxxxxxxxxxxxx.
             <code>
             xxxxxxxxxxxxxx
             xxxxxxxxxxxxxx
@@ -245,7 +259,7 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
     :return:
     """
     from entity import Entity
-    if if_expel:
+    if expel != 0:
         from graph_motif_code_generated_expel_version import code_motif_prompts_generate
     else:
         from graph_motif_code_generated import code_motif_prompts_generate
@@ -467,11 +481,14 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
             if requests[i] != -1:
                 request_entity = requests[i]
 
-                if "\"" in request_entity[0] and "\"" in request_entity[-1]:
-                    request_entity = request_entity[1:-1]
+                if len(request_entity) == 0:
+                    request_entity = entity_list[i].entity_name
+                else:
+                    if "\"" in request_entity[0] and "\"" in request_entity[-1]:
+                        request_entity = request_entity[1:-1]
 
-                elif "'" in request_entity[0] and "'" in request_entity[-1]:
-                    request_entity = request_entity[1:-1]
+                    elif "'" in request_entity[0] and "'" in request_entity[-1]:
+                        request_entity = request_entity[1:-1]
 
                 if (request_entity == entity_list[i].entity_name
                         or request_entity.lower() == entity_list[i].entity_name.lower()):
@@ -491,13 +508,13 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                 print(request_entity, entity_list[i].entity_name, entity_type)
                 try:
                     if entity_type == 'target':
-                        request_entity_id = ent_id_dict[entity_list[i].entity_name]
+                            request_entity_id = ent_id_dict[entity_list[i].entity_name]
                     else:
-                        request_entity_id = ent_id_dict[request_entity]
+                            request_entity_id = ent_id_dict[request_entity]
 
                     request_entity = Entity(request_entity, request_entity_id, entity_type)
                 except:
-                    # introduce noise
+                    #introduce noise
                     request_entity = Entity(entity_list[i].entity_name,
                                             entity_list[i].entity_id,
                                             'target')
@@ -519,10 +536,13 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                     text_motif_info = request_entity.get_only_triangle_information(if_triple=1, info_type=info_type, top_n=top_n, if_keep_top_n=1)
                     print(text_motif_info)
 
-                    if if_expel:
-                        with open(os.getcwd() + '/output/code_generated_rules.txt') as f:
-                            code_generated_rules = json.load(f)
-                            rule = code_generated_rules[-1]
+                    if expel != 0:
+                        with open(os.getcwd() + '/output/expel_v{}/expel_code_prompts_rules_v{}.txt'.format(str(expel), str(expel))) as f:
+                            code_generated_rules = f.read().split('\n\n')
+                            for i in range(1, len(code_generated_rules)):
+                                if code_generated_rules[-i] != '-1\n':
+                                    rule = code_generated_rules[-i]
+                                    break
                         code_motif_prompt = code_motif_prompts_generate.format(rule, text_motif_info)
                     else:
                         code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
@@ -542,10 +562,13 @@ def step(info_type, idx_prompt_dict, entity_list, step, idx):
                     text_motif_info = request_entity.get_dynamic_motifs_information(if_triple=1, info_type=info_type, top_n=top_n, if_keep_top_n=1)
                     print(text_motif_info)
 
-                    if if_expel:
-                        with open(os.getcwd() + '/output/code_generated_rules.txt') as f:
-                            code_generated_rules = json.load(f)
-                            rule = code_generated_rules[-1]
+                    if expel != 0:
+                        with open(os.getcwd() + '/output/expel_v{}/expel_code_prompts_rules_v{}.txt'.format(str(expel), str(expel))) as f:
+                            code_generated_rules = f.read().split('\n\n')
+                            for i in range(1, len(code_generated_rules)):
+                                if code_generated_rules[-i] != '-1\n':
+                                    rule = code_generated_rules[-i]
+                                    break
                         code_motif_prompt = code_motif_prompts_generate.format(rule, text_motif_info)
                     else:
                         code_motif_prompt = code_motif_prompts_generate.format(text_motif_info)
@@ -650,8 +673,7 @@ parser.add_argument('-top_n', '--top_n', type=int, help='How much motif we outpu
 
 parser.add_argument('-v', '--version', default='', type=str, help='version control')
 
-parser.add_argument('-e', '--expel', default=False, type=bool, help='If use expel mudule')
-
+parser.add_argument('-e', '--expel', default=0, type=int, help='If use expel mudule')
 
 
 # # 添加可选参数（带默认值）
@@ -666,7 +688,7 @@ LLM_type = args.llm_type
 threshold = args.threshold
 top_n = args.top_n
 version = args.version
-if_expel = args.expel
+expel = args.expel
 # module_name = args.react_file
 # ReAct_module = dynamic_import(module_name)
 # motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
@@ -755,23 +777,25 @@ if version != '':
 else:
     save_dir = 't'+str(threshold)+'_'+candidate_num_1+"_"+candifate_num_2+'_' + first_step_setting+"_{}motif".format(top_n)
 
-if if_expel:
-    save_dir = save_dir+'_expel'
+if expel == 0:
+    save_dir = save_dir
+else:
+    save_dir = save_dir+'_expel{}'.format(str(expel))
 
 
 if __name__ == '__main__':
 
     if not os.path.exists(current_path +'/output/{}'.format(dataset)):
-        os.mkdir(current_path +'/output/{}'.format(dataset))
+        os.makedirs(current_path +'/output/{}'.format(dataset))
 
     if not os.path.exists(current_path +'/output/{}/{}'.format(dataset, LLM_type)):
-        os.mkdir(current_path +'/output/{}/{}'.format(dataset, LLM_type))
+        os.makedirs(current_path +'/output/{}/{}'.format(dataset, LLM_type))
 
     if not os.path.exists(current_path +'/output/{}/{}/{}'.format(dataset, LLM_type, first_step_setting)):
-        os.mkdir(current_path +'/output/{}/{}/{}'.format(dataset,LLM_type, first_step_setting))
+        os.makedirs(current_path +'/output/{}/{}/{}'.format(dataset,LLM_type, first_step_setting))
 
     if not os.path.exists(current_path+ '/output/{}/{}/{}'.format(dataset, LLM_type, save_dir)):
-        os.mkdir(current_path+'/output/{}/{}/{}'.format(dataset, LLM_type, save_dir))
+        os.makedirs(current_path+'/output/{}/{}/{}'.format(dataset, LLM_type, save_dir))
 
     if info_type == 'baseline':
         idx_prompt_dict = baseline()
