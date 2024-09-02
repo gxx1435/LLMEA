@@ -1,0 +1,48 @@
+1. Sergei Borisovich Ivanov
+correct
+
+2. Akali Dal
+correct
+wrong second time
+
+3.Kengo Wa Dondo
+Reasoning error first time, correct second time
+Correct
+
+4.Imedi TV
+Correct
+
+5. Saud bin Faisal bin Abdul-Aziz
+False at first time
+Correct at second time
+
+6.  Coalition for Democratic Unity
+Hallucination occured but with a correct result
+Wrong at second time, text motif可做正确
+
+7. Grand National Party
+Wrong
+直接选可正确,text motif 正确
+
+8. Doctors Without Borders
+Correct
+
+9.Indian Administered Kashmir
+Kashmir没有三角形信息
+Wrong: code description 不能太长，要求的实体没有找到相关信息
+Second time correct
+
+10.Sergey Viktorovich Lavrov
+Correct but halluciation occurred
+
+（1）已排除candidate 返回为 ‘’和‘～’ 的正确性问题
+（2）
+
+潜在问题：
+1. 给LLM的motif code description不能太长，太长模型就会答非所问或出现幻觉
+2. 共享次数太多的三角形计算不出来，只能给observation说：计算太长，没有实体相关背景信息
+3. Candidate的三角形计算有很多为空，看了下KG2的大小确实要比KG1小很多，但有待检查
+4. 给LLM的code generation它看不懂，他就会自己再去把motif重新分析一遍，从而答非所问
+5. 有时能识别candidate list里面的实体，有时不能
+6. few-shot例子不够好
+7. Request一个胡乱的entity

@@ -1,0 +1,46 @@
+1. Massoud Ali Mohammadi
+text motif 可解, code motif 幻觉
+正确
+
+2. Salauddin
+Too difficult, text motif可走完流程，request不相关的实体
+正确
+
+3. Swaziland Youth Congress
+Too difficult, text motif可走完流程，request不相关的实体
+正确
+
+4. Shin Corp
+Too difficult, request不相关的实体
+text motif可做对
+正确
+
+5.Baba Suwe
+Too difficult, request不相关的实体
+不稳定，第二次可做对
+正确
+
+6. Víctor Quispe Palomino
+直接回答自身，错误，不稳定
+正确
+
+7. Coalition of the Radical Left
+正确
+
+8. Chui Sai On
+不稳定，幻觉严重
+正确
+
+9. Jomo Gbomo
+不稳定，幻觉严重
+正确
+
+10. Finnish Broadcasting Company
+正确
+
+
+（1）以自己结束
+（2）text motif可解，code motif幻觉
+（3）request不相关的实体
+（4）翻译和缩写基本能做对
+
