@@ -16,10 +16,11 @@ from graph_motif import (find_triangle_or_star_motifs, find_star_motifs,
 current_dir = os.getcwd()
 save_dir = current_dir + '/data'
 def get_paths():
-    dataset = 'icews_yago'
-    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_50_5041_all add_put_correct_ans_last.txt'.format(save_dir, dataset)
+    dataset = 'DBP15K/fr_en'
+    sematic_embedding_candidates_path = '{}/{}/candiadtes_semantic_embed_10_4500_cosine_put_correct_ans_last.txt'.format(save_dir, dataset)
+    trans = 0
 
-    from ReAct_API_call import dataset, sematic_embedding_candidates_path
+    # from ReAct_API_call import dataset, sematic_embedding_candidates_path, trans
 
     ent_id_1_path = '{}/{}/new_ent_ids_1'.format(save_dir, dataset)
     ent_id_2_path = '{}/{}/new_ent_ids_2_aligned'.format(save_dir, dataset)
@@ -29,12 +30,12 @@ def get_paths():
     _2_neighbor_subgraph2_path = '{}/{}/2_neighbor_subgraph_2'.format(save_dir,dataset)
     _1_neighbor_subgraph2_path = '{}/{}/1_neighbor_subgraph_2'.format(save_dir,dataset)
 
-    return (dataset, sematic_embedding_candidates_path,
+    return (dataset, trans, sematic_embedding_candidates_path,
             ent_id_1_path, ent_id_2_path,
             _1_neighbor_subgraph1_path, _1_neighbor_subgraph2_path,
             _2_neighbor_subgraph1_path, _2_neighbor_subgraph2_path)
 
-(dataset, sematic_embedding_candidates_path,
+(dataset, trans, sematic_embedding_candidates_path,
  ent_id_1_path, ent_id_2_path,
  _1_neighbor_subgraph1_path, _1_neighbor_subgraph2_path,
  _2_neighbor_subgraph1_path, _2_neighbor_subgraph2_path) = get_paths()
@@ -94,13 +95,13 @@ G1, G2 = get_Graph()
 def get_rel_dict():
     ##  获取relation of two nodes
     rel_1_dict = dict()
-
-    if 'zh_en' in dataset:
-        rel_ids_1 = '{}/{}/rel_ids_1_cn'.format(save_dir, dataset)
-    elif 'ja_en' in dataset:
-        rel_ids_1 = '{}/{}/rel_ids_1_ja'.format(save_dir, dataset)
-    elif 'fr_en' in dataset:
-        rel_ids_1 = '{}/{}/rel_ids_1_fr'.format(save_dir, dataset)
+    if trans == 0:
+        if 'zh_en' in dataset:
+            rel_ids_1 = '{}/{}/rel_ids_1_cn'.format(save_dir, dataset)
+        if 'ja_en' in dataset:
+            rel_ids_1 = '{}/{}/rel_ids_1_ja'.format(save_dir, dataset)
+        if 'fr_en' in dataset:
+            rel_ids_1 = '{}/{}/rel_ids_1_fr'.format(save_dir, dataset)
     else:
         rel_ids_1 = '{}/{}/rel_ids_1'.format(save_dir, dataset)
 
@@ -817,7 +818,7 @@ class Entity:
 
 def main():
 
-    ent_id_1_path = current_dir + '/data/{}/new_ent_ids_1_rs_0.3_new'.format(dataset)
+    ent_id_1_path = current_dir + '/data/{}/new_ent_ids_1_rs_0.3_new_fr'.format(dataset)
     ent_id_2_path = current_dir + '/data/{}/new_ent_ids_2_aligned_rs_0.3_new'.format(dataset)
 
     entity_type = 'candidate'
@@ -830,13 +831,13 @@ def main():
     elif entity_type == 'candidate':
         ent_id_dict = get_ent_id_dict(ent_id_2_path)
 
-    entity = """Jimmy Rasta"""
+    entity = """Al_Ahly_Sporting_Club"""
     entity_id = ent_id_dict[entity]
 
     entity = Entity(entity, entity_id, entity_type)
 
-    # _, _, prompts = entity.get_baseline_prompts()
-    prompts = entity.get_only_triangle_information(if_triple=1)
+    _, _, prompts = entity.get_baseline_prompts()
+    # prompts = entity.get_only_triangle_information(if_triple=1)
     # prompts = entity.get_dynamic_motifs_information(if_triple=1)
 
     print(prompts)

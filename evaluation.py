@@ -3,21 +3,23 @@ from run.utils import hit_1_10_rate, baseline_hit_rate
 
 
 if __name__ == '__main__':
-    dataset = 'DBP15K/fr_en'
-    save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/{}/gpt_4_turbo/t4500_50_50_corrected_5motif_v1'.format(dataset)
-    if 'zh' in dataset:
-        ent1_f = 'new_ent_ids_1_rs_0.3_new_cn'
-    elif 'ja' in dataset:
-        ent1_f = 'new_ent_ids_1_rs_0.3_new_ja'
-    elif 'fr' in dataset:
-        ent1_f = 'new_ent_ids_1_rs_0.3_new_fr'
+    dataset = 'DBP15K/ja_en'
+    save_dir = '/Users/gxx/Documents/2024/research/ZeroEA_for_Xiao/output/{}/gpt_4_turbo/t4500_10_10_corrected_notrans_5motif_v4'.format(dataset)
+    trans = 0
+    if trans == 0:
+        if 'zh' in dataset:
+            ent1_f = 'new_ent_ids_1_rs_0.3_new_cn'
+        elif 'ja' in dataset:
+            ent1_f = 'new_ent_ids_1_rs_0.3_new_ja'
+        elif 'fr' in dataset:
+            ent1_f = 'new_ent_ids_1_rs_0.3_new_fr'
     else:
         ent1_f = 'new_ent_ids_1_rs_0.3_new'
 
     ent2_f = 'new_ent_ids_2_aligned_rs_0.3_new'
     ## setting
     type = 'all'
-    method = 'code'
+    method = 'text'
     lite_or_base = 'lite'
     f_or_l = 'final_answer'
 

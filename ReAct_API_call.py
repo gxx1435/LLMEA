@@ -8,10 +8,7 @@ import argparse
 from tqdm import tqdm
 from run.utils import get_ent_id_dict, get_id_entity_dict
 # from API_bank_multi import collect_response
-from graph_motif_ReAct_selecting import *
 from graph_motif_ReAct_reranking import *
-from graph_motif_ReAct_reranking_code import *
-from graph_motif_ReAct_reranking_text import *
 
 
 # def dynamic_import(module_name):
@@ -675,6 +672,8 @@ parser.add_argument('-v', '--version', default='', type=str, help='version contr
 
 parser.add_argument('-e', '--expel', default=0, type=int, help='If use expel mudule')
 
+parser.add_argument('-trans', '--translation', default=0, type=int, help='If open translation')
+
 
 # # 添加可选参数（带默认值）
 # parser.add_argument('-n', '--number', type=int, default=42, help='要处理的数字')
@@ -689,79 +688,55 @@ threshold = args.threshold
 top_n = args.top_n
 version = args.version
 expel = args.expel
+trans = args.translation
 # module_name = args.react_file
 # ReAct_module = dynamic_import(module_name)
 # motif_ReAct_example_prompt = ReAct_module.motif_ReAct_example_prompt
 
-# if args.candidate_num_1 == 100 and args.candidate_num_2 == 50:
-#
-#     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn50
-#
-# elif args.candidate_num_1 == 100 and args.candidate_num_2 == 40:
-#
-#     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn40
-#
-# elif args.candidate_num_1 == 100 and args.candidate_num_2 == 30:
-#
-#     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn30
-#
-# elif args.candidate_num_1 == 100 and args.candidate_num_2 == 20:
-#
-#     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn20
-#
-# elif args.candidate_num_1 == 100 and args.candidate_num_2 == 10:
-#
-#     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn10
-
 if args.candidate_num_1 == 10 and args.candidate_num_2 == 10:
 
-    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn10_cn10
-    motif_ReAct_example_prompt_code = motif_ReAct_example_prompt_cn10_cn10_code
-    motif_ReAct_example_prompt_text = motif_ReAct_example_prompt_cn10_cn10_text
+    if 'fr' in dataset and trans == 0:
+        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn10_cn10_DBP15K_fr_no_translation
+    if ('zh' in dataset and trans == 0) or ('ja' in dataset and trans == 0):
+        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn10_cn10_DBP15K_zh_ja_no_translation
+    elif 'DBP15K' in dataset and trans == 1:
+        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn10_cn10_DBP15K_translation
+    elif 'icews' in dataset:
+        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn10_cn10_ICEWS
 
 elif args.candidate_num_1 == 20 and args.candidate_num_2 == 20:
 
     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn20_cn20
-    motif_ReAct_example_prompt_code = motif_ReAct_example_prompt_cn20_cn20_code
-    motif_ReAct_example_prompt_text = motif_ReAct_example_prompt_cn20_cn20_text
 
 elif args.candidate_num_1 == 50 and args.candidate_num_2 == 50:
-    if 'llama' in LLM_type:
-        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_llama
-    else:
-        if version == 'v0':
-            motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_v0
-        elif version == 'v1':
-            motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_v1
-        else:
-            motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50
-
-        motif_ReAct_example_prompt_code = motif_ReAct_example_prompt_cn50_cn50_code
-        motif_ReAct_example_prompt_text = motif_ReAct_example_prompt_cn50_cn50_text
+    if 'fr' in dataset and trans == 0:
+        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_DBP15K_fr_no_translation
+    if ('zh' in dataset and trans == 0) or ('ja' in dataset and trans == 0):
+        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_DBP15K_zh_ja_no_translation
+    elif 'DBP15K' in dataset and trans == 1:
+        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_DBP15K_translation
+    elif 'icews' in dataset:
+        motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn50_cn50_ICEWS
 
 elif args.candidate_num_1 == 70 and args.candidate_num_2 == 70:
 
     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn70_cn70
-    motif_ReAct_example_prompt_code = motif_ReAct_example_prompt_cn70_cn70_code
-    motif_ReAct_example_prompt_text = motif_ReAct_example_prompt_cn70_cn70_text
 
 elif args.candidate_num_1 == 100 and args.candidate_num_2 == 100:
 
     motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn100_cn100
-    motif_ReAct_example_prompt_code = motif_ReAct_example_prompt_cn100_cn100_code
-    motif_ReAct_example_prompt_text = motif_ReAct_example_prompt_cn100_cn100_text
 
-elif args.candidate_num_1 == 200 and args.candidate_num_2 == 200:
-
-    motif_ReAct_example_prompt = motif_ReAct_example_prompt_cn200_cn200
-    motif_ReAct_example_prompt_code = motif_ReAct_example_prompt_cn200_cn200_code
-    motif_ReAct_example_prompt_text = motif_ReAct_example_prompt_cn200_cn200_text
 
 sematic_embedding_candidates_path = args.sematic_embedding_candidates_path
 if 'orginal_ranking' in sematic_embedding_candidates_path:
     first_step_setting = 'original'
 elif 'put_correct_ans_last' in sematic_embedding_candidates_path:
     first_step_setting = 'corrected'
+
+if 'DBP15K' in dataset and trans == 1:
+    first_step_setting = first_step_setting+'_trans'
+if 'DBP15K' in dataset and trans == 0:
+    first_step_setting = first_step_setting+'_notrans'
 
 candidate_num_1 = str(args.candidate_num_1)
 candifate_num_2 = str(args.candidate_num_2)
@@ -782,6 +757,10 @@ if expel == 0:
 else:
     save_dir = save_dir+'_expel{}'.format(str(expel))
 
+# if 'DBP15K' in dataset and trans == True:
+#     save_dir = save_dir+'_trans'
+# elif 'DBP15K' in dataset and trans == False:
+#     save_dir = save_dir + '_notrans'
 
 if __name__ == '__main__':
 
